@@ -65,6 +65,44 @@ class AuthManager(private val config: CloudConfig) {
     }
     
     /**
+     * 只验证授权，不重新下载插件
+     * 如果授权失效会卸载插件
+     */
+    fun verifyAuthOnly() {
+        submitAsync {
+            val deviceInfo = DeviceInfo.getAllInfo()
+            
+            // 检查已验证的插件，移除授权失效的
+            val invalidLicenses = mutableListOf<String>()
+            
+            for ((licenseCode, verifiedPlugin) in verifiedPlugins) {
+                val result = verifySingleLicense(licenseCode, deviceInfo)
+                if (result == null) {
+                    invalidLicenses.add(licenseCode)
+                    warning("插件 ${verifiedPlugin.pluginName} 授权已失效，正在卸载...")
+                }
+            }
+            
+            // 卸载授权失效的插件
+            invalidLicenses.forEach { licenseCode ->
+                verifiedPlugins.remove(licenseCode)
+                val plugin = CloudCore.pluginLoader.getLoadedPlugins().find { 
+                    it.name == licenseCode 
+                }
+                if (plugin != null) {
+                    CloudCore.pluginLoader.unloadPlugin(plugin.name)
+                }
+            }
+            
+            if (invalidLicenses.isEmpty()) {
+                info("所有插件授权验证通过")
+            } else {
+                warning("共有 ${invalidLicenses.size} 个插件因授权失效被卸载")
+            }
+        }
+    }
+    
+    /**
      * 验证单个授权码
      */
     private fun verifySingleLicense(licenseCode: String, deviceInfo: DeviceInfoData): VerifiedPlugin? {

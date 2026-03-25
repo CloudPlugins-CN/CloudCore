@@ -22,13 +22,21 @@ object CloudCoreCommand {
     
     /**
      * 重载配置
+     * 只重新检查授权，不会重新下载插件
+     * 如果授权失效会卸载插件
      */
     @CommandBody
     val reload = subCommand {
         execute<CommandSender> { sender, _, _ ->
-            sender.sendMessage("§a[CloudCore] §f正在重新加载...")
+            sender.sendMessage("§a[CloudCore] §f正在重新加载配置...")
+            
+            // 重新加载配置文件
             CloudCore.reload()
-            sender.sendMessage("§a[CloudCore] §f重新加载完成!")
+            
+            // 只验证授权，不重新下载插件
+            CloudCore.authManager.verifyAuthOnly()
+            
+            sender.sendMessage("§a[CloudCore] §f配置重载完成！")
         }
     }
     
@@ -38,7 +46,7 @@ object CloudCoreCommand {
     @CommandBody
     val status = subCommand {
         execute<CommandSender> { sender, _, _ ->
-            sender.sendMessage("§a========== CloudCore 状态 ==========")
+            sender.sendMessage("§a========== CloudCore ==========")
             sender.sendMessage("§7服务器地址: §f${CloudCore.cloudConfig.serverUrl}")
             sender.sendMessage("§7用户名: §f${CloudCore.cloudConfig.username}")
             sender.sendMessage("§7授权码数量: §f${CloudCore.cloudConfig.licenseCodes.size}")
@@ -97,19 +105,5 @@ object CloudCoreCommand {
         }
     }
     
-    /**
-     * 验证授权
-     */
-    @CommandBody
-    val verify = subCommand {
-        execute<CommandSender> { sender, _, _ ->
-            if (!CloudCore.cloudConfig.isConfigured()) {
-                sender.sendMessage("§c[CloudCore] §f配置不完整，请先配置 config.yml")
-                return@execute
-            }
-            
-            sender.sendMessage("§a[CloudCore] §f正在验证授权...")
-            CloudCore.authManager.verifyAndLoadPlugins()
-        }
-    }
+
 }
