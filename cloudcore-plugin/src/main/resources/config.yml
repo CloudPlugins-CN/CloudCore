@@ -1,0 +1,21 @@
+# CloudCore 配置文件
+# 云端授权与插件管理系统
+
+# 授权服务器地址
+server-url: "http://localhost:8080"
+
+# 您的用户名 (在授权服务器注册的用户名)
+username: ""
+
+# 每个授权码对应一个云端插件
+license-codes:
+  # - "ABC123XYZ789@#$%defg"
+
+# 调试模式 (开启后会输出更多日志)
+debug: false
+
+# 网络设置
+connect-timeout: 30  # 连接超时 (秒)
+read-timeout: 60     # 读取超时 (秒)
+auto-retry: true     # 是否自动重试
+retry-count: 3       # 重试次数
