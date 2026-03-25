@@ -39,10 +39,6 @@ taboolib {
     relocate("com.google.errorprone.", "com.cloudcore.libs.errorprone.")
     relocate("org.intellij.", "com.cloudcore.libs.intellij.")
     relocate("org.jetbrains.", "com.cloudcore.libs.jetbrains.")
-    
-    // 排除 Kotlin 标准库打包
-    exclude("kotlin.**")
-    exclude("kotlinx.**")
 }
 
 repositories {
@@ -81,6 +77,9 @@ java {
 
 tasks.jar {
     archiveBaseName.set("CloudCore")
+    // 从 JAR 中排除 Kotlin 标准库
+    exclude("kotlin/**")
+    exclude("kotlinx/**")
 }
 
 // 清理JAR中的空目录
@@ -100,7 +99,6 @@ tasks.register("cleanEmptyDirs") {
             }
             jarFile.delete()
             file(jarFile.absolutePath + ".new").renameTo(jarFile)
-            println("已清理JAR中的空目录")
         }
     }
 }

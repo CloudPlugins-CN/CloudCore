@@ -8,6 +8,7 @@ import org.bukkit.Bukkit
 import org.bukkit.plugin.InvalidDescriptionException
 import org.bukkit.plugin.InvalidPluginException
 import org.bukkit.plugin.java.JavaPlugin
+import taboolib.common.platform.function.console
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.severe
 import taboolib.common.platform.function.warning
@@ -22,7 +23,7 @@ import java.util.zip.ZipException
 /**
  * 云端插件加载器
  * 负责下载、加载、卸载云端插件
- * 插件JAR存放在临时目录，卸载时自动清理
+ * 插件插件存放在临时目录，卸载时自动清理
  */
 class CloudPluginLoader(
     private val config: CloudConfig,
@@ -42,17 +43,13 @@ class CloudPluginLoader(
      */
     fun downloadAndLoadPlugin(plugin: VerifiedPlugin) {
         try {
-            info("正在下载插件: ${plugin.pluginName} v${plugin.pluginVersion}")
-            
-            // 下载JAR到临时目录
+            // 下载插件到临时目录
             val jarFile = downloadPlugin(plugin)
             if (jarFile == null) {
                 severe("插件下载失败: ${plugin.pluginName}")
                 return
             }
-            
-            info("插件下载完成: ${jarFile.absolutePath}")
-            
+
             // 在主线程加载插件
             submit {
                 loadPlugin(plugin.pluginName, jarFile)
@@ -67,12 +64,12 @@ class CloudPluginLoader(
     }
     
     /**
-     * 下载插件JAR文件
+     * 下载插件插件文件
      */
     private fun downloadPlugin(plugin: VerifiedPlugin): File? {
         val downloadUrl = "${config.serverUrl}${plugin.downloadUrl}"
         
-        // JAR存放在系统临时目录 (客户看不到)
+        // 插件存放在系统临时目录 (客户看不到)
         val tempFolder = CloudCore.tempFolder
         if (!tempFolder.exists()) {
             tempFolder.mkdirs()
@@ -81,10 +78,7 @@ class CloudPluginLoader(
         // 使用随机文件名
         val randomName = java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 32)
         val jarFile = File(tempFolder, "$randomName.jar")
-        
-        info("下载插件: ${plugin.pluginName} v${plugin.pluginVersion}")
-        info("下载URL: $downloadUrl")
-        
+
         var lastException: Exception? = null
         val maxRetries = if (config.autoRetry) config.retryCount else 1
         
@@ -107,15 +101,12 @@ class CloudPluginLoader(
                     if (!contentType.contains("application/java-archive") && 
                         !contentType.contains("application/octet-stream") &&
                         !contentType.contains("application/zip")) {
-                        warning("服务器返回的不是JAR文件, Content-Type: $contentType")
+                        warning("服务器返回的不是插件文件, Content-Type: $contentType")
                         // 尝试读取响应内容查看错误
                         val bodyText = response.body?.string()?.take(500) ?: ""
                         warning("响应内容: $bodyText")
                         return@use
                     }
-                    
-                    val contentLength = response.body?.contentLength() ?: 0
-                    info("开始下载, 文件大小: $contentLength bytes")
                     
                     response.body?.byteStream()?.use { input ->
                         FileOutputStream(jarFile).use { output ->
@@ -124,7 +115,6 @@ class CloudPluginLoader(
                     }
                     
                     if (jarFile.exists() && jarFile.length() > 0) {
-                        info("下载完成: ${jarFile.name} (${jarFile.length()} bytes)")
                         return jarFile
                     } else {
                         warning("下载后文件为空或不存在")
@@ -146,12 +136,12 @@ class CloudPluginLoader(
     }
     
     /**
-     * 验证JAR文件完整性
+     * 验证插件文件完整性
      */
     private fun validateJarFile(jarFile: File): Boolean {
         try {
             JarFile(jarFile).use { jar ->
-                // 检查是否能正常读取JAR
+                // 检查是否能正常读取插件
                 val entries = jar.entries()
                 var hasPluginYml = false
                 var entryCount = 0
@@ -164,13 +154,6 @@ class CloudPluginLoader(
                         // 读取并验证 plugin.yml 内容
                         jar.getInputStream(entry).use { input ->
                             val content = input.bufferedReader().readText()
-                            
-                            // 始终输出 plugin.yml 内容用于诊断
-                            info("========== plugin.yml 内容 ==========")
-                            content.lines().forEach { line ->
-                                info("  $line")
-                            }
-                            info("========================================")
                             
                             // 检查必要字段
                             if (!content.contains("name:") || !content.contains("main:")) {
@@ -187,20 +170,18 @@ class CloudPluginLoader(
                     }
                 }
                 
-                info("JAR文件包含 $entryCount 个条目")
-                
                 if (!hasPluginYml) {
-                    severe("JAR文件中未找到 plugin.yml")
+                    severe("插件文件中未找到 plugin.yml")
                     return false
                 }
                 
                 return true
             }
         } catch (e: ZipException) {
-            severe("JAR文件损坏或格式无效: ${e.message}")
+            severe("插件文件损坏或格式无效: ${e.message}")
             return false
         } catch (e: Exception) {
-            severe("验证JAR文件失败: ${e.message}")
+            severe("验证插件文件失败: ${e.message}")
             return false
         }
     }
@@ -210,13 +191,9 @@ class CloudPluginLoader(
      */
     private fun loadPlugin(pluginName: String, jarFile: File) {
         try {
-            info("正在加载插件: $pluginName")
-            info("文件: ${jarFile.absolutePath}")
-            info("大小: ${jarFile.length()} bytes")
-            
-            // 首先验证JAR文件完整性
+            // 首先验证插件文件完整性
             if (!validateJarFile(jarFile)) {
-                severe("JAR文件验证失败，尝试重新下载...")
+                severe("插件文件验证失败，尝试重新下载...")
                 jarFile.delete()
                 return
             }
@@ -230,9 +207,7 @@ class CloudPluginLoader(
                 jarFile.delete()
                 return
             }
-            
-            info("插件加载成功: ${loadedPlugin.name} v${loadedPlugin.description.version}")
-            
+
             // 创建插件配置目录 (plugins/CloudCore/Config/插件名)
             val pluginConfigDir = File(CloudCore.configFolder, loadedPlugin.name)
             pluginConfigDir.mkdirs()
@@ -250,7 +225,6 @@ class CloudPluginLoader(
                     modifiersField.setInt(field, field.modifiers and java.lang.reflect.Modifier.FINAL.inv())
                     
                     field.set(javaPlugin, pluginConfigDir)
-                    info("已设置插件配置目录: ${pluginConfigDir.absolutePath}")
                 } catch (e: Exception) {
                     // Java 12+ 使用 VarHandle
                     try {
@@ -260,7 +234,6 @@ class CloudPluginLoader(
                         val field = JavaPlugin::class.java.getDeclaredField("dataFolder")
                         val offset = unsafe.objectFieldOffset(field)
                         unsafe.putObject(javaPlugin, offset, pluginConfigDir)
-                        info("已设置插件配置目录(Unsafe): ${pluginConfigDir.absolutePath}")
                     } catch (e2: Exception) {
                         warning("无法修改dataFolder: ${e2.message}")
                     }
@@ -269,7 +242,7 @@ class CloudPluginLoader(
             
             // 启用插件
             pluginManager.enablePlugin(loadedPlugin)
-            
+                        
             // 记录已加载的插件
             loadedPlugins[pluginName] = LoadedCloudPlugin(
                 name = pluginName,
@@ -277,9 +250,12 @@ class CloudPluginLoader(
                 plugin = loadedPlugin as? JavaPlugin,
                 configDir = pluginConfigDir
             )
-            
-            info("云端插件加载成功: $pluginName")
-            
+                        
+            // 输出加载状态
+            console().sendMessage("§a已成功注入：")
+            val status = if (loadedPlugin.isEnabled) "§a成功" else "§c失败"
+            console().sendMessage("§e${loadedPlugin.name}§7—§b${loadedPlugin.description.version} $status")
+
             // 清理Config目录中不属于云端插件的内容
             cleanConfigFolder()
             
@@ -326,8 +302,6 @@ class CloudPluginLoader(
                 // 从Bukkit内部完全移除插件
                 unloadFromBukkit(plugin)
             }
-            
-            info("云端插件已卸载: $pluginName")
         } catch (e: Exception) {
             warning("卸载插件失败 [$pluginName]: ${e.message}")
             if (config.debug) {
@@ -356,10 +330,8 @@ class CloudPluginLoader(
             lookupNamesField.isAccessible = true
             val lookupNames = lookupNamesField.get(pluginManager) as MutableMap<String, org.bukkit.plugin.Plugin>
             lookupNames.remove(pluginName.lowercase())
-            
-            info("已从PluginManager移除插件: $pluginName")
         } catch (e: Exception) {
-            warning("从PluginManager移除插件失败: ${e.message}")
+            warning("移除插件失败: ${e.message}")
         }
         
         try {
@@ -381,10 +353,9 @@ class CloudPluginLoader(
             toRemove.forEach { knownCommands.remove(it) }
             
             if (toRemove.isNotEmpty()) {
-                info("已清除插件命令: ${toRemove.joinToString()}")
             }
         } catch (e: Exception) {
-            warning("清除插件命令失败: ${e.message}")
+            warning("清除失败: ${e.message}")
         }
         
         try {
@@ -394,10 +365,8 @@ class CloudPluginLoader(
             // 尝试关闭 URLClassLoader/PluginClassLoader
             if (classLoader is java.net.URLClassLoader) {
                 classLoader.close()
-                info("已关闭URLClassLoader: $pluginName")
             } else if (classLoader is java.io.Closeable) {
                 classLoader.close()
-                info("已关闭ClassLoader: $pluginName")
             }
             
             // 尝试从 PluginClassLoader 中清除 plugin 引用
@@ -426,7 +395,6 @@ class CloudPluginLoader(
         for (name in pluginNames) {
             unloadPlugin(name)
         }
-        info("所有云端插件已卸载")
     }
     
     /**

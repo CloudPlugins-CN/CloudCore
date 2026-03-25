@@ -4,7 +4,10 @@ import com.cloudcore.config.CloudConfig
 import com.cloudcore.loader.AuthManager
 import com.cloudcore.loader.CloudPluginLoader
 import taboolib.common.platform.Plugin
+import taboolib.common.platform.function.console
 import taboolib.common.platform.function.info
+import taboolib.common.platform.function.pluginId
+import taboolib.common.platform.function.pluginVersion
 import taboolib.common.platform.function.warning
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
@@ -54,7 +57,6 @@ object CloudCore : Plugin() {
     override fun onLoad() {
         // 只创建数据目录，Config目录在加载云端插件时按需创建
         dataFolder.mkdirs()
-        info("CloudCore 正在加载...")
     }
     
     override fun onEnable() {
@@ -69,25 +71,20 @@ object CloudCore : Plugin() {
         
         // 初始化云端插件加载器
         pluginLoader = CloudPluginLoader(cloudConfig, authManager)
-        
-        info("CloudCore 启动成功!")
-        info("服务器地址: ${cloudConfig.serverUrl}")
-        info("用户名: ${cloudConfig.username}")
-        info("授权码数量: ${cloudConfig.licenseCodes.size}")
-        
+
+        console().sendMessage("§cLoading §b$pluginId §6$pluginVersion")
+
         // 异步验证授权并加载插件
         if (cloudConfig.isConfigured()) {
             authManager.verifyAndLoadPlugins()
         } else {
-            warning("CloudCore 配置不完整，请检查 config.yml")
-            warning("需要配置: server-url, username, license-codes")
+            warning("请在配置文件填写授权信息")
         }
     }
     
     override fun onDisable() {
-        info("CloudCore 正在关闭...")
         pluginLoader.unloadAllPlugins()
-        info("CloudCore 已关闭!")
+        console().sendMessage("§cUnloading §b$pluginId §6$pluginVersion")
     }
     
     /**

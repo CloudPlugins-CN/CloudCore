@@ -41,8 +41,6 @@ class AuthManager(private val config: CloudConfig) {
      */
     fun verifyAndLoadPlugins() {
         submitAsync {
-            info("开始验证授权...")
-            
             val deviceInfo = DeviceInfo.getAllInfo()
             if (config.debug) {
                 DeviceInfo.printInfo()
@@ -55,8 +53,7 @@ class AuthManager(private val config: CloudConfig) {
                 val result = verifySingleLicense(licenseCode, deviceInfo)
                 if (result != null) {
                     verifiedPlugins[licenseCode] = result
-                    info("授权验证成功: ${result.pluginName} v${result.pluginVersion}")
-                    
+
                     // 下载并加载插件
                     CloudCore.pluginLoader.downloadAndLoadPlugin(result)
                     successCount++
@@ -64,8 +61,6 @@ class AuthManager(private val config: CloudConfig) {
                     failCount++
                 }
             }
-            
-            info("授权验证完成: 成功 $successCount, 失败 $failCount")
         }
     }
     

@@ -5,6 +5,12 @@ plugins {
     application
 }
 
+tasks.withType<Jar> {
+    if (name != "jar") {
+        enabled = false
+    }
+}
+
 group = "com.yangsu"
 version = "1.0.0"
 
@@ -30,31 +36,31 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
-    
+
     // Database - Exposed ORM
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-    
+
     // SQLite
     implementation("org.xerial:sqlite-jdbc:3.47.1.0")
-    
+
     // Password Hashing
     implementation("at.favre.lib:bcrypt:0.10.2")
-    
+
     // Logging
     implementation("ch.qos.logback:logback-classic:1.5.15")
-    
+
     // YAML Parser (for plugin.yml)
     implementation("org.yaml:snakeyaml:2.3")
-    
+
     // Email (Jakarta Mail)
     implementation("com.sun.mail:jakarta.mail:2.0.1")
-    
+
     // Kotlin
     implementation(kotlin("stdlib"))
-    
+
     // Test
     testImplementation(kotlin("test"))
 }
@@ -72,9 +78,17 @@ java {
 
 // 打包可执行 JAR
 tasks.jar {
+    archiveBaseName.set("CloudAuthServer")
     manifest {
         attributes["Main-Class"] = "com.yangsu.ApplicationKt"
     }
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+    // 正确合并所有依赖到 JAR
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from({
+        configurations.runtimeClasspath.get().map {
+            if (it.isDirectory) it else zipTree(it)
+        }
+    })
+    // 排除签名文件避免冲突
+    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "META-INF/*.MF")
 }

@@ -1,8 +1,5 @@
-# CloudCore 配置文件
-# 云端授权与插件管理系统
-
-# 授权服务器地址
-server-url: "http://localhost:8080"
+# 授权服务器地址(请勿修改)
+server-url: "http://114.66.63.20:8080"
 
 # 您的用户名 (在授权服务器注册的用户名)
 username: ""
