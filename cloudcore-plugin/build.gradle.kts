@@ -32,13 +32,17 @@ taboolib {
     version { taboolib = "6.2.4-99fb800" }
     
     // 打包依赖并重定位到 com.cloudcore.libs
+    // Kotlin 使用外部依赖，不打包
     relocate("okhttp3.", "com.cloudcore.libs.okhttp3.")
     relocate("okio.", "com.cloudcore.libs.okio.")
     relocate("com.google.gson.", "com.cloudcore.libs.gson.")
     relocate("com.google.errorprone.", "com.cloudcore.libs.errorprone.")
     relocate("org.intellij.", "com.cloudcore.libs.intellij.")
     relocate("org.jetbrains.", "com.cloudcore.libs.jetbrains.")
-    // kotlin 由 TabooLib 自动处理重定向到 kotlin220
+    
+    // 排除 Kotlin 标准库打包
+    exclude("kotlin.**")
+    exclude("kotlinx.**")
 }
 
 repositories {
@@ -51,9 +55,12 @@ dependencies {
     compileOnly(kotlin("stdlib"))
     compileOnly(fileTree("libs"))
     
-    // HTTP Client & JSON - taboolib会打包并重定位
+    // HTTP Client & JSON - taboolib 会打包并重定位
     taboo("com.squareup.okhttp3:okhttp:4.12.0")
     taboo("com.google.code.gson:gson:2.11.0")
+    
+    // Kotlin 标准库作为 runtimeOnly 依赖
+    runtimeOnly(kotlin("stdlib"))
 }
 
 tasks.withType<JavaCompile> {
