@@ -5,7 +5,6 @@ import com.cloudcore.loader.AuthManager
 import com.cloudcore.loader.CloudPluginLoader
 import taboolib.common.platform.Plugin
 import taboolib.common.platform.function.console
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.pluginId
 import taboolib.common.platform.function.pluginVersion
 import taboolib.common.platform.function.warning
