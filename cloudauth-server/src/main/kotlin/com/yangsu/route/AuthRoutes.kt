@@ -114,8 +114,8 @@ fun Route.authRoutes() {
                     call.respond(ApiResponse(true, "登录成功", LoginResponse(token, user.username, isAdmin, user.isSuperAdmin)))
                 },
                 onFailure = { e ->
-                    call.respond(HttpStatusCode.Unauthorized,
-                        ApiResponse<Nothing>(false, e.message))
+                    // 使用 200 OK 返回错误信息，避免 401 日志
+                    call.respond(ApiResponse<Nothing>(false, e.message ?: "用户名或密码错误"))
                 }
             )
         }

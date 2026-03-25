@@ -101,7 +101,6 @@ object CloudCore : Plugin() {
                 }
             }
         }
-        info("临时目录已清理")
     }
     
     /**
