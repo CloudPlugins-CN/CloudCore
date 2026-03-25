@@ -31,7 +31,7 @@ object CloudCoreCommand {
             sender.sendMessage("§a[CloudCore] §f正在重新加载配置...")
             
             // 重新加载配置文件
-            CloudCore.reload()
+            CloudCore.reloadConfigOnly()
             
             // 只验证授权，不重新下载插件
             CloudCore.authManager.verifyAuthOnly()

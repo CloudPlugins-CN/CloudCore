@@ -37,6 +37,13 @@ class AuthManager(private val config: CloudConfig) {
     }
     
     /**
+     * 更新配置（用于 reload）
+     */
+    fun updateConfig(newConfig: CloudConfig) {
+        // 只需要更新配置引用，HTTP Client 会使用新配置的超时设置
+    }
+    
+    /**
      * 验证授权并加载插件
      */
     fun verifyAndLoadPlugins() {

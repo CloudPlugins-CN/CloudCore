@@ -104,27 +104,15 @@ object CloudCore : Plugin() {
     }
     
     /**
-     * 重新加载配置和插件
+     * 只重新加载配置，不重新加载插件
      */
-    fun reload() {
-        info("正在重新加载 CloudCore...")
-        
-        // 卸载现有插件
-        pluginLoader.unloadAllPlugins()
-        
+    fun reloadConfigOnly() {
         // 重新加载配置
         config.reload()
         cloudConfig = CloudConfig(config)
         
-        // 重新初始化
-        authManager = AuthManager(cloudConfig)
-        pluginLoader = CloudPluginLoader(cloudConfig, authManager)
-        
-        // 重新验证并加载
-        if (cloudConfig.isConfigured()) {
-            authManager.verifyAndLoadPlugins()
-        }
-        
-        info("CloudCore 重新加载完成!")
+        // 更新授权管理器和加载器的配置引用
+        authManager.updateConfig(cloudConfig)
+        pluginLoader.updateConfig(cloudConfig)
     }
 }

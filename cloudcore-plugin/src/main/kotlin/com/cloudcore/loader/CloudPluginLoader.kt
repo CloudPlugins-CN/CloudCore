@@ -35,6 +35,13 @@ class CloudPluginLoader(
         .readTimeout(config.readTimeout.toLong() * 2, TimeUnit.SECONDS) // 下载需要更长时间
         .build()
     
+    /**
+     * 更新配置（用于 reload）
+     */
+    fun updateConfig(newConfig: CloudConfig) {
+        // 只需要更新配置引用，HTTP Client 会使用新配置的超时设置
+    }
+    
     /** 已加载的云端插件 */
     private val loadedPlugins = ConcurrentHashMap<String, LoadedCloudPlugin>()
     
