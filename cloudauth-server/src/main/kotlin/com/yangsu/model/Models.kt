@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 // ==================== 数据库表定义 ====================
 
 /**
- * 用户表（SQLite 默认复用删除的ID）
+ * 用户表
  */
 object Users : IntIdTable("users") {
     val username = varchar("username", 50).uniqueIndex()
@@ -22,7 +22,7 @@ object Users : IntIdTable("users") {
 }
 
 /**
- * 插件表（SQLite 默认复用删除的ID）
+ * 插件表
  */
 object Plugins : IntIdTable("plugins") {
     val name = varchar("name", 100).uniqueIndex()
@@ -37,7 +37,7 @@ object Plugins : IntIdTable("plugins") {
 }
 
 /**
- * 授权码表（SQLite 默认复用删除的ID）
+ * 授权码表
  */
 object LicenseCodes : IntIdTable("license_codes") {
     val code = varchar("code", 20).uniqueIndex()  // 20位授权码
@@ -51,7 +51,7 @@ object LicenseCodes : IntIdTable("license_codes") {
 }
 
 /**
- * 设备绑定表（SQLite 默认复用删除的ID）
+ * 设备绑定表
  * 绑定 IP/MAC/机器码, 三选二匹配即可通过验证
  */
 object DeviceBindings : IntIdTable("device_bindings") {
@@ -64,7 +64,7 @@ object DeviceBindings : IntIdTable("device_bindings") {
 }
 
 /**
- * 用户授权关联表（SQLite 默认复用删除的ID）
+ * 用户授权关联表
  * 同一用户可以拥有同一插件的多个授权码
  */
 object UserPluginAuth : IntIdTable("user_plugin_auth") {
@@ -76,7 +76,7 @@ object UserPluginAuth : IntIdTable("user_plugin_auth") {
 }
 
 /**
- * 操作日志表（SQLite 默认复用删除的ID）
+ * 操作日志表
  */
 object AuditLogs : IntIdTable("audit_logs") {
     val userId = reference("user_id", Users).nullable()
@@ -88,7 +88,7 @@ object AuditLogs : IntIdTable("audit_logs") {
 }
 
 /**
- * 系统配置表（SQLite 默认复用删除的ID）
+ * 系统配置表
  */
 object SystemConfig : IntIdTable("system_config") {
     val key = varchar("config_key", 50).uniqueIndex()
@@ -97,7 +97,7 @@ object SystemConfig : IntIdTable("system_config") {
 }
 
 /**
- * 插件置换配置表（SQLite 默认复用删除的ID）
+ * 插件置换配置表
  */
 object PluginExchangeConfigs : IntIdTable("plugin_exchange_configs") {
     val fromPluginId = reference("from_plugin_id", Plugins)  // 源插件
@@ -107,7 +107,7 @@ object PluginExchangeConfigs : IntIdTable("plugin_exchange_configs") {
 }
 
 /**
- * 插件领取配置表（SQLite 默认复用删除的ID）
+ * 插件领取配置表
  */
 object PluginClaimConfigs : IntIdTable("plugin_claim_configs") {
     val pluginId = reference("plugin_id", Plugins)  // 可领取的插件
@@ -119,7 +119,7 @@ object PluginClaimConfigs : IntIdTable("plugin_claim_configs") {
 }
 
 /**
- * 邮箱验证码表（SQLite 默认复用删除的ID）
+ * 邮箱验证码表
  */
 object VerificationCodes : IntIdTable("verification_codes") {
     val email = varchar("email", 100)
