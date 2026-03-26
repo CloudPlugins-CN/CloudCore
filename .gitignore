@@ -24,3 +24,6 @@ Thumbs.db
 
 # Database
 *.db
+
+# Data folder
+data/
