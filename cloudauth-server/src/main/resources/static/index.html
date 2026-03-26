@@ -7,67 +7,379 @@
     <script src="/vue.js"></script>
     <script src="/axios.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Microsoft YaHei', sans-serif; background: #f5f7fa; min-height: 100vh; }
-        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); width: 400px; }
-        .login-title { text-align: center; margin-bottom: 25px; color: #333; font-size: 22px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; color: #666; font-size: 14px; }
-        .form-group input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
-        .form-group input:focus { outline: none; border-color: #409EFF; }
-        .input-group { display: flex; gap: 10px; }
-        .input-group input { flex: 1; }
-        .input-group button { flex-shrink: 0; white-space: nowrap; }
-        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: all 0.3s; }
-        .btn-primary { background: #409EFF; color: white; }
-        .btn-primary:hover { background: #66b1ff; }
-        .btn-primary:disabled { background: #a0cfff; cursor: not-allowed; }
-        .btn-danger { background: #f56c6c; color: white; }
-        .btn-danger:hover { background: #f89898; }
-        .btn-success { background: #67c23a; color: white; }
-        .btn-warning { background: #e6a23c; color: white; }
-        .btn-small { padding: 5px 10px; font-size: 12px; margin: 2px; }
-        .btn-block { width: 100%; }
-        .tabs { display: flex; border-bottom: 1px solid #ddd; margin-bottom: 20px; }
-        .tab { padding: 10px 15px; cursor: pointer; border-bottom: 2px solid transparent; font-size: 14px; }
-        .tab.active { color: #409EFF; border-bottom-color: #409EFF; }
-        .main-container { display: flex; min-height: 100vh; }
-        .sidebar { width: 200px; background: #304156; color: white; flex-shrink: 0; }
-        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid #3a4a5e; }
-        .sidebar-header h2 { font-size: 18px; margin-bottom: 5px; }
-        .sidebar-header small { color: #aaa; }
-        .menu-item { padding: 15px 20px; cursor: pointer; transition: all 0.3s; }
-        .menu-item:hover, .menu-item.active { background: #409EFF; }
-        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-        .header { background: white; padding: 15px 20px; margin-bottom: 20px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-        .card { background: white; padding: 20px; border-radius: 4px; margin-bottom: 20px; }
-        .card-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
-        .stat-card { background: white; padding: 20px; border-radius: 4px; text-align: center; }
-        .stat-value { font-size: 32px; font-weight: bold; color: #409EFF; }
-        .stat-label { color: #666; margin-top: 5px; }
-        .toolbar { margin-bottom: 15px; display: flex; gap: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px 10px; text-align: left; border: 1px solid #ebeef5; }
-        th { background: #f5f7fa; font-weight: 600; color: #606266; }
-        tr:hover { background: #f5f7fa; }
-        .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px; }
-        .tag-success { background: #e1f3d8; color: #67c23a; }
-        .tag-danger { background: #fde2e2; color: #f56c6c; }
-        .tag-info { background: #e9e9eb; color: #909399; }
-        .tag-warning { background: #faecd8; color: #e6a23c; }
-        .license-code { font-family: monospace; background: #f5f5f5; padding: 3px 6px; border-radius: 3px; font-size: 12px; }
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .modal { background: white; padding: 20px; border-radius: 8px; width: 450px; max-width: 90%; }
-        .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; }
-        .modal-footer { margin-top: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end; }
-        select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
-        .msg { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 4px; z-index: 2000; }
-        .msg-success { background: #f0f9eb; color: #67c23a; border: 1px solid #c2e7b0; }
-        .msg-error { background: #fef0f0; color: #f56c6c; border: 1px solid #fbc4c4; }
-        .link { color: #409EFF; cursor: pointer; font-size: 13px; }
-        .link:hover { text-decoration: underline; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 400px;
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+            font-size: 22px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #409EFF;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+        }
+
+        .input-group button {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #409EFF;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #66b1ff;
+        }
+
+        .btn-primary:disabled {
+            background: #a0cfff;
+            cursor: not-allowed;
+        }
+
+        .btn-danger {
+            background: #f56c6c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #f89898;
+        }
+
+        .btn-success {
+            background: #67c23a;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #e6a23c;
+            color: white;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-size: 14px;
+        }
+
+        .tab.active {
+            color: #409EFF;
+            border-bottom-color: #409EFF;
+        }
+
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 200px;
+            background: #304156;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #3a4a5e;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header small {
+            color: #aaa;
+        }
+
+        .menu-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: #409EFF;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .header {
+            background: white;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #409EFF;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .toolbar {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+            border: 1px solid #ebeef5;
+        }
+
+        th {
+            background: #f5f7fa;
+            font-weight: 600;
+            color: #606266;
+        }
+
+        tr:hover {
+            background: #f5f7fa;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .tag-success {
+            background: #e1f3d8;
+            color: #67c23a;
+        }
+
+        .tag-danger {
+            background: #fde2e2;
+            color: #f56c6c;
+        }
+
+        .tag-info {
+            background: #e9e9eb;
+            color: #909399;
+        }
+
+        .tag-warning {
+            background: #faecd8;
+            color: #e6a23c;
+        }
+
+        .license-code {
+            font-family: monospace;
+            background: #f5f5f5;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 450px;
+            max-width: 90%;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+            text-align: right;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .msg {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 4px;
+            z-index: 2000;
+        }
+
+        .msg-success {
+            background: #f0f9eb;
+            color: #67c23a;
+            border: 1px solid #c2e7b0;
+        }
+
+        .msg-error {
+            background: #fef0f0;
+            color: #f56c6c;
+            border: 1px solid #fbc4c4;
+        }
+
+        .link {
+            color: #409EFF;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -83,38 +395,59 @@
             </div>
             <!-- 登录 -->
             <div v-if="authTab==='login'">
-                <div class="form-group"><label>用户名</label><input v-model="loginForm.username" placeholder="请输入用户名"></div>
-                <div class="form-group"><label>密码</label><input v-model="loginForm.password" type="password" placeholder="请输入密码"></div>
-                <button class="btn btn-primary btn-block" @click="login" :disabled="loading">{{ loading ? '登录中...' : '登录' }}</button>
-                <div style="text-align:right;margin-top:10px"><span class="link" @click="authTab='forgot'">忘记密码?</span></div>
+                <div class="form-group"><label>用户名</label><input v-model="loginForm.username"
+                                                                    placeholder="请输入用户名"></div>
+                <div class="form-group"><label>密码</label><input v-model="loginForm.password" type="password"
+                                                                  placeholder="请输入密码"></div>
+                <button class="btn btn-primary btn-block" @click="login" :disabled="loading">
+                    {{ loading ? '登录中...' : '登录' }}
+                </button>
+                <div style="text-align:right;margin-top:10px"><span class="link"
+                                                                    @click="authTab='forgot'">忘记密码?</span></div>
             </div>
             <!-- 注册 -->
             <div v-if="authTab==='register'">
-                <div class="form-group"><label>用户名</label><input v-model="registerForm.username" placeholder="3-20字符"></div>
-                <div class="form-group"><label>密码</label><input v-model="registerForm.password" type="password" placeholder="至少6位"></div>
-                <div class="form-group"><label>邮箱</label><input v-model="registerForm.email" type="email" placeholder="请输入邮箱"></div>
+                <div class="form-group"><label>用户名</label><input v-model="registerForm.username"
+                                                                    placeholder="3-20字符"></div>
+                <div class="form-group"><label>密码</label><input v-model="registerForm.password" type="password"
+                                                                  placeholder="至少6位"></div>
+                <div class="form-group"><label>邮箱</label><input v-model="registerForm.email" type="email"
+                                                                  placeholder="请输入邮箱"></div>
                 <div class="form-group">
                     <label>验证码</label>
                     <div class="input-group">
                         <input v-model="registerForm.verificationCode" placeholder="6位验证码">
-                        <button class="btn btn-primary" @click="sendRegisterCode" :disabled="regCodeCooldown>0||loading">{{ regCodeCooldown>0?regCodeCooldown+'秒':'获取验证码' }}</button>
+                        <button class="btn btn-primary" @click="sendRegisterCode"
+                                :disabled="regCodeCooldown>0||loading">
+                            {{ regCodeCooldown > 0 ? regCodeCooldown + '秒' : '获取验证码' }}
+                        </button>
                     </div>
                 </div>
-                <button class="btn btn-primary btn-block" @click="register" :disabled="loading">{{ loading ? '注册中...' : '注册' }}</button>
+                <button class="btn btn-primary btn-block" @click="register" :disabled="loading">
+                    {{ loading ? '注册中...' : '注册' }}
+                </button>
             </div>
             <!-- 找回密码 -->
             <div v-if="authTab==='forgot'">
-                <div class="form-group"><label>邮箱</label><input v-model="forgotForm.email" type="email" placeholder="请输入注册邮箱"></div>
+                <div class="form-group"><label>邮箱</label><input v-model="forgotForm.email" type="email"
+                                                                  placeholder="请输入注册邮箱"></div>
                 <div class="form-group">
                     <label>验证码</label>
                     <div class="input-group">
                         <input v-model="forgotForm.verificationCode" placeholder="6位验证码">
-                        <button class="btn btn-primary" @click="sendForgotCode" :disabled="forgotCodeCooldown>0||loading">{{ forgotCodeCooldown>0?forgotCodeCooldown+'秒':'获取验证码' }}</button>
+                        <button class="btn btn-primary" @click="sendForgotCode"
+                                :disabled="forgotCodeCooldown>0||loading">
+                            {{ forgotCodeCooldown > 0 ? forgotCodeCooldown + '秒' : '获取验证码' }}
+                        </button>
                     </div>
                 </div>
-                <div class="form-group"><label>新密码</label><input v-model="forgotForm.newPassword" type="password" placeholder="至少6位"></div>
-                <button class="btn btn-primary btn-block" @click="resetPassword" :disabled="loading">{{ loading ? '重置中...' : '重置密码' }}</button>
-                <div style="text-align:right;margin-top:10px"><span class="link" @click="authTab='login'">返回登录</span></div>
+                <div class="form-group"><label>新密码</label><input v-model="forgotForm.newPassword" type="password"
+                                                                    placeholder="至少6位"></div>
+                <button class="btn btn-primary btn-block" @click="resetPassword" :disabled="loading">
+                    {{ loading ? '重置中...' : '重置密码' }}
+                </button>
+                <div style="text-align:right;margin-top:10px"><span class="link"
+                                                                    @click="authTab='login'">返回登录</span></div>
             </div>
         </div>
     </div>
@@ -125,13 +458,26 @@
                 <h2>CloudPlugins</h2>
                 <small>{{ isAdmin ? (isSuperAdmin ? '超级管理员' : '管理员') : '用户' }}</small>
             </div>
-            <div class="menu-item" :class="{active: currentPage==='dashboard'}" @click="currentPage='dashboard'" v-if="isAdmin">📊 仪表盘</div>
-            <div class="menu-item" :class="{active: currentPage==='userdash'}" @click="currentPage='userdash'" v-if="!isAdmin">📊 仪表盘</div>
-            <div class="menu-item" :class="{active: currentPage==='pluginlist'}" @click="currentPage='pluginlist'">📦 插件列表</div>
-            <div class="menu-item" :class="{active: currentPage==='plugins'}" @click="currentPage='plugins'" v-if="isAdmin">🔌 插件管理</div>
-            <div class="menu-item" :class="{active: currentPage==='licenses'}" @click="currentPage='licenses'" v-if="isAdmin">🔑 授权码管理</div>
-            <div class="menu-item" :class="{active: currentPage==='users'}" @click="currentPage='users'" v-if="isAdmin">👥 用户管理</div>
-            <div class="menu-item" :class="{active: currentPage==='myauth'}" @click="currentPage='myauth'">📋 我的授权</div>
+            <div class="menu-item" :class="{active: currentPage==='dashboard'}" @click="currentPage='dashboard'"
+                 v-if="isAdmin">📊 仪表盘
+            </div>
+            <div class="menu-item" :class="{active: currentPage==='userdash'}" @click="currentPage='userdash'"
+                 v-if="!isAdmin">📊 仪表盘
+            </div>
+            <div class="menu-item" :class="{active: currentPage==='pluginlist'}" @click="currentPage='pluginlist'">📦
+                插件列表
+            </div>
+            <div class="menu-item" :class="{active: currentPage==='plugins'}" @click="currentPage='plugins'"
+                 v-if="isAdmin">🔌 插件管理
+            </div>
+            <div class="menu-item" :class="{active: currentPage==='licenses'}" @click="currentPage='licenses'"
+                 v-if="isAdmin">🔑 授权码管理
+            </div>
+            <div class="menu-item" :class="{active: currentPage==='users'}" @click="currentPage='users'" v-if="isAdmin">
+                👥 用户管理
+            </div>
+            <div class="menu-item" :class="{active: currentPage==='myauth'}" @click="currentPage='myauth'">📋 我的授权
+            </div>
         </div>
 
         <div class="main-content">
@@ -144,16 +490,26 @@
             <div v-if="currentPage==='pluginlist'" class="card">
                 <div class="card-title">可用插件</div>
                 <table>
-                    <thead><tr><th>ID</th><th>插件名</th><th>显示名</th><th>描述</th><th>版本</th></tr></thead>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>插件名</th>
+                        <th>显示名</th>
+                        <th>描述</th>
+                        <th>版本</th>
+                    </tr>
+                    </thead>
                     <tbody>
-                        <tr v-for="p in publicPlugins" :key="p.id">
-                            <td>{{ p.id }}</td>
-                            <td>{{ p.name }}</td>
-                            <td>{{ p.displayName }}</td>
-                            <td>{{ p.description || '-' }}</td>
-                            <td>{{ p.version }}</td>
-                        </tr>
-                        <tr v-if="!publicPlugins.length"><td colspan="5" style="text-align:center;color:#999">暂无数据</td></tr>
+                    <tr v-for="p in publicPlugins" :key="p.id">
+                        <td>{{ p.id }}</td>
+                        <td>{{ p.name }}</td>
+                        <td>{{ p.displayName }}</td>
+                        <td>{{ p.description || '-' }}</td>
+                        <td>{{ p.version }}</td>
+                    </tr>
+                    <tr v-if="!publicPlugins.length">
+                        <td colspan="5" style="text-align:center;color:#999">暂无数据</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -161,24 +517,46 @@
             <!-- 用户仪表盘 -->
             <div v-if="currentPage==='userdash' && !isAdmin" class="card">
                 <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-value">{{ userStats.totalLicenses }}</div><div class="stat-label">我的授权</div></div>
-                    <div class="stat-card"><div class="stat-value">{{ userStats.totalPlugins }}</div><div class="stat-label">我的插件</div></div>
-                    <div class="stat-card"><div class="stat-value">{{ userStats.totalBindings }}</div><div class="stat-label">绑定设备</div></div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ userStats.totalLicenses }}</div>
+                        <div class="stat-label">我的授权</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ userStats.totalPlugins }}</div>
+                        <div class="stat-label">我的插件</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ userStats.totalBindings }}</div>
+                        <div class="stat-label">绑定设备</div>
+                    </div>
                 </div>
             </div>
 
             <div v-if="currentPage==='dashboard' && isAdmin">
                 <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-value">{{ stats.totalUsers }}</div><div class="stat-label">总用户数</div></div>
-                    <div class="stat-card"><div class="stat-value">{{ stats.totalPlugins }}</div><div class="stat-label">总插件数</div></div>
-                    <div class="stat-card"><div class="stat-value">{{ stats.totalLicenses }}</div><div class="stat-label">总授权码</div></div>
-                    <div class="stat-card"><div class="stat-value">{{ stats.activeLicenses }}</div><div class="stat-label">有效授权</div></div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ stats.totalUsers }}</div>
+                        <div class="stat-label">总用户数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ stats.totalPlugins }}</div>
+                        <div class="stat-label">总插件数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ stats.totalLicenses }}</div>
+                        <div class="stat-label">总授权码</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ stats.activeLicenses }}</div>
+                        <div class="stat-label">有效授权</div>
+                    </div>
                 </div>
                 <div class="card">
                     <div class="card-title">系统配置</div>
                     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                         <label>解绑冷却时间(小时):</label>
-                        <input v-model.number="cooldownHours" type="number" min="0" style="width:80px;padding:8px;border:1px solid #ddd;border-radius:4px">
+                        <input v-model.number="cooldownHours" type="number" min="0"
+                               style="width:80px;padding:8px;border:1px solid #ddd;border-radius:4px">
                         <button class="btn btn-primary" @click="saveCooldown">保存</button>
                         <span style="color:#999;font-size:12px">用户绑定设备后，需等待该时间后才能解绑</span>
                     </div>
@@ -194,29 +572,49 @@
                 <div class="toolbar">
                     <button class="btn btn-primary" @click="showPluginDialog=true">创建插件</button>
                     <button class="btn btn-warning" @click="showExchangeConfigDialog=true">置换配置</button>
-                    <button class="btn btn-success" @click="showClaimConfigDialog=true;loadClaimConfigs()">领取配置</button>
+                    <button class="btn btn-success" @click="showClaimConfigDialog=true;loadClaimConfigs()">领取配置
+                    </button>
                     <button class="btn" @click="loadPlugins">刷新</button>
                 </div>
                 <table>
-                    <thead><tr><th>ID</th><th>插件名</th><th>显示名</th><th>描述</th><th>版本</th><th>状态</th><th>创建时间</th><th>更新时间</th><th>操作</th></tr></thead>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>插件名</th>
+                        <th>显示名</th>
+                        <th>描述</th>
+                        <th>版本</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>更新时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
                     <tbody>
-                        <tr v-for="p in plugins" :key="p.id">
-                            <td>{{ p.id }}</td>
-                            <td><span v-if="p.jarUploaded">{{ p.name }}</span><span v-else class="tag tag-warning">待上传</span></td>
-                            <td>{{ p.displayName }}</td>
-                            <td>{{ p.description || '-' }}</td>
-                            <td>{{ p.version }}</td>
-                            <td><span :class="['tag', p.enabled?'tag-success':'tag-danger']">{{ p.enabled?'启用':'禁用' }}</span></td>
-                            <td>{{ p.createdAt }}</td>
-                            <td>{{ p.updatedAt }}</td>
-                            <td style="white-space:nowrap">
-                                <button class="btn btn-small" @click="editPlugin(p)">编辑</button>
-                                <button class="btn btn-primary btn-small" @click="openUpload(p)">上传</button>
-                                <button class="btn btn-small" :class="p.enabled?'btn-warning':'btn-success'" @click="togglePlugin(p)">{{ p.enabled?'禁用':'启用' }}</button>
-                                <button class="btn btn-danger btn-small" @click="deletePlugin(p)">删除</button>
-                            </td>
-                        </tr>
-                        <tr v-if="!plugins.length"><td colspan="9" style="text-align:center;color:#999">暂无数据</td></tr>
+                    <tr v-for="p in plugins" :key="p.id">
+                        <td>{{ p.id }}</td>
+                        <td><span v-if="p.jarUploaded">{{ p.name }}</span><span v-else
+                                                                                class="tag tag-warning">待上传</span>
+                        </td>
+                        <td>{{ p.displayName }}</td>
+                        <td>{{ p.description || '-' }}</td>
+                        <td>{{ p.version }}</td>
+                        <td><span :class="['tag', p.enabled?'tag-success':'tag-danger']">{{ p.enabled ? '启用' : '禁用'
+                            }}</span></td>
+                        <td>{{ p.createdAt }}</td>
+                        <td>{{ p.updatedAt }}</td>
+                        <td style="white-space:nowrap">
+                            <button class="btn btn-small" @click="editPlugin(p)">编辑</button>
+                            <button class="btn btn-primary btn-small" @click="openUpload(p)">上传</button>
+                            <button class="btn btn-small" :class="p.enabled?'btn-warning':'btn-success'"
+                                    @click="togglePlugin(p)">{{ p.enabled ? '禁用' : '启用' }}
+                            </button>
+                            <button class="btn btn-danger btn-small" @click="deletePlugin(p)">删除</button>
+                        </td>
+                    </tr>
+                    <tr v-if="!plugins.length">
+                        <td colspan="9" style="text-align:center;color:#999">暂无数据</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -228,22 +626,38 @@
                     <button class="btn" @click="loadLicenses">刷新</button>
                 </div>
                 <table>
-                    <thead><tr><th>ID</th><th>授权码</th><th>插件</th><th>用户</th><th>绑定</th><th>状态</th><th>操作</th></tr></thead>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>授权码</th>
+                        <th>插件</th>
+                        <th>用户</th>
+                        <th>绑定</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
                     <tbody>
-                        <tr v-for="l in licenses" :key="l.id">
-                            <td>{{ l.id }}</td>
-                            <td><span class="license-code">{{ l.code }}</span></td>
-                            <td>{{ l.pluginName }}</td>
-                            <td><span v-if="!l.username" class="tag tag-info">通用</span><span v-else>{{ l.username }}</span></td>
-                            <td>{{ l.maxBindings===0?'不限':(l.currentBindings+'/'+l.maxBindings) }}</td>
-                            <td><span :class="['tag', l.enabled?'tag-success':'tag-danger']">{{ l.enabled?'有效':'禁用' }}</span></td>
-                            <td style="white-space:nowrap">
-                                <button class="btn btn-small" @click="openBindingEdit(l)">修改</button>
-                                <button class="btn btn-small" :class="l.enabled?'btn-warning':'btn-success'" @click="toggleLicense(l)">{{ l.enabled?'禁用':'启用' }}</button>
-                                <button class="btn btn-danger btn-small" @click="deleteLicense(l)">删除</button>
-                            </td>
-                        </tr>
-                        <tr v-if="!licenses.length"><td colspan="7" style="text-align:center;color:#999">暂无数据</td></tr>
+                    <tr v-for="l in licenses" :key="l.id">
+                        <td>{{ l.id }}</td>
+                        <td><span class="license-code">{{ l.code }}</span></td>
+                        <td>{{ l.pluginName }}</td>
+                        <td><span v-if="!l.username" class="tag tag-info">通用</span><span v-else>{{ l.username
+                            }}</span></td>
+                        <td>{{ l.maxBindings === 0 ? '不限' : (l.currentBindings + '/' + l.maxBindings) }}</td>
+                        <td><span :class="['tag', l.enabled?'tag-success':'tag-danger']">{{ l.enabled ? '有效' : '禁用'
+                            }}</span></td>
+                        <td style="white-space:nowrap">
+                            <button class="btn btn-small" @click="openBindingEdit(l)">修改</button>
+                            <button class="btn btn-small" :class="l.enabled?'btn-warning':'btn-success'"
+                                    @click="toggleLicense(l)">{{ l.enabled ? '禁用' : '启用' }}
+                            </button>
+                            <button class="btn btn-danger btn-small" @click="deleteLicense(l)">删除</button>
+                        </td>
+                    </tr>
+                    <tr v-if="!licenses.length">
+                        <td colspan="7" style="text-align:center;color:#999">暂无数据</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -251,24 +665,47 @@
             <div v-if="currentPage==='users' && isAdmin" class="card">
                 <div class="card-title">用户管理</div>
                 <table>
-                    <thead><tr><th>ID</th><th>用户名</th><th>邮箱</th><th>角色</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>邮箱</th>
+                        <th>角色</th>
+                        <th>状态</th>
+                        <th>注册时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
                     <tbody>
-                        <tr v-for="u in users" :key="u.id">
-                            <td>{{ u.id }}</td>
-                            <td>{{ u.username }}</td>
-                            <td>{{ u.email || '-' }}</td>
-                            <td><span :class="['tag', u.isSuperAdmin?'tag-danger':(u.isAdmin?'tag-warning':'')]">{{ u.isSuperAdmin?'超级管理员':(u.isAdmin?'管理员':'用户') }}</span></td>
-                            <td><span :class="['tag', u.banned?'tag-danger':'tag-success']">{{ u.banned?'已封禁':'正常' }}</span></td>
-                            <td>{{ u.createdAt }}</td>
-                            <td style="white-space:nowrap">
-                                <button class="btn btn-small" @click="openPwd(u)">修改密码</button>
-                                <button class="btn btn-warning btn-small" @click="adminUnbindUser(u)" v-if="!u.isAdmin">解绑设备</button>
-                                <button class="btn btn-danger btn-small" @click="deleteUserLicenses(u)">删除授权</button>
-                                <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-small" :class="u.banned?'btn-success':'btn-danger'" @click="toggleBan(u)">{{ u.banned?'解封账号':'账号封禁' }}</button>
-                                <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-small" :class="u.isAdmin?'':'btn-primary'" @click="toggleAdmin(u)">{{ u.isAdmin?'取消管理':'设为管理' }}</button>
-                                <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-danger btn-small" @click="deleteUser(u)">删除用户</button>
-                            </td>
-                        </tr>
+                    <tr v-for="u in users" :key="u.id">
+                        <td>{{ u.id }}</td>
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.email || '-' }}</td>
+                        <td><span
+                                :class="['tag', u.isSuperAdmin?'tag-danger':(u.isAdmin?'tag-warning':'')]">{{ u.isSuperAdmin ? '超级管理员' : (u.isAdmin ? '管理员' : '用户')
+                            }}</span></td>
+                        <td><span :class="['tag', u.banned?'tag-danger':'tag-success']">{{ u.banned ? '已封禁' : '正常'
+                            }}</span></td>
+                        <td>{{ u.createdAt }}</td>
+                        <td style="white-space:nowrap">
+                            <button class="btn btn-small" @click="openPwd(u)">修改密码</button>
+                            <button class="btn btn-warning btn-small" @click="adminUnbindUser(u)" v-if="!u.isAdmin">
+                                解绑设备
+                            </button>
+                            <button class="btn btn-danger btn-small" @click="deleteUserLicenses(u)">删除授权</button>
+                            <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-small"
+                                    :class="u.banned?'btn-success':'btn-danger'" @click="toggleBan(u)">
+                                {{ u.banned ? '解封账号' : '账号封禁' }}
+                            </button>
+                            <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-small"
+                                    :class="u.isAdmin?'':'btn-primary'" @click="toggleAdmin(u)">
+                                {{ u.isAdmin ? '取消管理' : '设为管理' }}
+                            </button>
+                            <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-danger btn-small"
+                                    @click="deleteUser(u)">删除用户
+                            </button>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -278,33 +715,52 @@
                     <span>我的授权</span>
                     <div style="display:flex;gap:10px">
                         <button class="btn btn-warning btn-small" @click="openUserExchangeDialog">插件置换</button>
-                        <button class="btn btn-success btn-small" @click="showClaimDialog=true;loadClaimablePlugins()">领取插件</button>
-                        <button class="btn btn-danger btn-small" @click="userUnbindAll" v-if="myPlugins.some(p=>p.bindings.length)">解绑全部设备</button>
+                        <button class="btn btn-success btn-small" @click="showClaimDialog=true;loadClaimablePlugins()">
+                            领取插件
+                        </button>
+                        <button class="btn btn-danger btn-small" @click="userUnbindAll"
+                                v-if="myPlugins.some(p=>p.bindings.length)">解绑全部设备
+                        </button>
                     </div>
                 </div>
                 <table>
-                    <thead><tr><th>插件名</th><th>显示名</th><th>版本</th><th>授权码</th><th>过期时间</th><th>绑定设备</th><th>操作</th></tr></thead>
+                    <thead>
+                    <tr>
+                        <th>插件名</th>
+                        <th>显示名</th>
+                        <th>版本</th>
+                        <th>授权码</th>
+                        <th>过期时间</th>
+                        <th>绑定设备</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
                     <tbody>
-                        <tr v-for="p in myPlugins" :key="p.pluginId">
-                            <td>{{ p.pluginName }}</td>
-                            <td>{{ p.displayName }}</td>
-                            <td>{{ p.version }}</td>
-                            <td><span class="license-code">{{ p.licenseCode }}</span></td>
-                            <td>{{ p.expiresAt || '永久' }}</td>
-                            <td>
-                                <div v-if="p.bindings.length">
-                                    <div v-for="b in p.bindings" :key="b.id" style="margin-bottom:5px;padding:5px;background:#f5f7fa;border-radius:4px;font-size:12px">
-                                        <div>IP: {{ b.ip || '-' }} | MAC: {{ b.mac || '-' }}</div>
-                                        <div style="margin-top:3px">绑定: {{ b.createdAt }}</div>
-                                    </div>
+                    <tr v-for="p in myPlugins" :key="p.pluginId">
+                        <td>{{ p.pluginName }}</td>
+                        <td>{{ p.displayName }}</td>
+                        <td>{{ p.version }}</td>
+                        <td><span class="license-code">{{ p.licenseCode }}</span></td>
+                        <td>{{ p.expiresAt || '永久' }}</td>
+                        <td>
+                            <div v-if="p.bindings.length">
+                                <div v-for="b in p.bindings" :key="b.id"
+                                     style="margin-bottom:5px;padding:5px;background:#f5f7fa;border-radius:4px;font-size:12px">
+                                    <div>IP: {{ b.ip || '-' }} | MAC: {{ b.mac || '-' }}</div>
+                                    <div style="margin-top:3px">绑定: {{ b.createdAt }}</div>
                                 </div>
-                                <span v-else style="color:#999">未绑定</span>
-                            </td>
-                            <td style="white-space:nowrap">
-                                <button v-for="b in p.bindings" :key="'unbind-'+b.id" class="btn btn-danger btn-small" @click="userUnbind(b.id)">解绑</button>
-                            </td>
-                        </tr>
-                        <tr v-if="!myPlugins.length"><td colspan="7" style="text-align:center;color:#999">暂无授权</td></tr>
+                            </div>
+                            <span v-else style="color:#999">未绑定</span>
+                        </td>
+                        <td style="white-space:nowrap">
+                            <button v-for="b in p.bindings" :key="'unbind-'+b.id" class="btn btn-danger btn-small"
+                                    @click="userUnbind(b.id)">解绑
+                            </button>
+                        </td>
+                    </tr>
+                    <tr v-if="!myPlugins.length">
+                        <td colspan="7" style="text-align:center;color:#999">暂无授权</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -315,7 +771,8 @@
     <div v-if="showPluginDialog" class="modal-overlay" @click.self="showPluginDialog=false">
         <div class="modal">
             <div class="modal-title">创建插件</div>
-            <div class="form-group"><label>展示名</label><input v-model="pluginForm.displayName" placeholder="用户可见的名称"></div>
+            <div class="form-group"><label>展示名</label><input v-model="pluginForm.displayName"
+                                                                placeholder="用户可见的名称"></div>
             <div class="modal-footer">
                 <button class="btn" @click="showPluginDialog=false">取消</button>
                 <button class="btn btn-primary" @click="createPlugin" :disabled="loading">创建</button>
@@ -343,13 +800,21 @@
             <div class="modal-title">生成授权码</div>
             <div class="form-group">
                 <label>选择插件</label>
-                <select v-model="genForm.pluginId"><option :value="null" disabled>请选择插件</option><option v-for="p in plugins" :key="p.id" :value="p.id">{{ p.displayName }}</option></select>
+                <select v-model="genForm.pluginId">
+                    <option :value="null" disabled>请选择插件</option>
+                    <option v-for="p in plugins" :key="p.id" :value="p.id">{{ p.displayName }}</option>
+                </select>
             </div>
             <div class="form-group"><label>授权给用户（可选，留空为通用码）</label>
                 <div style="position:relative">
-                    <input v-model="genForm.username" placeholder="输入用户名筛选或直接选择" @input="onUsernameInput" @focus="onUserSelectFocus" @blur="hideUserSelect">
-                    <div v-if="showUserSelect && filteredUsers.length" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-radius:4px;max-height:200px;overflow-y:auto;z-index:1000;margin-top:2px">
-                        <div v-for="u in filteredUsers" :key="u.id" style="padding:8px 12px;cursor:pointer;transition:all 0.2s" @click="selectUser(u.username)" @mouseover="$event.target.style.background='#f5f7fa'" @mouseout="$event.target.style.background='white'">
+                    <input v-model="genForm.username" placeholder="输入用户名筛选或直接选择" @input="onUsernameInput"
+                           @focus="onUserSelectFocus" @blur="hideUserSelect">
+                    <div v-if="showUserSelect && filteredUsers.length"
+                         style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-radius:4px;max-height:200px;overflow-y:auto;z-index:1000;margin-top:2px">
+                        <div v-for="u in filteredUsers" :key="u.id"
+                             style="padding:8px 12px;cursor:pointer;transition:all 0.2s" @click="selectUser(u.username)"
+                             @mouseover="$event.target.style.background='#f5f7fa'"
+                             @mouseout="$event.target.style.background='white'">
                             {{ u.username }}
                         </div>
                     </div>
@@ -358,12 +823,16 @@
             <div class="form-group" v-if="!genForm.username"><label>自定义授权码（可选）</label>
                 <input v-model="genForm.customCode" placeholder="留空则随机生成">
             </div>
-            <div class="form-group"><label>数量</label><input v-model.number="genForm.count" type="number" min="1" max="100"></div>
-            <div class="form-group" v-if="genForm.username"><label>最大绑定数</label><input v-model.number="genForm.maxBindings" type="number" min="1" max="10"></div>
-            <div class="form-group"><label>有效期(天，0=永久)</label><input v-model.number="genForm.expiresInDays" type="number" min="0"></div>
+            <div class="form-group"><label>数量</label><input v-model.number="genForm.count" type="number" min="1"
+                                                              max="100"></div>
+            <div class="form-group" v-if="genForm.username"><label>最大绑定数</label><input
+                    v-model.number="genForm.maxBindings" type="number" min="1" max="10"></div>
+            <div class="form-group"><label>有效期(天，0=永久)</label><input v-model.number="genForm.expiresInDays"
+                                                                           type="number" min="0"></div>
             <div class="modal-footer">
                 <button class="btn" @click="showGenDialog=false">取消</button>
-                <button class="btn btn-primary" @click="generateLicenses" :disabled="loading||!genForm.pluginId">生成</button>
+                <button class="btn btn-primary" @click="generateLicenses" :disabled="loading||!genForm.pluginId">生成
+                </button>
             </div>
         </div>
     </div>
@@ -371,32 +840,44 @@
     <div v-if="showUploadDialog" class="modal-overlay" @click.self="showUploadDialog=false">
         <div class="modal" style="width:520px">
             <div class="modal-title">上传插件JAR文件</div>
-            <div v-if="uploadPlugin" style="margin-bottom:15px;padding:12px;background:#f5f7fa;border-radius:6px;line-height:1.8">
+            <div v-if="uploadPlugin"
+                 style="margin-bottom:15px;padding:12px;background:#f5f7fa;border-radius:6px;line-height:1.8">
                 <div><strong>显示名:</strong> {{ uploadPlugin.displayName }}</div>
                 <div><strong>当前版本:</strong> {{ uploadPlugin.version }}</div>
-                <div><strong>状态:</strong> <span :class="['tag', uploadPlugin.jarUploaded?'tag-success':'tag-warning']">{{ uploadPlugin.jarUploaded?'已上传':'待上传' }}</span></div>
+                <div><strong>状态:</strong> <span
+                        :class="['tag', uploadPlugin.jarUploaded?'tag-success':'tag-warning']">{{ uploadPlugin.jarUploaded ? '已上传' : '待上传'
+                    }}</span></div>
             </div>
-            <div v-if="!selectedFile" class="upload-area" @click="$refs.fileInput.click()" @dragover.prevent @drop.prevent="onDrop" style="border:2px dashed #ddd;border-radius:8px;padding:40px 20px;text-align:center;cursor:pointer;transition:all 0.3s" onmouseover="this.style.borderColor='#409EFF';this.style.background='#f5f7fa'" onmouseout="this.style.borderColor='#ddd';this.style.background='white'">
+            <div v-if="!selectedFile" class="upload-area" @click="$refs.fileInput.click()" @dragover.prevent
+                 @drop.prevent="onDrop"
+                 style="border:2px dashed #ddd;border-radius:8px;padding:40px 20px;text-align:center;cursor:pointer;transition:all 0.3s"
+                 onmouseover="this.style.borderColor='#409EFF';this.style.background='#f5f7fa'"
+                 onmouseout="this.style.borderColor='#ddd';this.style.background='white'">
                 <div style="font-size:48px;margin-bottom:10px">📦</div>
-                <div style="color:#666;font-size:15px">将JAR文件拖到此处，或<span style="color:#409EFF;font-weight:bold">点击选择</span></div>
+                <div style="color:#666;font-size:15px">将JAR文件拖到此处，或<span style="color:#409EFF;font-weight:bold">点击选择</span>
+                </div>
                 <div style="color:#999;font-size:12px;margin-top:8px">只允许上传 .jar 文件</div>
                 <input ref="fileInput" type="file" @change="onFileChange" accept=".jar" style="display:none">
             </div>
-            <div v-if="selectedFile" style="margin-top:10px;padding:15px;background:#f0f9eb;border:1px solid #c2e7b0;border-radius:6px">
+            <div v-if="selectedFile"
+                 style="margin-top:10px;padding:15px;background:#f0f9eb;border:1px solid #c2e7b0;border-radius:6px">
                 <div style="font-size:15px;font-weight:bold;color:#67c23a;margin-bottom:10px">✅ 已选择文件</div>
                 <div style="line-height:1.8;color:#606266">
                     <div><strong>文件名:</strong> {{ selectedFile.name }}</div>
                     <div><strong>文件大小:</strong> {{ formatSize(selectedFile.size) }}</div>
                 </div>
                 <div style="margin-top:12px;text-align:right">
-                    <button class="btn btn-small" @click="$refs.fileInput.click()" style="margin-right:8px">重新选择</button>
+                    <button class="btn btn-small" @click="$refs.fileInput.click()" style="margin-right:8px">重新选择
+                    </button>
                     <button class="btn btn-danger btn-small" @click="selectedFile=null">移除文件</button>
                 </div>
                 <input ref="fileInput" type="file" @change="onFileChange" accept=".jar" style="display:none">
             </div>
             <div class="modal-footer" style="margin-top:25px;padding-top:15px;border-top:1px solid #eee">
                 <button class="btn" @click="showUploadDialog=false">取消</button>
-                <button class="btn btn-primary" @click="doUpload" :disabled="!selectedFile||uploading">{{ uploading?'上传中...':'确认上传' }}</button>
+                <button class="btn btn-primary" @click="doUpload" :disabled="!selectedFile||uploading">
+                    {{ uploading ? '上传中...' : '确认上传' }}
+                </button>
             </div>
         </div>
     </div>
@@ -404,7 +885,8 @@
     <div v-if="showPwdDialog" class="modal-overlay" @click.self="showPwdDialog=false">
         <div class="modal">
             <div class="modal-title">修改密码 - {{ pwdForm.username }}</div>
-            <div class="form-group"><label>新密码</label><input v-model="pwdForm.newPassword" type="password" placeholder="至少6位"></div>
+            <div class="form-group"><label>新密码</label><input v-model="pwdForm.newPassword" type="password"
+                                                                placeholder="至少6位"></div>
             <div class="modal-footer">
                 <button class="btn" @click="showPwdDialog=false">取消</button>
                 <button class="btn btn-primary" @click="changePwd" :disabled="loading">确认</button>
@@ -416,7 +898,9 @@
         <div class="modal">
             <div class="modal-title">生成的授权码</div>
             <pre style="background:#f5f5f5;padding:10px;max-height:300px;overflow:auto">{{ generatedCodes }}</pre>
-            <div class="modal-footer"><button class="btn btn-primary" @click="codesDialog=false">确定</button></div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" @click="codesDialog=false">确定</button>
+            </div>
         </div>
     </div>
 
@@ -427,7 +911,8 @@
                 <div>授权码：<span class="license-code">{{ bindingForm.code }}</span></div>
                 <div style="margin-top:5px">当前绑定：{{ bindingForm.currentBindings }} 个设备</div>
             </div>
-            <div class="form-group"><label>最大绑定数 (0=不限)</label><input v-model.number="bindingForm.maxBindings" type="number" min="0" max="100"></div>
+            <div class="form-group"><label>最大绑定数 (0=不限)</label><input v-model.number="bindingForm.maxBindings"
+                                                                             type="number" min="0" max="100"></div>
             <div class="modal-footer">
                 <button class="btn" @click="showBindingDialog=false">取消</button>
                 <button class="btn btn-primary" @click="updateBindings" :disabled="loading">保存</button>
@@ -455,7 +940,9 @@
             </div>
             <div class="modal-footer">
                 <button class="btn" @click="showAddExchangeDialog=false">取消</button>
-                <button class="btn btn-primary" @click="doAddExchangeConfig" :disabled="loading||!addExchangeForm.fromPluginId||!addExchangeForm.toPluginId">创建</button>
+                <button class="btn btn-primary" @click="doAddExchangeConfig"
+                        :disabled="loading||!addExchangeForm.fromPluginId||!addExchangeForm.toPluginId">创建
+                </button>
             </div>
         </div>
     </div>
@@ -468,32 +955,48 @@
                 <button class="btn btn-primary btn-small" @click="openAddClaimDialog">新增领取配置</button>
             </div>
             <table style="margin-bottom:15px">
-                <thead><tr><th>可领取插件</th><th>领取条件</th><th>排除插件</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+                <thead>
+                <tr>
+                    <th>可领取插件</th>
+                    <th>领取条件</th>
+                    <th>排除插件</th>
+                    <th>状态</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
                 <tbody>
-                    <tr v-for="config in claimConfigs" :key="config.id">
-                        <td>{{ config.pluginDisplayName }}</td>
-                        <td>
+                <tr v-for="config in claimConfigs" :key="config.id">
+                    <td>{{ config.pluginDisplayName }}</td>
+                    <td>
                             <span v-if="config.requiredPluginId">
                                 拥有 {{ config.requiredPluginDisplayName }}
                             </span>
-                            <span v-else>
+                        <span v-else>
                                 拥有 {{ config.requiredAuthCount }} 个授权码
                             </span>
-                        </td>
-                        <td>
-                            <span v-if="config.excludePluginIds && config.excludePluginIds.length" style="font-size:12px;color:#666">
+                    </td>
+                    <td>
+                            <span v-if="config.excludePluginIds && config.excludePluginIds.length"
+                                  style="font-size:12px;color:#666">
                                 排除 {{ config.excludePluginIds.length }} 个插件
                             </span>
-                            <span v-else style="font-size:12px;color:#999">无</span>
-                        </td>
-                        <td><span :class="['tag', config.enabled?'tag-success':'tag-danger']">{{ config.enabled?'启用':'禁用' }}</span></td>
-                        <td>{{ config.createdAt }}</td>
-                        <td style="white-space:nowrap">
-                            <button class="btn btn-small" @click="toggleClaimConfig(config)">{{ config.enabled?'禁用':'启用' }}</button>
-                            <button class="btn btn-danger btn-small" @click="deleteClaimConfigById(config.id)">删除</button>
-                        </td>
-                    </tr>
-                    <tr v-if="!claimConfigs.length"><td colspan="6" style="text-align:center;color:#999">暂无配置</td></tr>
+                        <span v-else style="font-size:12px;color:#999">无</span>
+                    </td>
+                    <td><span
+                            :class="['tag', config.enabled?'tag-success':'tag-danger']">{{ config.enabled ? '启用' : '禁用'
+                        }}</span></td>
+                    <td>{{ config.createdAt }}</td>
+                    <td style="white-space:nowrap">
+                        <button class="btn btn-small" @click="toggleClaimConfig(config)">
+                            {{ config.enabled ? '禁用' : '启用' }}
+                        </button>
+                        <button class="btn btn-danger btn-small" @click="deleteClaimConfigById(config.id)">删除</button>
+                    </td>
+                </tr>
+                <tr v-if="!claimConfigs.length">
+                    <td colspan="6" style="text-align:center;color:#999">暂无配置</td>
+                </tr>
                 </tbody>
             </table>
             <div class="modal-footer">
@@ -534,15 +1037,23 @@
             <div class="form-group">
                 <label>排除的插件（这些插件不计入授权码数量）</label>
                 <div style="position:relative">
-                    <input v-model="addClaimForm.excludePluginInput" placeholder="输入插件名筛选或直接选择" @input="onExcludePluginInput" @focus="onExcludePluginFocus" @blur="hideExcludePluginSelect" style="width:100%">
-                    <div v-if="showExcludePluginSelect && filteredExcludePlugins.length" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-radius:4px;max-height:200px;overflow-y:auto;z-index:1000;margin-top:2px">
-                        <div v-for="p in filteredExcludePlugins" :key="p.id" style="padding:8px 12px;cursor:pointer;transition:all 0.2s" @click="addExcludePlugin(p)" @mouseover="$event.target.style.background='#f5f7fa'" @mouseout="$event.target.style.background='white'">
+                    <input v-model="addClaimForm.excludePluginInput" placeholder="输入插件名筛选或直接选择"
+                           @input="onExcludePluginInput" @focus="onExcludePluginFocus" @blur="hideExcludePluginSelect"
+                           style="width:100%">
+                    <div v-if="showExcludePluginSelect && filteredExcludePlugins.length"
+                         style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-radius:4px;max-height:200px;overflow-y:auto;z-index:1000;margin-top:2px">
+                        <div v-for="p in filteredExcludePlugins" :key="p.id"
+                             style="padding:8px 12px;cursor:pointer;transition:all 0.2s" @click="addExcludePlugin(p)"
+                             @mouseover="$event.target.style.background='#f5f7fa'"
+                             @mouseout="$event.target.style.background='white'">
                             {{ p.displayName }}
                         </div>
                     </div>
                 </div>
-                <div v-if="addClaimForm.excludePluginIds.length > 0" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
-                    <span v-for="pid in addClaimForm.excludePluginIds" :key="pid" class="tag tag-info" style="display:flex;align-items:center;gap:5px;">
+                <div v-if="addClaimForm.excludePluginIds.length > 0"
+                     style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
+                    <span v-for="pid in addClaimForm.excludePluginIds" :key="pid" class="tag tag-info"
+                          style="display:flex;align-items:center;gap:5px;">
                         {{ getPluginName(pid) }}
                         <span style="cursor:pointer;font-weight:bold;" @click="removeExcludePlugin(pid)">×</span>
                     </span>
@@ -550,7 +1061,10 @@
             </div>
             <div class="modal-footer">
                 <button class="btn" @click="showAddClaimDialog=false">取消</button>
-                <button class="btn btn-primary" @click="doAddClaimConfig" :disabled="loading||!addClaimForm.pluginId||(!addClaimForm.requiredPluginId && addClaimForm.conditionType==='hasPlugin')">创建</button>
+                <button class="btn btn-primary" @click="doAddClaimConfig"
+                        :disabled="loading||!addClaimForm.pluginId||(!addClaimForm.requiredPluginId && addClaimForm.conditionType==='hasPlugin')">
+                    创建
+                </button>
             </div>
         </div>
     </div>
@@ -563,19 +1077,34 @@
                 <button class="btn btn-primary btn-small" @click="openAddExchangeDialog">新增置换</button>
             </div>
             <table style="margin-bottom:15px">
-                <thead><tr><th>源插件</th><th>目标插件</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+                <thead>
+                <tr>
+                    <th>源插件</th>
+                    <th>目标插件</th>
+                    <th>状态</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
                 <tbody>
-                    <tr v-for="config in exchangeConfigs" :key="config.id">
-                        <td>{{ config.fromPluginDisplayName }}</td>
-                        <td>{{ config.toPluginDisplayName }}</td>
-                        <td><span :class="['tag', config.enabled?'tag-success':'tag-danger']">{{ config.enabled?'启用':'禁用' }}</span></td>
-                        <td>{{ config.createdAt }}</td>
-                        <td style="white-space:nowrap">
-                            <button class="btn btn-small" @click="toggleExchangeConfig(config)">{{ config.enabled?'禁用':'启用' }}</button>
-                            <button class="btn btn-danger btn-small" @click="deleteExchangeConfigById(config.id)">删除</button>
-                        </td>
-                    </tr>
-                    <tr v-if="!exchangeConfigs.length"><td colspan="5" style="text-align:center;color:#999">暂无配置</td></tr>
+                <tr v-for="config in exchangeConfigs" :key="config.id">
+                    <td>{{ config.fromPluginDisplayName }}</td>
+                    <td>{{ config.toPluginDisplayName }}</td>
+                    <td><span
+                            :class="['tag', config.enabled?'tag-success':'tag-danger']">{{ config.enabled ? '启用' : '禁用'
+                        }}</span></td>
+                    <td>{{ config.createdAt }}</td>
+                    <td style="white-space:nowrap">
+                        <button class="btn btn-small" @click="toggleExchangeConfig(config)">
+                            {{ config.enabled ? '禁用' : '启用' }}
+                        </button>
+                        <button class="btn btn-danger btn-small" @click="deleteExchangeConfigById(config.id)">删除
+                        </button>
+                    </td>
+                </tr>
+                <tr v-if="!exchangeConfigs.length">
+                    <td colspan="5" style="text-align:center;color:#999">暂无配置</td>
+                </tr>
                 </tbody>
             </table>
             <div class="modal-footer">
@@ -590,7 +1119,8 @@
             <div class="modal-title">插件置换</div>
             <div style="margin-bottom:15px;padding:10px;background:#fffbe6;border:1px solid #ffe58f;border-radius:4px;font-size:13px">
                 <div style="color:#b46a00">⚠️ 置换说明：</div>
-                <div style="color:#666;margin-top:5px;line-height:1.6">• 置换会将您的源插件授权码转换为目标插件授权码</div>
+                <div style="color:#666;margin-top:5px;line-height:1.6">• 置换会将您的源插件授权码转换为目标插件授权码
+                </div>
                 <div style="color:#666;line-height:1.6">• 授权码本身不会改变，只会变更所属插件</div>
                 <div style="color:#666;line-height:1.6">• 置换后无法恢复，请谨慎操作</div>
             </div>
@@ -605,7 +1135,9 @@
             </div>
             <div class="modal-footer">
                 <button class="btn" @click="showUserExchangeDialog=false">取消</button>
-                <button class="btn btn-warning" @click="doUserExchange" :disabled="loading||!userExchangeForm.exchangeConfigId">执行置换</button>
+                <button class="btn btn-warning" @click="doUserExchange"
+                        :disabled="loading||!userExchangeForm.exchangeConfigId">执行置换
+                </button>
             </div>
         </div>
     </div>
@@ -620,28 +1152,39 @@
                 <div style="color:#666;line-height:1.6">• 每个插件只能领取一次</div>
             </div>
             <table style="margin-bottom:15px">
-                <thead><tr><th>插件名</th><th>显示名</th><th>描述</th><th>领取条件</th><th>操作</th></tr></thead>
+                <thead>
+                <tr>
+                    <th>插件名</th>
+                    <th>显示名</th>
+                    <th>描述</th>
+                    <th>领取条件</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
                 <tbody>
-                    <tr v-for="plugin in claimablePlugins" :key="plugin.id">
-                        <td>{{ plugin.name }}</td>
-                        <td>{{ plugin.displayName }}</td>
-                        <td>{{ plugin.description || '-' }}</td>
-                        <td>
+                <tr v-for="plugin in claimablePlugins" :key="plugin.id">
+                    <td>{{ plugin.name }}</td>
+                    <td>{{ plugin.displayName }}</td>
+                    <td>{{ plugin.description || '-' }}</td>
+                    <td>
                             <span v-if="plugin.requiredPluginId" style="font-size:12px;color:#666">
                                 拥有 {{ plugin.requiredPluginName }}
                             </span>
-                            <span v-else-if="plugin.requiredAuthCount>0" style="font-size:12px;color:#666">
+                        <span v-else-if="plugin.requiredAuthCount>0" style="font-size:12px;color:#666">
                                 拥有 {{ plugin.requiredAuthCount }} 个授权码
                             </span>
-                            <span v-else style="font-size:12px;color:#999">无门槛</span>
-                        </td>
-                        <td>
-                            <button class="btn btn-success btn-small" @click="claimPlugin(plugin.configId)" :disabled="!plugin.canClaim">
-                                {{ plugin.canClaim ? '领取' : '未满足条件' }}
-                            </button>
-                        </td>
-                    </tr>
-                    <tr v-if="!claimablePlugins.length"><td colspan="5" style="text-align:center;color:#999">暂无可领取插件</td></tr>
+                        <span v-else style="font-size:12px;color:#999">无门槛</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-success btn-small" @click="claimPlugin(plugin.configId)"
+                                :disabled="!plugin.canClaim">
+                            {{ plugin.canClaim ? '领取' : '未满足条件' }}
+                        </button>
+                    </td>
+                </tr>
+                <tr v-if="!claimablePlugins.length">
+                    <td colspan="5" style="text-align:center;color:#999">暂无可领取插件</td>
+                </tr>
                 </tbody>
             </table>
             <div class="modal-footer">
@@ -652,483 +1195,1111 @@
 </div>
 
 <script>
-const { createApp, ref, onMounted, nextTick } = Vue;
-createApp({
-    setup() {
-        const isLoggedIn = ref(false), isAdmin = ref(false), isSuperAdmin = ref(false), username = ref(''), token = ref(''), loading = ref(false);
-        const authTab = ref('login'), currentPage = ref('dashboard'), msg = ref(null);
-        const loginForm = ref({username:'',password:''});
-        const registerForm = ref({username:'',password:'',email:'',verificationCode:''});
-        const forgotForm = ref({email:'',verificationCode:'',newPassword:''});
-        const regCodeCooldown = ref(0), forgotCodeCooldown = ref(0);
-        const pluginForm = ref({displayName:''}), editForm = ref({id:null,name:'',displayName:'',version:'',description:'',mainClass:'',enabled:true});
-        const genForm = ref({pluginId:null,username:null,count:1,maxBindings:1,expiresInDays:0,customCode:''}), pwdForm = ref({userId:null,username:'',newPassword:''}), bindingForm = ref({id:null,code:'',maxBindings:0,currentBindings:0});
-        const showPluginDialog = ref(false), showEditDialog = ref(false), showGenDialog = ref(false), showUploadDialog = ref(false), showPwdDialog = ref(false), codesDialog = ref(false), showBindingDialog = ref(false);
-        const uploadPlugin = ref(null), selectedFile = ref(null), uploading = ref(false), generatedCodes = ref('');
-        const stats = ref({totalUsers:0,totalPlugins:0,totalLicenses:0,activeLicenses:0,unbindCooldownHours:24});
-        const cooldownHours = ref(24);
-        const plugins = ref([]), licenses = ref([]), users = ref([]), myPlugins = ref([]);
-        // 新增功能相关变量
-        const publicPlugins = ref([]); // 公开插件列表
-        const userStats = ref({totalLicenses:0,totalPlugins:0,totalBindings:0}); // 用户仪表盘统计
-        const exchangeConfigs = ref([]); // 置换配置列表（管理员）
-        const availableExchangeConfigs = ref([]); // 可用置换配置（用户）
-        const claimablePlugins = ref([]); // 可领取插件
-        const userExchangeForm = ref({exchangeConfigId:null}); // 用户置换表单
-        const showExchangeConfigDialog = ref(false); // 显示置换配置弹窗
-        const showUserExchangeDialog = ref(false); // 显示用户置换弹窗
-        const showClaimDialog = ref(false); // 显示领取弹窗
-        const showUserSelect = ref(false); // 显示用户选择下拉框
-        const filteredUsers = ref([]); // 过滤后的用户列表
-        // 新增置换配置对话框
-        const showAddExchangeDialog = ref(false);
-        const addExchangeForm = ref({fromPluginId:null,toPluginId:null});
-        // 领取配置相关变量
-        const showClaimConfigDialog = ref(false);
-        const showAddClaimDialog = ref(false);
-        const claimConfigs = ref([]);
-        const addClaimForm = ref({pluginId:null,conditionType:'authCount',requiredAuthCount:1,requiredPluginId:null,excludePluginIds:[],excludePluginInput:''});
-        const showExcludePluginSelect = ref(false);
-        const filteredExcludePlugins = ref([]);
+    const {createApp, ref, onMounted, nextTick} = Vue;
+    createApp({
+        setup() {
+            const isLoggedIn = ref(false), isAdmin = ref(false), isSuperAdmin = ref(false), username = ref(''),
+                token = ref(''), loading = ref(false);
+            const authTab = ref('login'), currentPage = ref('dashboard'), msg = ref(null);
+            const loginForm = ref({username: '', password: ''});
+            const registerForm = ref({username: '', password: '', email: '', verificationCode: ''});
+            const forgotForm = ref({email: '', verificationCode: '', newPassword: ''});
+            const regCodeCooldown = ref(0), forgotCodeCooldown = ref(0);
+            const pluginForm = ref({displayName: ''}), editForm = ref({
+                id: null,
+                name: '',
+                displayName: '',
+                version: '',
+                description: '',
+                mainClass: '',
+                enabled: true
+            });
+            const genForm = ref({
+                    pluginId: null,
+                    username: null,
+                    count: 1,
+                    maxBindings: 1,
+                    expiresInDays: 0,
+                    customCode: ''
+                }), pwdForm = ref({userId: null, username: '', newPassword: ''}),
+                bindingForm = ref({id: null, code: '', maxBindings: 0, currentBindings: 0});
+            const showPluginDialog = ref(false), showEditDialog = ref(false), showGenDialog = ref(false),
+                showUploadDialog = ref(false), showPwdDialog = ref(false), codesDialog = ref(false),
+                showBindingDialog = ref(false);
+            const uploadPlugin = ref(null), selectedFile = ref(null), uploading = ref(false), generatedCodes = ref('');
+            const stats = ref({
+                totalUsers: 0,
+                totalPlugins: 0,
+                totalLicenses: 0,
+                activeLicenses: 0,
+                unbindCooldownHours: 24
+            });
+            const cooldownHours = ref(24);
+            const plugins = ref([]), licenses = ref([]), users = ref([]), myPlugins = ref([]);
+            // 新增功能相关变量
+            const publicPlugins = ref([]); // 公开插件列表
+            const userStats = ref({totalLicenses: 0, totalPlugins: 0, totalBindings: 0}); // 用户仪表盘统计
+            const exchangeConfigs = ref([]); // 置换配置列表（管理员）
+            const availableExchangeConfigs = ref([]); // 可用置换配置（用户）
+            const claimablePlugins = ref([]); // 可领取插件
+            const userExchangeForm = ref({exchangeConfigId: null}); // 用户置换表单
+            const showExchangeConfigDialog = ref(false); // 显示置换配置弹窗
+            const showUserExchangeDialog = ref(false); // 显示用户置换弹窗
+            const showClaimDialog = ref(false); // 显示领取弹窗
+            const showUserSelect = ref(false); // 显示用户选择下拉框
+            const filteredUsers = ref([]); // 过滤后的用户列表
+            // 新增置换配置对话框
+            const showAddExchangeDialog = ref(false);
+            const addExchangeForm = ref({fromPluginId: null, toPluginId: null});
+            // 领取配置相关变量
+            const showClaimConfigDialog = ref(false);
+            const showAddClaimDialog = ref(false);
+            const claimConfigs = ref([]);
+            const addClaimForm = ref({
+                pluginId: null,
+                conditionType: 'authCount',
+                requiredAuthCount: 1,
+                requiredPluginId: null,
+                excludePluginIds: [],
+                excludePluginInput: ''
+            });
+            const showExcludePluginSelect = ref(false);
+            const filteredExcludePlugins = ref([]);
 
-        const showMsg = (text, type='success') => { msg.value = {text,type}; setTimeout(()=>msg.value=null, 3000); };
-        const api = axios.create({baseURL:'/api'});
-        api.interceptors.request.use(c => { if(token.value) c.headers.Authorization=`Bearer ${token.value}`; return c; });
+            const showMsg = (text, type = 'success') => {
+                msg.value = {text, type};
+                setTimeout(() => msg.value = null, 3000);
+            };
+            const api = axios.create({baseURL: '/api'});
+            api.interceptors.request.use(c => {
+                if (token.value) c.headers.Authorization = `Bearer ${token.value}`;
+                return c;
+            });
 
-        const startCooldown = (type) => {
-            if(type==='register'){regCodeCooldown.value=60;const t=setInterval(()=>{regCodeCooldown.value--;if(regCodeCooldown.value<=0)clearInterval(t);},1000);}
-            else{forgotCodeCooldown.value=60;const t=setInterval(()=>{forgotCodeCooldown.value--;if(forgotCodeCooldown.value<=0)clearInterval(t);},1000);}
-        };
-
-        const sendRegisterCode = async () => {
-            if(!registerForm.value.email){showMsg('请输入邮箱','error');return;}
-            loading.value = true;
-            try { const r = await api.post('/auth/send-code', {email:registerForm.value.email,type:'REGISTER'}); if(r.data.success){showMsg('验证码已发送');startCooldown('register');} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'发送失败','error');}
-            loading.value = false;
-        };
-
-        const sendForgotCode = async () => {
-            if(!forgotForm.value.email){showMsg('请输入邮箱','error');return;}
-            loading.value = true;
-            try { const r = await api.post('/auth/send-code', {email:forgotForm.value.email,type:'FORGOT_PASSWORD'}); if(r.data.success){showMsg('验证码已发送');startCooldown('forgot');} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'发送失败','error');}
-            loading.value = false;
-        };
-
-        const login = async () => {
-            loading.value = true;
-            try {
-                const r = await api.post('/auth/login', loginForm.value);
-                if (r.data.success) {
-                    token.value = r.data.data.token; username.value = r.data.data.username; isAdmin.value = r.data.data.isAdmin; isSuperAdmin.value = r.data.data.isSuperAdmin || false; isLoggedIn.value = true;
-                    localStorage.setItem('token', token.value); localStorage.setItem('username', username.value); localStorage.setItem('isAdmin', isAdmin.value); localStorage.setItem('isSuperAdmin', isSuperAdmin.value);
-                    currentPage.value = isAdmin.value ? 'dashboard' : 'myauth'; loadData(); showMsg('登录成功');
+            const startCooldown = (type) => {
+                if (type === 'register') {
+                    regCodeCooldown.value = 60;
+                    const t = setInterval(() => {
+                        regCodeCooldown.value--;
+                        if (regCodeCooldown.value <= 0) clearInterval(t);
+                    }, 1000);
                 } else {
-                    // 后端返回 200 但 success=false，显示错误信息
-                    showMsg(r.data.message || '用户名或密码错误', 'error');
+                    forgotCodeCooldown.value = 60;
+                    const t = setInterval(() => {
+                        forgotCodeCooldown.value--;
+                        if (forgotCodeCooldown.value <= 0) clearInterval(t);
+                    }, 1000);
                 }
-            } catch (e) {
-                // 网络错误或其他异常
-                showMsg(e.response?.data?.message || '登录失败', 'error');
-            }
-            loading.value = false;
-        };
+            };
 
-        const register = async () => {
-            if(!registerForm.value.verificationCode){showMsg('请输入验证码','error');return;}
-            loading.value = true;
-            try { const r = await api.post('/auth/register', registerForm.value); if (r.data.success) { showMsg('注册成功'); authTab.value = 'login'; loginForm.value.username = registerForm.value.username; registerForm.value={username:'',password:'',email:'',verificationCode:''}; } }
-            catch (e) { showMsg(e.response?.data?.message || '注册失败', 'error'); }
-            loading.value = false;
-        };
-
-        const resetPassword = async () => {
-            if(!forgotForm.value.verificationCode){showMsg('请输入验证码','error');return;}
-            if(forgotForm.value.newPassword.length<6){showMsg('密码至少6位','error');return;}
-            loading.value = true;
-            try { const r = await api.post('/auth/forgot-password', forgotForm.value); if(r.data.success){showMsg('密码重置成功');authTab.value='login';forgotForm.value={email:'',verificationCode:'',newPassword:''};} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'重置失败','error');}
-            loading.value = false;
-        };
-
-        const logout = () => { isLoggedIn.value = false; token.value = ''; localStorage.clear(); };
-        const loadData = () => { if(isAdmin.value){loadStats();loadPlugins();loadLicenses();loadUsers();loadExchangeConfigs();} loadMyAuth(); };
-        const loadStats = async () => { try { const r = await api.get('/admin/stats'); if(r.data.success){ stats.value = r.data.data; cooldownHours.value = r.data.data.unbindCooldownHours || 24; } } catch(e){} };
-        const loadPlugins = async () => {
-            try {
-                const r = await api.get('/admin/plugins');
-                if(r.data.success) {
-                    plugins.value = r.data.data || [];
-                    console.log('插件列表已加载:', plugins.value.length, '个插件');
+            const sendRegisterCode = async () => {
+                if (!registerForm.value.email) {
+                    showMsg('请输入邮箱', 'error');
+                    return;
                 }
-            } catch(e){
-                console.error('加载插件列表失败:', e);
-            }
-        };
-        const loadLicenses = async () => { try { const r = await api.get('/admin/licenses'); if(r.data.success) licenses.value = r.data.data; } catch(e){} };
-        const loadUsers = async () => { try { const r = await api.get('/admin/users'); if(r.data.success) users.value = r.data.data; } catch(e){} };
-        const loadMyAuth = async () => { try { const r = await api.get('/user/auth'); if(r.data.success) myPlugins.value = r.data.data.plugins; } catch(e){} };
-        // 新增功能的数据加载方法
-        const loadPublicPlugins = async () => { try { const r = await api.get('/public/plugins'); if(r.data.success) publicPlugins.value = r.data.data; } catch(e){} };
-        const loadUserStats = async () => { try { const r = await api.get('/user/dashboard'); if(r.data.success) userStats.value = r.data.data; } catch(e){} };
-        const loadExchangeConfigs = async () => { try { const r = await api.get('/admin/exchange-configs'); if(r.data.success) exchangeConfigs.value = r.data.data; } catch(e){} };
-        const loadAvailableExchangeConfigs = async () => {
-            try {
-                const r = await api.get('/user/exchange-configs');
-                console.log('加载置换配置:', r.data);
-                if(r.data.success) {
-                    availableExchangeConfigs.value = r.data.data || [];
-                    console.log('可用置换配置:', availableExchangeConfigs.value);
+                loading.value = true;
+                try {
+                    const r = await api.post('/auth/send-code', {email: registerForm.value.email, type: 'REGISTER'});
+                    if (r.data.success) {
+                        showMsg('验证码已发送');
+                        startCooldown('register');
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '发送失败', 'error');
                 }
-            } catch(e){
-                console.error('加载置换配置失败:', e);
-            }
-        };
-        const loadClaimablePlugins = async () => {
-            try {
-                console.log('开始加载可领取插件...');
-                const r = await api.get('/user/claimable-plugins');
-                console.log('可领取插件接口返回:', r.data);
-                if(r.data.success) {
-                    claimablePlugins.value = r.data.data || [];
-                    console.log('可领取插件已加载:', claimablePlugins.value.length, '个');
-                } else {
-                    console.error('加载可领取插件失败:', r.data.message);
-                }
-            } catch(e) {
-                console.error('加载可领取插件异常:', e);
-            }
-        };
-        const loadClaimConfigs = async () => { try { const r = await api.get('/admin/claim-configs'); if(r.data.success) claimConfigs.value = r.data.data; } catch(e){} };
+                loading.value = false;
+            };
 
-        const createPlugin = async () => {
-            loading.value = true;
-            try {
-                const r = await api.post('/admin/plugins', pluginForm.value);
-                if(r.data.success){
-                    showMsg('创建成功');
-                    showPluginDialog.value=false;
-                    pluginForm.value={displayName:''};
-                    // 强制刷新插件列表（管理员）
-                    plugins.value = [];
-                    await nextTick();
-                    await loadPlugins();
-                    // 同时刷新公开插件列表
-                    await loadPublicPlugins();
-                    await loadStats();
-                    console.log('创建后插件列表:', plugins.value);
-                    console.log('创建后公开插件列表:', publicPlugins.value);
+            const sendForgotCode = async () => {
+                if (!forgotForm.value.email) {
+                    showMsg('请输入邮箱', 'error');
+                    return;
                 }
-            }
-            catch(e){showMsg(e.response?.data?.message||'创建失败','error');}
-            loading.value = false;
-        };
-        const editPlugin = p => { editForm.value = {id:p.id,name:p.name,displayName:p.displayName,version:p.version,description:p.description||'',mainClass:p.mainClass,enabled:p.enabled}; showEditDialog.value = true; };
-        const updatePlugin = async () => {
-            loading.value = true;
-            try { const r = await api.put(`/admin/plugins/${editForm.value.id}`, editForm.value); if(r.data.success){showMsg('更新成功');showEditDialog.value=false;loadPlugins();} }
-            catch(e){showMsg(e.response?.data?.message||'更新失败','error');}
-            loading.value = false;
-        };
-        const deletePlugin = async p => { if(!confirm(`确定删除 "${p.displayName}"?`)) return; try { const r = await api.delete(`/admin/plugins/${p.id}`); if(r.data.success){showMsg('删除成功');loadPlugins();loadStats();} } catch(e){showMsg('删除失败','error');} };
-        const openUpload = p => { uploadPlugin.value = p; selectedFile.value = null; showUploadDialog.value = true; };
-        const onFileChange = e => { selectedFile.value = e.target.files[0]; };
-        const onDrop = e => { const f = e.dataTransfer.files[0]; if(f && f.name.endsWith('.jar')) selectedFile.value = f; else showMsg('只能上传.jar文件','error'); };
-        const formatSize = bytes => { if(!bytes) return '0 B'; const k=1024,sizes=['B','KB','MB','GB'],i=Math.floor(Math.log(bytes)/Math.log(k)); return parseFloat((bytes/Math.pow(k,i)).toFixed(2))+' '+sizes[i]; };
-        const doUpload = async () => {
-            if(!selectedFile.value) return; uploading.value = true;
-            try { const fd = new FormData(); fd.append('file', selectedFile.value); const r = await api.post(`/admin/plugins/${uploadPlugin.value.id}/upload`, fd); if(r.data.success){showMsg(r.data.message);showUploadDialog.value=false;loadPlugins();}else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'上传失败','error');}
-            uploading.value = false;
-        };
-        const generateLicenses = async () => {
-            loading.value = true;
-            try { const d = {...genForm.value}; if(d.expiresInDays===0)d.expiresInDays=null; if(!d.customCode)delete d.customCode; const r = await api.post('/admin/licenses/generate', d); if(r.data.success){generatedCodes.value=r.data.data.map(l=>`${l.pluginDisplayName}: ${l.code}`).join('\n');codesDialog.value=true;showGenDialog.value=false;loadLicenses();loadStats();loadMyAuth();genForm.value={pluginId:null,username:null,count:1,maxBindings:1,expiresInDays:0,customCode:''};} }
-            catch(e){showMsg(e.response?.data?.message||'生成失败','error');}
-            loading.value = false;
-        };
-        const toggleLicense = async l => { try { const r = await api.put(`/admin/licenses/${l.id}/toggle?enabled=${!l.enabled}`); if(r.data.success){showMsg(r.data.message);loadLicenses();loadStats();} } catch(e){showMsg('操作失败','error');} };
-        const togglePlugin = async p => { try { const r = await api.put(`/admin/plugins/${p.id}/toggle?enabled=${!p.enabled}`); if(r.data.success){showMsg(r.data.message);loadPlugins();} } catch(e){showMsg('操作失败','error');} };
-        const deleteLicense = async l => { if(!confirm('确定删除?')) return; try { const r = await api.delete(`/admin/licenses/${l.id}`); if(r.data.success){showMsg('删除成功');loadLicenses();loadStats();} } catch(e){showMsg('删除失败','error');} };
-        const openBindingEdit = l => { bindingForm.value = {id:l.id,code:l.code,maxBindings:l.maxBindings,currentBindings:l.currentBindings}; showBindingDialog.value = true; };
-        const updateBindings = async () => {
-            loading.value = true;
-            try { const r = await api.put(`/admin/licenses/${bindingForm.value.id}/bindings?maxBindings=${bindingForm.value.maxBindings}`); if(r.data.success){showMsg(r.data.message);showBindingDialog.value=false;loadLicenses();} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'修改失败','error');}
-            loading.value = false;
-        };
-        const openPwd = u => { pwdForm.value = {userId:u.id,username:u.username,newPassword:''}; showPwdDialog.value = true; };
-        const changePwd = async () => {
-            if(pwdForm.value.newPassword.length<6){showMsg('密码至少6位','error');return;} loading.value = true;
-            try { const r = await api.post('/admin/users/password', {userId:pwdForm.value.userId,newPassword:pwdForm.value.newPassword}); if(r.data.success){showMsg('修改成功');showPwdDialog.value=false;} }
-            catch(e){showMsg(e.response?.data?.message||'修改失败','error');}
-            loading.value = false;
-        };
-        const saveCooldown = async () => {
-            try { const r = await api.post(`/admin/config/unbind-cooldown?hours=${cooldownHours.value}`); if(r.data.success){showMsg(r.data.message);} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'保存失败','error');}
-        };
-        const adminUnbindUser = async (u) => {
-            if(!confirm(`确定解绑用户 "${u.username}" 的所有设备?`)) return;
-            try { const r = await api.post(`/admin/users/${u.id}/unbind`); if(r.data.success){showMsg(r.data.message);} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'解绑失败','error');}
-        };
-        const deleteUserLicenses = async (u) => {
-            if(!confirm(`确定删除用户 "${u.username}" 的所有授权码? 此操作不可恢复!`)) return;
-            try { const r = await api.delete(`/admin/users/${u.id}/licenses`); if(r.data.success){showMsg(r.data.message);loadLicenses();loadStats();loadMyAuth();} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'删除失败','error');}
-        };
-        const toggleBan = async (u) => {
-            const action = u.banned ? '解封账号' : '账号封禁';
-            if(!confirm(`确定${action}用户 "${u.username}"?`)) return;
-            try { const r = await api.post(`/admin/users/${u.id}/${u.banned?'unban':'ban'}`); if(r.data.success){showMsg(r.data.message);loadUsers();} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||`${action}失败`,'error');}
-        };
-        const toggleAdmin = async (u) => {
-            const action = u.isAdmin ? '取消管理员' : '设为管理员';
-            if(!confirm(`确定${action} "${u.username}"?`)) return;
-            try { const r = await api.post(`/admin/users/${u.id}/set-admin?isAdmin=${!u.isAdmin}`); if(r.data.success){showMsg(r.data.message);loadUsers();} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||`${action}失败`,'error');}
-        };
-        const deleteUser = async (u) => {
-            if(!confirm(`确定删除用户 "${u.username}"? 此操作将级联删除该用户的所有授权码和设备绑定记录，不可恢复!`)) return;
-            try { const r = await api.delete(`/admin/users/${u.id}`); if(r.data.success){showMsg(r.data.message);loadUsers();loadStats();loadLicenses();} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'删除失败','error');}
-        };
-        const adminUnbindAll = async () => {
-            if(!confirm('确定解绑所有用户的所有设备? 此操作不可恢复!')) return;
-            try { const r = await api.post('/admin/unbind-all'); if(r.data.success){showMsg(r.data.message);} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'解绑失败','error');}
-        };
-        const userUnbind = async (bindingId) => {
-            if(!confirm('确定解绑此设备?')) return;
-            try { const r = await api.post('/user/unbind', {bindingId}); if(r.data.success){showMsg('解绑成功');loadMyAuth();} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'解绑失败','error');}
-        };
-        const userUnbindAll = async () => {
-            if(!confirm('确定解绑所有设备？解绑后会触发冷却时间，影响后续单独解绑!')) return;
-            try { const r = await api.post('/user/unbind-all'); if(r.data.success){showMsg(r.data.message);loadMyAuth();} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'解绑失败','error');}
-        };
-        const verifyToken = async () => { try { const r = await api.get('/user/verify'); if(!r.data.success){logout();showMsg('登录已失效','error');} } catch(e){logout();} };
+                loading.value = true;
+                try {
+                    const r = await api.post('/auth/send-code', {
+                        email: forgotForm.value.email,
+                        type: 'FORGOT_PASSWORD'
+                    });
+                    if (r.data.success) {
+                        showMsg('验证码已发送');
+                        startCooldown('forgot');
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '发送失败', 'error');
+                }
+                loading.value = false;
+            };
 
-        // 新增功能的方法
-        const openAddExchangeDialog = () => {
-            if(plugins.value.length < 2) { showMsg('至少需要两个插件才能配置置换', 'error'); return; }
-            addExchangeForm.value = {fromPluginId:null,toPluginId:null};
-            showExchangeConfigDialog.value = false;  // 关闭置换配置弹窗
-            showAddExchangeDialog.value = true;
-        };
-        const openAddClaimDialog = () => {
-            if(plugins.value.length < 1) { showMsg('至少需要一个插件才能配置领取', 'error'); return; }
-            addClaimForm.value = {pluginId:null,conditionType:'authCount',requiredAuthCount:1,requiredPluginId:null,excludePluginIds:[],excludePluginInput:''};
-            showClaimConfigDialog.value = false;  // 关闭领取配置弹窗
-            showAddClaimDialog.value = true;
-        };
-        const getPluginName = (pid) => {
-            const p = plugins.value.find(p => p.id === pid);
-            return p ? p.displayName : `插件#${pid}`;
-        };
-        const onExcludePluginFocus = () => {
-            const input = addClaimForm.value.excludePluginInput || '';
-            if(input) {
-                filteredExcludePlugins.value = plugins.value.filter(p => 
-                    p.displayName.toLowerCase().includes(input.toLowerCase()) &&
-                    !addClaimForm.value.excludePluginIds.includes(p.id) &&
-                    p.id !== addClaimForm.value.pluginId
-                );
-            } else {
-                filteredExcludePlugins.value = plugins.value.filter(p => 
-                    !addClaimForm.value.excludePluginIds.includes(p.id) &&
-                    p.id !== addClaimForm.value.pluginId
-                );
-            }
-            showExcludePluginSelect.value = true;
-        };
-        const onExcludePluginInput = () => {
-            const input = addClaimForm.value.excludePluginInput || '';
-            if(input) {
-                filteredExcludePlugins.value = plugins.value.filter(p => 
-                    p.displayName.toLowerCase().includes(input.toLowerCase()) &&
-                    !addClaimForm.value.excludePluginIds.includes(p.id) &&
-                    p.id !== addClaimForm.value.pluginId
-                );
-            } else {
-                filteredExcludePlugins.value = plugins.value.filter(p => 
-                    !addClaimForm.value.excludePluginIds.includes(p.id) &&
-                    p.id !== addClaimForm.value.pluginId
-                );
-            }
-            showExcludePluginSelect.value = true;
-        };
-        const addExcludePlugin = (p) => {
-            if(!addClaimForm.value.excludePluginIds.includes(p.id)) {
-                addClaimForm.value.excludePluginIds.push(p.id);
-            }
-            addClaimForm.value.excludePluginInput = '';
-            showExcludePluginSelect.value = false;
-        };
-        const removeExcludePlugin = (pid) => {
-            const idx = addClaimForm.value.excludePluginIds.indexOf(pid);
-            if(idx > -1) {
-                addClaimForm.value.excludePluginIds.splice(idx, 1);
-            }
-        };
-        const hideExcludePluginSelect = () => { setTimeout(() => { showExcludePluginSelect.value = false; }, 200); };
-        const doAddClaimConfig = async () => {
-            if(!addClaimForm.value.pluginId) {
-                showMsg('请选择可领取的插件', 'error'); return;
-            }
-            if(addClaimForm.value.conditionType === 'hasPlugin' && !addClaimForm.value.requiredPluginId) {
-                showMsg('请选择需要拥有的插件', 'error'); return;
-            }
-            loading.value = true;
-            try {
-                const request = {
-                    pluginId: addClaimForm.value.pluginId,
-                    requiredAuthCount: addClaimForm.value.conditionType === 'authCount' ? addClaimForm.value.requiredAuthCount : 1,
-                    requiredPluginId: addClaimForm.value.conditionType === 'hasPlugin' ? addClaimForm.value.requiredPluginId : null,
-                    excludePluginIds: addClaimForm.value.excludePluginIds || [],
-                    enabled: true
+            const login = async () => {
+                loading.value = true;
+                try {
+                    const r = await api.post('/auth/login', loginForm.value);
+                    if (r.data.success) {
+                        token.value = r.data.data.token;
+                        username.value = r.data.data.username;
+                        isAdmin.value = r.data.data.isAdmin;
+                        isSuperAdmin.value = r.data.data.isSuperAdmin || false;
+                        isLoggedIn.value = true;
+                        localStorage.setItem('token', token.value);
+                        localStorage.setItem('username', username.value);
+                        localStorage.setItem('isAdmin', isAdmin.value);
+                        localStorage.setItem('isSuperAdmin', isSuperAdmin.value);
+                        currentPage.value = isAdmin.value ? 'dashboard' : 'myauth';
+                        loadData();
+                        showMsg('登录成功');
+                    } else {
+                        // 后端返回 200 但 success=false，显示错误信息
+                        showMsg(r.data.message || '用户名或密码错误', 'error');
+                    }
+                } catch (e) {
+                    // 网络错误或其他异常
+                    showMsg(e.response?.data?.message || '登录失败', 'error');
+                }
+                loading.value = false;
+            };
+
+            const register = async () => {
+                if (!registerForm.value.verificationCode) {
+                    showMsg('请输入验证码', 'error');
+                    return;
+                }
+                loading.value = true;
+                try {
+                    const r = await api.post('/auth/register', registerForm.value);
+                    if (r.data.success) {
+                        showMsg('注册成功');
+                        authTab.value = 'login';
+                        loginForm.value.username = registerForm.value.username;
+                        registerForm.value = {username: '', password: '', email: '', verificationCode: ''};
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '注册失败', 'error');
+                }
+                loading.value = false;
+            };
+
+            const resetPassword = async () => {
+                if (!forgotForm.value.verificationCode) {
+                    showMsg('请输入验证码', 'error');
+                    return;
+                }
+                if (forgotForm.value.newPassword.length < 6) {
+                    showMsg('密码至少6位', 'error');
+                    return;
+                }
+                loading.value = true;
+                try {
+                    const r = await api.post('/auth/forgot-password', forgotForm.value);
+                    if (r.data.success) {
+                        showMsg('密码重置成功');
+                        authTab.value = 'login';
+                        forgotForm.value = {email: '', verificationCode: '', newPassword: ''};
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '重置失败', 'error');
+                }
+                loading.value = false;
+            };
+
+            const logout = () => {
+                isLoggedIn.value = false;
+                token.value = '';
+                localStorage.clear();
+            };
+            const loadData = () => {
+                if (isAdmin.value) {
+                    loadStats();
+                    loadPlugins();
+                    loadLicenses();
+                    loadUsers();
+                    loadExchangeConfigs();
+                }
+                loadMyAuth();
+            };
+            const loadStats = async () => {
+                try {
+                    const r = await api.get('/admin/stats');
+                    if (r.data.success) {
+                        stats.value = r.data.data;
+                        cooldownHours.value = r.data.data.unbindCooldownHours || 24;
+                    }
+                } catch (e) {
+                }
+            };
+            const loadPlugins = async () => {
+                try {
+                    const r = await api.get('/admin/plugins');
+                    if (r.data.success) {
+                        plugins.value = r.data.data || [];
+                        console.log('插件列表已加载:', plugins.value.length, '个插件');
+                    }
+                } catch (e) {
+                    console.error('加载插件列表失败:', e);
+                }
+            };
+            const loadLicenses = async () => {
+                try {
+                    const r = await api.get('/admin/licenses');
+                    if (r.data.success) licenses.value = r.data.data;
+                } catch (e) {
+                }
+            };
+            const loadUsers = async () => {
+                try {
+                    const r = await api.get('/admin/users');
+                    if (r.data.success) users.value = r.data.data;
+                } catch (e) {
+                }
+            };
+            const loadMyAuth = async () => {
+                try {
+                    const r = await api.get('/user/auth');
+                    if (r.data.success) myPlugins.value = r.data.data.plugins;
+                } catch (e) {
+                }
+            };
+            // 新增功能的数据加载方法
+            const loadPublicPlugins = async () => {
+                try {
+                    const r = await api.get('/public/plugins');
+                    if (r.data.success) publicPlugins.value = r.data.data;
+                } catch (e) {
+                }
+            };
+            const loadUserStats = async () => {
+                try {
+                    const r = await api.get('/user/dashboard');
+                    if (r.data.success) userStats.value = r.data.data;
+                } catch (e) {
+                }
+            };
+            const loadExchangeConfigs = async () => {
+                try {
+                    const r = await api.get('/admin/exchange-configs');
+                    if (r.data.success) exchangeConfigs.value = r.data.data;
+                } catch (e) {
+                }
+            };
+            const loadAvailableExchangeConfigs = async () => {
+                try {
+                    const r = await api.get('/user/exchange-configs');
+                    console.log('加载置换配置:', r.data);
+                    if (r.data.success) {
+                        availableExchangeConfigs.value = r.data.data || [];
+                        console.log('可用置换配置:', availableExchangeConfigs.value);
+                    }
+                } catch (e) {
+                    console.error('加载置换配置失败:', e);
+                }
+            };
+            const loadClaimablePlugins = async () => {
+                try {
+                    console.log('开始加载可领取插件...');
+                    const r = await api.get('/user/claimable-plugins');
+                    console.log('可领取插件接口返回:', r.data);
+                    if (r.data.success) {
+                        claimablePlugins.value = r.data.data || [];
+                        console.log('可领取插件已加载:', claimablePlugins.value.length, '个');
+                    } else {
+                        console.error('加载可领取插件失败:', r.data.message);
+                    }
+                } catch (e) {
+                    console.error('加载可领取插件异常:', e);
+                }
+            };
+            const loadClaimConfigs = async () => {
+                try {
+                    const r = await api.get('/admin/claim-configs');
+                    if (r.data.success) claimConfigs.value = r.data.data;
+                } catch (e) {
+                }
+            };
+
+            const createPlugin = async () => {
+                loading.value = true;
+                try {
+                    const r = await api.post('/admin/plugins', pluginForm.value);
+                    if (r.data.success) {
+                        showMsg('创建成功');
+                        showPluginDialog.value = false;
+                        pluginForm.value = {displayName: ''};
+                        // 强制刷新插件列表（管理员）
+                        plugins.value = [];
+                        await nextTick();
+                        await loadPlugins();
+                        // 同时刷新公开插件列表
+                        await loadPublicPlugins();
+                        await loadStats();
+                        console.log('创建后插件列表:', plugins.value);
+                        console.log('创建后公开插件列表:', publicPlugins.value);
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '创建失败', 'error');
+                }
+                loading.value = false;
+            };
+            const editPlugin = p => {
+                editForm.value = {
+                    id: p.id,
+                    name: p.name,
+                    displayName: p.displayName,
+                    version: p.version,
+                    description: p.description || '',
+                    mainClass: p.mainClass,
+                    enabled: p.enabled
                 };
-                const r = await api.post('/admin/claim-configs', request);
-                if(r.data.success) {
-                    showMsg('领取配置创建成功');
-                    showAddClaimDialog.value = false;
-                    addClaimForm.value = {pluginId:null,conditionType:'authCount',requiredAuthCount:1,requiredPluginId:null,excludePluginIds:[],excludePluginInput:''};
-                    await loadClaimConfigs();
-                    showClaimConfigDialog.value = true;  // 重新打开领取配置弹窗
+                showEditDialog.value = true;
+            };
+            const updatePlugin = async () => {
+                loading.value = true;
+                try {
+                    const r = await api.put(`/admin/plugins/${editForm.value.id}`, editForm.value);
+                    if (r.data.success) {
+                        showMsg('更新成功');
+                        showEditDialog.value = false;
+                        plugins.value = [];
+                        await nextTick();
+                        await loadPlugins();
+                        // 同时刷新公开插件列表
+                        await loadPublicPlugins();
+                        await loadStats();
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '更新失败', 'error');
                 }
-                else { showMsg(r.data.message, 'error'); }
-            } catch(e) { showMsg(e.response?.data?.message || '创建失败', 'error'); }
-            loading.value = false;
-        };
-        const toggleClaimConfig = async (config) => {
-            loading.value = true;
-            try {
-                const r = await api.put(`/admin/claim-configs/${config.id}/toggle?enabled=${!config.enabled}`);
-                if(r.data.success) { showMsg(r.data.message); loadClaimConfigs(); }
-                else { showMsg(r.data.message, 'error'); }
-            } catch(e) { showMsg(e.response?.data?.message || '操作失败', 'error'); }
-            loading.value = false;
-        };
-        const deleteClaimConfigById = async (id) => {
-            if(!confirm('确定删除此领取配置？')) return;
-            try { const r = await api.delete(`/admin/claim-configs/${id}`); if(r.data.success){showMsg('删除成功');loadClaimConfigs();} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'删除失败','error');}
-        };
-        const doAddExchangeConfig = async () => {
-            if(!addExchangeForm.value.fromPluginId || !addExchangeForm.value.toPluginId) {
-                showMsg('请选择源插件和目标插件', 'error'); return;
-            }
-            if(addExchangeForm.value.fromPluginId === addExchangeForm.value.toPluginId) {
-                showMsg('源插件和目标插件不能相同', 'error'); return;
-            }
-            loading.value = true;
-            try {
-                const r = await api.post('/admin/exchange-configs', {
-                    fromPluginId: addExchangeForm.value.fromPluginId,
-                    toPluginId: addExchangeForm.value.toPluginId,
-                    enabled: true
-                });
-                if(r.data.success) {
-                    showMsg('置换配置创建成功');
-                    showAddExchangeDialog.value = false;
-                    addExchangeForm.value = {fromPluginId:null,toPluginId:null};
-                    await loadExchangeConfigs();
-                    showExchangeConfigDialog.value = true;  // 重新打开置换配置弹窗
+                loading.value = false;
+            };
+            const deletePlugin = async p => {
+                if (!confirm(`确定删除 "${p.displayName}"?`)) return;
+                try {
+                    const r = await api.delete(`/admin/plugins/${p.id}`);
+                    if (r.data.success) {
+                        showMsg('删除成功');
+                        loadPlugins();
+                        loadStats();
+                        // 强制刷新插件列表（管理员）
+                        plugins.value = [];
+                        await nextTick();
+                        await loadPlugins();
+                        // 同时刷新公开插件列表
+                        await loadPublicPlugins();
+                        await loadStats();
+                    }
+                } catch (e) {
+                    showMsg('删除失败', 'error');
                 }
-                else { showMsg(r.data.message, 'error'); }
-            } catch(e) { showMsg(e.response?.data?.message || '创建失败', 'error'); }
-            loading.value = false;
-        };
-        const toggleExchangeConfig = async (config) => {
-            loading.value = true;
-            try {
-                const r = await api.put(`/admin/exchange-configs/${config.id}/toggle?enabled=${!config.enabled}`);
-                if(r.data.success) { showMsg(r.data.message); loadExchangeConfigs(); }
-                else { showMsg(r.data.message, 'error'); }
-            } catch(e) { showMsg(e.response?.data?.message || '操作失败', 'error'); }
-            loading.value = false;
-        };
-        const deleteExchangeConfigById = async (id) => {
-            if(!confirm('确定删除此置换配置？')) return;
-            try { const r = await api.delete(`/admin/exchange-configs/${id}`); if(r.data.success){showMsg('删除成功');loadExchangeConfigs();} else{showMsg(r.data.message,'error');} }
-            catch(e){showMsg(e.response?.data?.message||'删除失败','error');}
-        };
-        const openUserExchangeDialog = async () => {
-            userExchangeForm.value = {exchangeConfigId:null};
-            await loadAvailableExchangeConfigs();
-            showUserExchangeDialog.value = true;
-        };
-        const doUserExchange = async () => {
-            if(!userExchangeForm.value.exchangeConfigId) { showMsg('请选择置换方案', 'error'); return; }
-            loading.value = true;
-            try {
-                const r = await api.post('/user/exchange', { exchangeConfigId: userExchangeForm.value.exchangeConfigId });
-                if(r.data.success) { showMsg(r.data.message); showUserExchangeDialog.value = false; loadMyAuth(); userExchangeForm.value = {exchangeConfigId:null}; }
-                else { showMsg(r.data.message, 'error'); }
-            } catch(e) { showMsg(e.response?.data?.message || '置换失败', 'error'); }
-            loading.value = false;
-        };
-        const claimPlugin = async (configId) => {
-            if(!configId) { showMsg('无效的领取配置', 'error'); return; }
-            loading.value = true;
-            try {
-                const r = await api.post('/user/claim', { configId });
-                if(r.data.success) { showMsg(r.data.message); loadClaimablePlugins(); loadMyAuth(); }
-                else { showMsg(r.data.message, 'error'); }
-            } catch(e) { showMsg(e.response?.data?.message || '领取失败', 'error'); }
-            loading.value = false;
-        };
-        const onUserSelectFocus = () => {
-            // 获得焦点时显示所有用户
-            const input = genForm.value.username || '';
-            if(input) {
-                filteredUsers.value = users.value.filter(u => u.username.toLowerCase().includes(input.toLowerCase()));
-            } else {
-                filteredUsers.value = users.value;
-            }
-            showUserSelect.value = true;
-        };
-        const onUsernameInput = () => {
-            const input = genForm.value.username || '';
-            // 输入时实时过滤
-            if(input) {
-                filteredUsers.value = users.value.filter(u => u.username.toLowerCase().includes(input.toLowerCase()));
-            } else {
-                filteredUsers.value = users.value;
-            }
-            showUserSelect.value = true;
-        };
-        const selectUser = (username) => {
-            genForm.value.username = username;
-            showUserSelect.value = false;
-        };
-        const hideUserSelect = () => { setTimeout(() => { showUserSelect.value = false; }, 200); };
+            };
+            const openUpload = p => {
+                uploadPlugin.value = p;
+                selectedFile.value = null;
+                showUploadDialog.value = true;
+            };
+            const onFileChange = e => {
+                selectedFile.value = e.target.files[0];
+            };
+            const onDrop = e => {
+                const f = e.dataTransfer.files[0];
+                if (f && f.name.endsWith('.jar')) selectedFile.value = f; else showMsg('只能上传.jar文件', 'error');
+            };
+            const formatSize = bytes => {
+                if (!bytes) return '0 B';
+                const k = 1024, sizes = ['B', 'KB', 'MB', 'GB'], i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            };
+            const doUpload = async () => {
+                if (!selectedFile.value) return;
+                uploading.value = true;
+                try {
+                    const fd = new FormData();
+                    fd.append('file', selectedFile.value);
+                    const r = await api.post(`/admin/plugins/${uploadPlugin.value.id}/upload`, fd);
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                        showUploadDialog.value = false;
+                        loadPlugins();
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '上传失败', 'error');
+                }
+                uploading.value = false;
+            };
+            const generateLicenses = async () => {
+                loading.value = true;
+                try {
+                    const d = {...genForm.value};
+                    if (d.expiresInDays === 0) d.expiresInDays = null;
+                    if (!d.customCode) delete d.customCode;
+                    const r = await api.post('/admin/licenses/generate', d);
+                    if (r.data.success) {
+                        generatedCodes.value = r.data.data.map(l => `${l.pluginDisplayName}: ${l.code}`).join('\n');
+                        codesDialog.value = true;
+                        showGenDialog.value = false;
+                        loadLicenses();
+                        loadStats();
+                        loadMyAuth();
+                        genForm.value = {
+                            pluginId: null,
+                            username: null,
+                            count: 1,
+                            maxBindings: 1,
+                            expiresInDays: 0,
+                            customCode: ''
+                        };
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '生成失败', 'error');
+                }
+                loading.value = false;
+            };
+            const toggleLicense = async l => {
+                try {
+                    const r = await api.put(`/admin/licenses/${l.id}/toggle?enabled=${!l.enabled}`);
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                        loadLicenses();
+                        loadStats();
+                    }
+                } catch (e) {
+                    showMsg('操作失败', 'error');
+                }
+            };
+            const togglePlugin = async p => {
+                try {
+                    const r = await api.put(`/admin/plugins/${p.id}/toggle?enabled=${!p.enabled}`);
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                        loadPlugins();
+                    }
+                } catch (e) {
+                    showMsg('操作失败', 'error');
+                }
+            };
+            const deleteLicense = async l => {
+                if (!confirm('确定删除?')) return;
+                try {
+                    const r = await api.delete(`/admin/licenses/${l.id}`);
+                    if (r.data.success) {
+                        showMsg('删除成功');
+                        loadLicenses();
+                        loadStats();
+                    }
+                } catch (e) {
+                    showMsg('删除失败', 'error');
+                }
+            };
+            const openBindingEdit = l => {
+                bindingForm.value = {
+                    id: l.id,
+                    code: l.code,
+                    maxBindings: l.maxBindings,
+                    currentBindings: l.currentBindings
+                };
+                showBindingDialog.value = true;
+            };
+            const updateBindings = async () => {
+                loading.value = true;
+                try {
+                    const r = await api.put(`/admin/licenses/${bindingForm.value.id}/bindings?maxBindings=${bindingForm.value.maxBindings}`);
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                        showBindingDialog.value = false;
+                        loadLicenses();
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '修改失败', 'error');
+                }
+                loading.value = false;
+            };
+            const openPwd = u => {
+                pwdForm.value = {userId: u.id, username: u.username, newPassword: ''};
+                showPwdDialog.value = true;
+            };
+            const changePwd = async () => {
+                if (pwdForm.value.newPassword.length < 6) {
+                    showMsg('密码至少6位', 'error');
+                    return;
+                }
+                loading.value = true;
+                try {
+                    const r = await api.post('/admin/users/password', {
+                        userId: pwdForm.value.userId,
+                        newPassword: pwdForm.value.newPassword
+                    });
+                    if (r.data.success) {
+                        showMsg('修改成功');
+                        showPwdDialog.value = false;
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '修改失败', 'error');
+                }
+                loading.value = false;
+            };
+            const saveCooldown = async () => {
+                try {
+                    const r = await api.post(`/admin/config/unbind-cooldown?hours=${cooldownHours.value}`);
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '保存失败', 'error');
+                }
+            };
+            const adminUnbindUser = async (u) => {
+                if (!confirm(`确定解绑用户 "${u.username}" 的所有设备?`)) return;
+                try {
+                    const r = await api.post(`/admin/users/${u.id}/unbind`);
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '解绑失败', 'error');
+                }
+            };
+            const deleteUserLicenses = async (u) => {
+                if (!confirm(`确定删除用户 "${u.username}" 的所有授权码? 此操作不可恢复!`)) return;
+                try {
+                    const r = await api.delete(`/admin/users/${u.id}/licenses`);
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                        loadLicenses();
+                        loadStats();
+                        loadMyAuth();
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '删除失败', 'error');
+                }
+            };
+            const toggleBan = async (u) => {
+                const action = u.banned ? '解封账号' : '账号封禁';
+                if (!confirm(`确定${action}用户 "${u.username}"?`)) return;
+                try {
+                    const r = await api.post(`/admin/users/${u.id}/${u.banned ? 'unban' : 'ban'}`);
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                        loadUsers();
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || `${action}失败`, 'error');
+                }
+            };
+            const toggleAdmin = async (u) => {
+                const action = u.isAdmin ? '取消管理员' : '设为管理员';
+                if (!confirm(`确定${action} "${u.username}"?`)) return;
+                try {
+                    const r = await api.post(`/admin/users/${u.id}/set-admin?isAdmin=${!u.isAdmin}`);
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                        loadUsers();
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || `${action}失败`, 'error');
+                }
+            };
+            const deleteUser = async (u) => {
+                if (!confirm(`确定删除用户 "${u.username}"? 此操作将级联删除该用户的所有授权码和设备绑定记录，不可恢复!`)) return;
+                try {
+                    const r = await api.delete(`/admin/users/${u.id}`);
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                        loadUsers();
+                        loadStats();
+                        loadLicenses();
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '删除失败', 'error');
+                }
+            };
+            const adminUnbindAll = async () => {
+                if (!confirm('确定解绑所有用户的所有设备? 此操作不可恢复!')) return;
+                try {
+                    const r = await api.post('/admin/unbind-all');
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '解绑失败', 'error');
+                }
+            };
+            const userUnbind = async (bindingId) => {
+                if (!confirm('确定解绑此设备?')) return;
+                try {
+                    const r = await api.post('/user/unbind', {bindingId});
+                    if (r.data.success) {
+                        showMsg('解绑成功');
+                        loadMyAuth();
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '解绑失败', 'error');
+                }
+            };
+            const userUnbindAll = async () => {
+                if (!confirm('确定解绑所有设备？解绑后会触发冷却时间，影响后续单独解绑!')) return;
+                try {
+                    const r = await api.post('/user/unbind-all');
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                        loadMyAuth();
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '解绑失败', 'error');
+                }
+            };
+            const verifyToken = async () => {
+                try {
+                    const r = await api.get('/user/verify');
+                    if (!r.data.success) {
+                        logout();
+                        showMsg('登录已失效', 'error');
+                    }
+                } catch (e) {
+                    logout();
+                }
+            };
 
-        onMounted(() => {
-            const t = localStorage.getItem('token');
-            if(t){ token.value=t; username.value=localStorage.getItem('username')||''; isAdmin.value=localStorage.getItem('isAdmin')==='true'; isSuperAdmin.value=localStorage.getItem('isSuperAdmin')==='true'; isLoggedIn.value=true; currentPage.value=isAdmin.value?'dashboard':'myauth'; verifyToken(); loadData(); }
-            // 加载公开插件列表（无需登录）
-            loadPublicPlugins();
-        });
+            // 新增功能的方法
+            const openAddExchangeDialog = () => {
+                if (plugins.value.length < 2) {
+                    showMsg('至少需要两个插件才能配置置换', 'error');
+                    return;
+                }
+                addExchangeForm.value = {fromPluginId: null, toPluginId: null};
+                showExchangeConfigDialog.value = false;  // 关闭置换配置弹窗
+                showAddExchangeDialog.value = true;
+            };
+            const openAddClaimDialog = () => {
+                if (plugins.value.length < 1) {
+                    showMsg('至少需要一个插件才能配置领取', 'error');
+                    return;
+                }
+                addClaimForm.value = {
+                    pluginId: null,
+                    conditionType: 'authCount',
+                    requiredAuthCount: 1,
+                    requiredPluginId: null,
+                    excludePluginIds: [],
+                    excludePluginInput: ''
+                };
+                showClaimConfigDialog.value = false;  // 关闭领取配置弹窗
+                showAddClaimDialog.value = true;
+            };
+            const getPluginName = (pid) => {
+                const p = plugins.value.find(p => p.id === pid);
+                return p ? p.displayName : `插件#${pid}`;
+            };
+            const onExcludePluginFocus = () => {
+                const input = addClaimForm.value.excludePluginInput || '';
+                if (input) {
+                    filteredExcludePlugins.value = plugins.value.filter(p =>
+                        p.displayName.toLowerCase().includes(input.toLowerCase()) &&
+                        !addClaimForm.value.excludePluginIds.includes(p.id) &&
+                        p.id !== addClaimForm.value.pluginId
+                    );
+                } else {
+                    filteredExcludePlugins.value = plugins.value.filter(p =>
+                        !addClaimForm.value.excludePluginIds.includes(p.id) &&
+                        p.id !== addClaimForm.value.pluginId
+                    );
+                }
+                showExcludePluginSelect.value = true;
+            };
+            const onExcludePluginInput = () => {
+                const input = addClaimForm.value.excludePluginInput || '';
+                if (input) {
+                    filteredExcludePlugins.value = plugins.value.filter(p =>
+                        p.displayName.toLowerCase().includes(input.toLowerCase()) &&
+                        !addClaimForm.value.excludePluginIds.includes(p.id) &&
+                        p.id !== addClaimForm.value.pluginId
+                    );
+                } else {
+                    filteredExcludePlugins.value = plugins.value.filter(p =>
+                        !addClaimForm.value.excludePluginIds.includes(p.id) &&
+                        p.id !== addClaimForm.value.pluginId
+                    );
+                }
+                showExcludePluginSelect.value = true;
+            };
+            const addExcludePlugin = (p) => {
+                if (!addClaimForm.value.excludePluginIds.includes(p.id)) {
+                    addClaimForm.value.excludePluginIds.push(p.id);
+                }
+                addClaimForm.value.excludePluginInput = '';
+                showExcludePluginSelect.value = false;
+            };
+            const removeExcludePlugin = (pid) => {
+                const idx = addClaimForm.value.excludePluginIds.indexOf(pid);
+                if (idx > -1) {
+                    addClaimForm.value.excludePluginIds.splice(idx, 1);
+                }
+            };
+            const hideExcludePluginSelect = () => {
+                setTimeout(() => {
+                    showExcludePluginSelect.value = false;
+                }, 200);
+            };
+            const doAddClaimConfig = async () => {
+                if (!addClaimForm.value.pluginId) {
+                    showMsg('请选择可领取的插件', 'error');
+                    return;
+                }
+                if (addClaimForm.value.conditionType === 'hasPlugin' && !addClaimForm.value.requiredPluginId) {
+                    showMsg('请选择需要拥有的插件', 'error');
+                    return;
+                }
+                loading.value = true;
+                try {
+                    const request = {
+                        pluginId: addClaimForm.value.pluginId,
+                        requiredAuthCount: addClaimForm.value.conditionType === 'authCount' ? addClaimForm.value.requiredAuthCount : 1,
+                        requiredPluginId: addClaimForm.value.conditionType === 'hasPlugin' ? addClaimForm.value.requiredPluginId : null,
+                        excludePluginIds: addClaimForm.value.excludePluginIds || [],
+                        enabled: true
+                    };
+                    const r = await api.post('/admin/claim-configs', request);
+                    if (r.data.success) {
+                        showMsg('领取配置创建成功');
+                        showAddClaimDialog.value = false;
+                        addClaimForm.value = {
+                            pluginId: null,
+                            conditionType: 'authCount',
+                            requiredAuthCount: 1,
+                            requiredPluginId: null,
+                            excludePluginIds: [],
+                            excludePluginInput: ''
+                        };
+                        await loadClaimConfigs();
+                        showClaimConfigDialog.value = true;  // 重新打开领取配置弹窗
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '创建失败', 'error');
+                }
+                loading.value = false;
+            };
+            const toggleClaimConfig = async (config) => {
+                loading.value = true;
+                try {
+                    const r = await api.put(`/admin/claim-configs/${config.id}/toggle?enabled=${!config.enabled}`);
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                        loadClaimConfigs();
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '操作失败', 'error');
+                }
+                loading.value = false;
+            };
+            const deleteClaimConfigById = async (id) => {
+                if (!confirm('确定删除此领取配置？')) return;
+                try {
+                    const r = await api.delete(`/admin/claim-configs/${id}`);
+                    if (r.data.success) {
+                        showMsg('删除成功');
+                        loadClaimConfigs();
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '删除失败', 'error');
+                }
+            };
+            const doAddExchangeConfig = async () => {
+                if (!addExchangeForm.value.fromPluginId || !addExchangeForm.value.toPluginId) {
+                    showMsg('请选择源插件和目标插件', 'error');
+                    return;
+                }
+                if (addExchangeForm.value.fromPluginId === addExchangeForm.value.toPluginId) {
+                    showMsg('源插件和目标插件不能相同', 'error');
+                    return;
+                }
+                loading.value = true;
+                try {
+                    const r = await api.post('/admin/exchange-configs', {
+                        fromPluginId: addExchangeForm.value.fromPluginId,
+                        toPluginId: addExchangeForm.value.toPluginId,
+                        enabled: true
+                    });
+                    if (r.data.success) {
+                        showMsg('置换配置创建成功');
+                        showAddExchangeDialog.value = false;
+                        addExchangeForm.value = {fromPluginId: null, toPluginId: null};
+                        await loadExchangeConfigs();
+                        showExchangeConfigDialog.value = true;  // 重新打开置换配置弹窗
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '创建失败', 'error');
+                }
+                loading.value = false;
+            };
+            const toggleExchangeConfig = async (config) => {
+                loading.value = true;
+                try {
+                    const r = await api.put(`/admin/exchange-configs/${config.id}/toggle?enabled=${!config.enabled}`);
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                        loadExchangeConfigs();
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '操作失败', 'error');
+                }
+                loading.value = false;
+            };
+            const deleteExchangeConfigById = async (id) => {
+                if (!confirm('确定删除此置换配置？')) return;
+                try {
+                    const r = await api.delete(`/admin/exchange-configs/${id}`);
+                    if (r.data.success) {
+                        showMsg('删除成功');
+                        loadExchangeConfigs();
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '删除失败', 'error');
+                }
+            };
+            const openUserExchangeDialog = async () => {
+                userExchangeForm.value = {exchangeConfigId: null};
+                await loadAvailableExchangeConfigs();
+                showUserExchangeDialog.value = true;
+            };
+            const doUserExchange = async () => {
+                if (!userExchangeForm.value.exchangeConfigId) {
+                    showMsg('请选择置换方案', 'error');
+                    return;
+                }
+                loading.value = true;
+                try {
+                    const r = await api.post('/user/exchange', {exchangeConfigId: userExchangeForm.value.exchangeConfigId});
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                        showUserExchangeDialog.value = false;
+                        loadMyAuth();
+                        userExchangeForm.value = {exchangeConfigId: null};
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '置换失败', 'error');
+                }
+                loading.value = false;
+            };
+            const claimPlugin = async (configId) => {
+                if (!configId) {
+                    showMsg('无效的领取配置', 'error');
+                    return;
+                }
+                loading.value = true;
+                try {
+                    const r = await api.post('/user/claim', {configId});
+                    if (r.data.success) {
+                        showMsg(r.data.message);
+                        loadClaimablePlugins();
+                        loadMyAuth();
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '领取失败', 'error');
+                }
+                loading.value = false;
+            };
+            const onUserSelectFocus = () => {
+                // 获得焦点时显示所有用户
+                const input = genForm.value.username || '';
+                if (input) {
+                    filteredUsers.value = users.value.filter(u => u.username.toLowerCase().includes(input.toLowerCase()));
+                } else {
+                    filteredUsers.value = users.value;
+                }
+                showUserSelect.value = true;
+            };
+            const onUsernameInput = () => {
+                const input = genForm.value.username || '';
+                // 输入时实时过滤
+                if (input) {
+                    filteredUsers.value = users.value.filter(u => u.username.toLowerCase().includes(input.toLowerCase()));
+                } else {
+                    filteredUsers.value = users.value;
+                }
+                showUserSelect.value = true;
+            };
+            const selectUser = (username) => {
+                genForm.value.username = username;
+                showUserSelect.value = false;
+            };
+            const hideUserSelect = () => {
+                setTimeout(() => {
+                    showUserSelect.value = false;
+                }, 200);
+            };
 
-        return { isLoggedIn,isAdmin,isSuperAdmin,username,loading,authTab,currentPage,msg,loginForm,registerForm,forgotForm,regCodeCooldown,forgotCodeCooldown,
-            pluginForm,editForm,genForm,pwdForm,bindingForm,showPluginDialog,showEditDialog,showGenDialog,showUploadDialog,showPwdDialog,codesDialog,showBindingDialog,
-            uploadPlugin,selectedFile,uploading,generatedCodes,stats,plugins,licenses,users,myPlugins,cooldownHours,
-            publicPlugins,userStats,exchangeConfigs,availableExchangeConfigs,claimablePlugins,userExchangeForm,
-            showExchangeConfigDialog,showUserExchangeDialog,showClaimDialog,showUserSelect,filteredUsers,
-            showAddExchangeDialog,addExchangeForm,openAddExchangeDialog,doAddExchangeConfig,
-            showClaimConfigDialog,showAddClaimDialog,claimConfigs,addClaimForm,openAddClaimDialog,doAddClaimConfig,toggleClaimConfig,deleteClaimConfigById,loadClaimConfigs,loadClaimablePlugins,
-            showExcludePluginSelect,filteredExcludePlugins,onExcludePluginFocus,onExcludePluginInput,addExcludePlugin,removeExcludePlugin,hideExcludePluginSelect,getPluginName,
-            login,register,resetPassword,sendRegisterCode,sendForgotCode,logout,loadPlugins,loadLicenses,createPlugin,editPlugin,updatePlugin,deletePlugin,togglePlugin,
-            openUpload,onFileChange,onDrop,formatSize,doUpload,generateLicenses,toggleLicense,deleteLicense,openBindingEdit,updateBindings,openPwd,changePwd,saveCooldown,
-            userUnbind,userUnbindAll,adminUnbindUser,adminUnbindAll,deleteUserLicenses,toggleBan,toggleAdmin,deleteUser,
-            toggleExchangeConfig,deleteExchangeConfigById,openUserExchangeDialog,doUserExchange,claimPlugin,onUsernameInput,onUserSelectFocus,selectUser,hideUserSelect };
-    }
-}).mount('#app');
+            onMounted(() => {
+                const t = localStorage.getItem('token');
+                if (t) {
+                    token.value = t;
+                    username.value = localStorage.getItem('username') || '';
+                    isAdmin.value = localStorage.getItem('isAdmin') === 'true';
+                    isSuperAdmin.value = localStorage.getItem('isSuperAdmin') === 'true';
+                    isLoggedIn.value = true;
+                    currentPage.value = isAdmin.value ? 'dashboard' : 'myauth';
+                    verifyToken();
+                    loadData();
+                }
+                // 加载公开插件列表（无需登录）
+                loadPublicPlugins();
+            });
+
+            return {
+                isLoggedIn,
+                isAdmin,
+                isSuperAdmin,
+                username,
+                loading,
+                authTab,
+                currentPage,
+                msg,
+                loginForm,
+                registerForm,
+                forgotForm,
+                regCodeCooldown,
+                forgotCodeCooldown,
+                pluginForm,
+                editForm,
+                genForm,
+                pwdForm,
+                bindingForm,
+                showPluginDialog,
+                showEditDialog,
+                showGenDialog,
+                showUploadDialog,
+                showPwdDialog,
+                codesDialog,
+                showBindingDialog,
+                uploadPlugin,
+                selectedFile,
+                uploading,
+                generatedCodes,
+                stats,
+                plugins,
+                licenses,
+                users,
+                myPlugins,
+                cooldownHours,
+                publicPlugins,
+                userStats,
+                exchangeConfigs,
+                availableExchangeConfigs,
+                claimablePlugins,
+                userExchangeForm,
+                showExchangeConfigDialog,
+                showUserExchangeDialog,
+                showClaimDialog,
+                showUserSelect,
+                filteredUsers,
+                showAddExchangeDialog,
+                addExchangeForm,
+                openAddExchangeDialog,
+                doAddExchangeConfig,
+                showClaimConfigDialog,
+                showAddClaimDialog,
+                claimConfigs,
+                addClaimForm,
+                openAddClaimDialog,
+                doAddClaimConfig,
+                toggleClaimConfig,
+                deleteClaimConfigById,
+                loadClaimConfigs,
+                loadClaimablePlugins,
+                showExcludePluginSelect,
+                filteredExcludePlugins,
+                onExcludePluginFocus,
+                onExcludePluginInput,
+                addExcludePlugin,
+                removeExcludePlugin,
+                hideExcludePluginSelect,
+                getPluginName,
+                login,
+                register,
+                resetPassword,
+                sendRegisterCode,
+                sendForgotCode,
+                logout,
+                loadPlugins,
+                loadLicenses,
+                createPlugin,
+                editPlugin,
+                updatePlugin,
+                deletePlugin,
+                togglePlugin,
+                openUpload,
+                onFileChange,
+                onDrop,
+                formatSize,
+                doUpload,
+                generateLicenses,
+                toggleLicense,
+                deleteLicense,
+                openBindingEdit,
+                updateBindings,
+                openPwd,
+                changePwd,
+                saveCooldown,
+                userUnbind,
+                userUnbindAll,
+                adminUnbindUser,
+                adminUnbindAll,
+                deleteUserLicenses,
+                toggleBan,
+                toggleAdmin,
+                deleteUser,
+                toggleExchangeConfig,
+                deleteExchangeConfigById,
+                openUserExchangeDialog,
+                doUserExchange,
+                claimPlugin,
+                onUsernameInput,
+                onUserSelectFocus,
+                selectUser,
+                hideUserSelect
+            };
+        }
+    }).mount('#app');
 </script>
 </body>
 </html>
