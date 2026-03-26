@@ -183,12 +183,94 @@ object UserService {
     }
     
     /**
-     * 检查用户是否存在（用于验证token有效性）
+     * 检查用户是否存在（用于验证 token 有效性）
      */
     suspend fun userExists(userId: Int): Boolean = dbQuery {
         Users.selectAll()
             .where { Users.id eq userId }
             .count() > 0
+    }
+        
+    /**
+     * 获取用户仪表盘统计信息
+     */
+    suspend fun getUserDashboardStats(): Map<String, Any> = dbQuery {
+        val totalUsers = Users.selectAll().count()
+        val totalLicenses = LicenseCodes.selectAll().count()
+        val totalPlugins = Plugins.selectAll().count()
+            
+        mapOf(
+            "totalUsers" to totalUsers,
+            "totalLicenses" to totalLicenses,
+            "totalPlugins" to totalPlugins
+        )
+    }
+        
+    /**
+     * 插件领取：检查条件并发放授权码
+     */
+    suspend fun claimPlugin(userId: Int, targetPluginId: Int, excludePlugins: List<Int>? = null): Result<String> = dbQuery {
+        // 检查目标插件是否存在
+        val targetPlugin = Plugins.selectAll().where { Plugins.id eq targetPluginId }.singleOrNull()
+        if (targetPlugin == null) {
+            return@dbQuery Result.failure(Exception("目标插件不存在"))
+        }
+            
+        // 获取用户当前拥有的所有授权码（排除指定插件）
+        val excludeList = excludePlugins ?: emptyList()
+        val condition = (UserPluginAuth.userId eq userId) and 
+                       (UserPluginAuth.pluginId notInList excludeList)
+            
+        val userLicenses = UserPluginAuth.join(LicenseCodes, on = { UserPluginAuth.licenseId eq LicenseCodes.id })
+            .select(UserPluginAuth.licenseId, LicenseCodes.pluginId)
+            .where { condition }
+            .toList()
+            
+        val totalCount = userLicenses.size
+        val ownedPluginIds = userLicenses.map { it[LicenseCodes.pluginId] }.toSet()
+            
+        // 检查条件：拥有指定插件或授权码总数达到要求
+        // 这里简化为：只要拥有任意插件的授权码即可领取
+        // 你可以根据需要调整条件逻辑
+        val hasRequiredPlugin = ownedPluginIds.isNotEmpty()
+            
+        if (!hasRequiredPlugin && totalCount < 1) {
+            return@dbQuery Result.failure(Exception("不满足领取条件，需要拥有至少一个插件的授权码"))
+        }
+            
+        // 生成一个新的授权码给用户
+        val licenseCode = generateClaimCode()
+        val now = LocalDateTime.now()
+            
+        // 插入授权码
+        val licenseId = LicenseCodes.insertAndGetId {
+            it[code] = licenseCode
+            it[pluginId] = targetPluginId
+            it[maxBindings] = 1
+            it[enabled] = true
+            it[createdAt] = now
+        }
+            
+        // 关联用户和插件
+        UserPluginAuth.insert {
+            it[userId] = userId
+            it[pluginId] = targetPluginId
+            it[licenseId] = licenseId
+            it[grantedAt] = now
+            it[grantedBy] = userId  // 自己领取
+        }
+            
+        Result.success("成功领取 ${targetPlugin[displayName]} 授权码：$licenseCode")
+    }
+        
+    /**
+     * 生成随机授权码
+     */
+    private fun generateClaimCode(): String {
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        return (1..20)
+            .map { chars.random() }
+            .joinToString("")
     }
     
     /**

@@ -220,8 +220,8 @@ object PluginService {
     }
     
     /**
-     * 从上传的JAR文件更新插件信息
-     * @param pluginName 从plugin.yml获取的插件名
+     * 从上传的 JAR 文件更新插件信息
+     * @param pluginName 从 plugin.yml 获取的插件名
      */
     fun updatePluginFromJar(id: Int, pluginName: String, newVersion: String, mainClass: String, description: String?): Boolean {
         return org.jetbrains.exposed.sql.transactions.transaction {
@@ -242,7 +242,7 @@ object PluginService {
                 }
             }
             
-            // 删除旧的JAR文件
+            // 删除旧的 JAR 文件
             val oldJar = getPluginJarPath(currentName, currentVersion)
             if (oldJar.exists()) {
                 oldJar.delete()
@@ -260,5 +260,57 @@ object PluginService {
             }
             true
         }
+    }
+    
+    /**
+     * 获取所有可用插件（公开，无需登录）
+     */
+    suspend fun getAllAvailablePlugins(): List<PluginSimpleDTO> = dbQuery {
+        Plugins.selectAll()
+            .where { Plugins.enabled eq true }
+            .orderBy(Plugins.createdAt to SortOrder.DESC)
+            .map { row ->
+                PluginSimpleDTO(
+                    id = row[Plugins.id].value,
+                    name = row[Plugins.name],
+                    displayName = row[Plugins.displayName],
+                    description = row[Plugins.description],
+                    version = row[Plugins.version]
+                )
+            }
+    }
+    
+    /**
+     * 插件置换：将插件 A 的授权码转换为插件 B
+     */
+    suspend fun exchangePlugin(fromPluginId: Int, toPluginId: Int): Result<String> = dbQuery {
+        // 检查两个插件是否存在
+        val fromPlugin = Plugins.selectAll().where { Plugins.id eq fromPluginId }.singleOrNull()
+        val toPlugin = Plugins.selectAll().where { Plugins.id eq toPluginId }.singleOrNull()
+        
+        if (fromPlugin == null || toPlugin == null) {
+            return@dbQuery Result.failure(Exception("插件不存在"))
+        }
+        
+        // 查找该插件的所有授权码
+        val licenses = LicenseCodes.selectAll()
+            .where { LicenseCodes.pluginId eq fromPluginId }
+            .toList()
+        
+        if (licenses.isEmpty()) {
+            return@dbQuery Result.failure(Exception("该插件没有授权码"))
+        }
+        
+        // 批量更新授权码的插件 ID
+        var count = 0
+        licenses.forEach { license ->
+            LicenseCodes.update({ LicenseCodes.id eq license[LicenseCodes.id] }) {
+                it[pluginId] = toPluginId
+                it[updatedAt] = LocalDateTime.now()
+            }
+            count++
+        }
+        
+        Result.success("已将 $count 个授权码从 ${fromPlugin[displayName]} 置换为 ${toPlugin[displayName]}")
     }
 }

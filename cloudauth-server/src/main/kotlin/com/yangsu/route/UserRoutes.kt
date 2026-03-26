@@ -1,10 +1,12 @@
 package com.yangsu.route
 
 import com.yangsu.model.ApiResponse
+import com.yangsu.model.ClaimPluginRequest
 import com.yangsu.model.UserUnbindRequest
 import com.yangsu.model.VerifyUserDTO
 import com.yangsu.service.AuthService
 import com.yangsu.service.LicenseService
+import com.yangsu.service.PluginService
 import com.yangsu.service.UserService
 import com.yangsu.config.getUserId
 import io.ktor.http.HttpStatusCode
@@ -98,6 +100,38 @@ fun Route.userRoutes() {
                     }
                 )
             }
+            
+            // 获取用户仪表盘统计信息
+            get("/dashboard") {
+                val stats = UserService.getUserDashboardStats()
+                call.respond(ApiResponse(true, data = stats))
+            }
+            
+            // 领取插件授权码
+            post("/claim") {
+                val principal = call.principal<JWTPrincipal>()!!
+                val userId = principal.getUserId()
+                val request = call.receive<ClaimPluginRequest>()
+                
+                val result = UserService.claimPlugin(userId, request.targetPluginId, request.excludePlugins)
+                result.fold(
+                    onSuccess = { message ->
+                        call.respond(ApiResponse<Nothing>(true, message))
+                    },
+                    onFailure = { e ->
+                        call.respond(HttpStatusCode.BadRequest,
+                            ApiResponse<Nothing>(false, e.message))
+                    }
+                )
+            }
+        }
+    }
+    
+    // 公开 API：获取所有可用插件（无需登录）
+    route("/api/public") {
+        get("/plugins") {
+            val plugins = PluginService.getAllAvailablePlugins()
+            call.respond(ApiResponse(true, data = plugins))
         }
     }
 }

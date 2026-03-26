@@ -370,6 +370,21 @@ fun Route.adminRoutes() {
                 }
             }
             
+            // 插件置换：将插件 A 的授权码转换为插件 B
+            post("/plugins/exchange") {
+                val request = call.receive<ExchangePluginRequest>()
+                val result = PluginService.exchangePlugin(request.fromPluginId, request.toPluginId)
+                result.fold(
+                    onSuccess = { message ->
+                        call.respond(ApiResponse<Nothing>(true, message))
+                    },
+                    onFailure = { e ->
+                        call.respond(HttpStatusCode.BadRequest,
+                            ApiResponse<Nothing>(false, e.message))
+                    }
+                )
+            }
+            
             // ==================== 授权码管理 ====================
             
             // 获取所有授权码

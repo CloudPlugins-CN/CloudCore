@@ -40,7 +40,7 @@ object Plugins : IntIdTable("plugins") {
  * 授权码表
  */
 object LicenseCodes : IntIdTable("license_codes") {
-    val code = varchar("code", 30).uniqueIndex()  // 20位授权码
+    val code = varchar("code", 30).uniqueIndex()  // 30位授权码
     val userId = reference("user_id", Users).nullable()  // 绑定的用户
     val pluginId = reference("plugin_id", Plugins)  // 对应的插件
     val expiresAt = datetime("expires_at").nullable()  // 过期时间,null为永久
@@ -322,4 +322,25 @@ data class StatsDTO(
 data class VerifyUserDTO(
     val username: String,
     val isAdmin: Boolean
+)
+
+@Serializable
+data class PluginSimpleDTO(
+    val id: Int,
+    val name: String,
+    val displayName: String,
+    val description: String?,
+    val version: String
+)
+
+@Serializable
+data class ExchangePluginRequest(
+    val fromPluginId: Int,
+    val toPluginId: Int
+)
+
+@Serializable
+data class ClaimPluginRequest(
+    val targetPluginId: Int,
+    val excludePlugins: List<Int>? = null  // 排除的插件 ID 列表
 )
