@@ -8,7 +8,7 @@ username: ""
 license-codes:
   # - "ABC123XYZ789@#$%defg"
 
-# 调试模式 (开启后会输出更多日志)
+# 调试模式
 debug: false
 
 # 网络设置
