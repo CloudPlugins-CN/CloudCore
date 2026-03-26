@@ -7,7 +7,7 @@
 ```
 CloudCore/
 ├── cloudauth-server/    # 授权管理服务器 (Kotlin + Ktor)
-└── cloudcore-plugin/    # 核心授权插件 SDK (Java)
+└── cloudcore-plugin/    # 核心授权插件 SDK (Kotlin)
 ```
 
 ## 模块说明
@@ -32,8 +32,8 @@ CloudCore/
 ### 2. cloudcore-plugin (核心插件)
 
 **技术栈：**
-- 语言：Java
-- API：Bukkit/Spigot
+- 语言：Kotlin
+- 框架：TabooLib
 
 **功能：**
 - 提供授权验证 SDK
