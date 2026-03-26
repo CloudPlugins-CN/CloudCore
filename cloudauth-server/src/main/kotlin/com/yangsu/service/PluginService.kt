@@ -281,6 +281,26 @@ object PluginService {
     }
     
     /**
+     * 切换插件启用状态
+     */
+    suspend fun togglePlugin(id: Int, enabled: Boolean): Boolean = dbQuery {
+        val plugin = Plugins.selectAll()
+            .where { Plugins.id eq id }
+            .singleOrNull()
+            
+        if (plugin == null) {
+            return@dbQuery false
+        }
+        
+        val now = LocalDateTime.now()
+        Plugins.update({ Plugins.id eq id }) {
+            it[Plugins.enabled] = enabled
+            it[updatedAt] = now
+        }
+        true
+    }
+    
+    /**
      * 插件置换：将插件 A 的授权码转换为插件 B
      */
     suspend fun exchangePlugin(fromPluginId: Int, toPluginId: Int): Result<String> = dbQuery {

@@ -212,6 +212,7 @@
                             <td style="white-space:nowrap">
                                 <button class="btn btn-small" @click="editPlugin(p)">编辑</button>
                                 <button class="btn btn-primary btn-small" @click="openUpload(p)">上传</button>
+                                <button class="btn btn-small" :class="p.enabled?'btn-warning':'btn-success'" @click="togglePlugin(p)">{{ p.enabled?'禁用':'启用' }}</button>
                                 <button class="btn btn-danger btn-small" @click="deletePlugin(p)">删除</button>
                             </td>
                         </tr>
@@ -330,7 +331,6 @@
             <div class="form-group"><label>版本</label><input v-model="editForm.version"></div>
             <div class="form-group"><label>描述</label><input v-model="editForm.description"></div>
             <div class="form-group"><label>主类</label><input v-model="editForm.mainClass"></div>
-            <div class="form-group"><label><input type="checkbox" v-model="editForm.enabled"> 启用</label></div>
             <div class="modal-footer">
                 <button class="btn" @click="showEditDialog=false">取消</button>
                 <button class="btn btn-primary" @click="updatePlugin" :disabled="loading">保存</button>
@@ -849,6 +849,7 @@ createApp({
             loading.value = false;
         };
         const toggleLicense = async l => { try { const r = await api.put(`/admin/licenses/${l.id}/toggle?enabled=${!l.enabled}`); if(r.data.success){showMsg(r.data.message);loadLicenses();loadStats();} } catch(e){showMsg('操作失败','error');} };
+        const togglePlugin = async p => { try { const r = await api.put(`/admin/plugins/${p.id}/toggle?enabled=${!p.enabled}`); if(r.data.success){showMsg(r.data.message);loadPlugins();} } catch(e){showMsg('操作失败','error');} };
         const deleteLicense = async l => { if(!confirm('确定删除?')) return; try { const r = await api.delete(`/admin/licenses/${l.id}`); if(r.data.success){showMsg('删除成功');loadLicenses();loadStats();} } catch(e){showMsg('删除失败','error');} };
         const openBindingEdit = l => { bindingForm.value = {id:l.id,code:l.code,maxBindings:l.maxBindings,currentBindings:l.currentBindings}; showBindingDialog.value = true; };
         const updateBindings = async () => {
@@ -1122,7 +1123,7 @@ createApp({
             showAddExchangeDialog,addExchangeForm,openAddExchangeDialog,doAddExchangeConfig,
             showClaimConfigDialog,showAddClaimDialog,claimConfigs,addClaimForm,openAddClaimDialog,doAddClaimConfig,toggleClaimConfig,deleteClaimConfigById,loadClaimConfigs,loadClaimablePlugins,
             showExcludePluginSelect,filteredExcludePlugins,onExcludePluginFocus,onExcludePluginInput,addExcludePlugin,removeExcludePlugin,hideExcludePluginSelect,getPluginName,
-            login,register,resetPassword,sendRegisterCode,sendForgotCode,logout,loadPlugins,loadLicenses,createPlugin,editPlugin,updatePlugin,deletePlugin,
+            login,register,resetPassword,sendRegisterCode,sendForgotCode,logout,loadPlugins,loadLicenses,createPlugin,editPlugin,updatePlugin,deletePlugin,togglePlugin,
             openUpload,onFileChange,onDrop,formatSize,doUpload,generateLicenses,toggleLicense,deleteLicense,openBindingEdit,updateBindings,openPwd,changePwd,saveCooldown,
             userUnbind,userUnbindAll,adminUnbindUser,adminUnbindAll,deleteUserLicenses,toggleBan,toggleAdmin,deleteUser,
             toggleExchangeConfig,deleteExchangeConfigById,openUserExchangeDialog,doUserExchange,claimPlugin,onUsernameInput,onUserSelectFocus,selectUser,hideUserSelect };

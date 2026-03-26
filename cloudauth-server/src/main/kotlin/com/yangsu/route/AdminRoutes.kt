@@ -304,6 +304,26 @@ fun Route.adminRoutes() {
                 }
             }
             
+            // 禁用/启用插件
+            put("/plugins/{id}/toggle") {
+                val id = call.parameters["id"]?.toIntOrNull()
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest,
+                        SimpleApiResponse(false, "无效的插件ID"))
+                    return@put
+                }
+                
+                val enabled = call.request.queryParameters["enabled"]?.toBoolean() ?: true
+                val success = PluginService.togglePlugin(id, enabled)
+                
+                if (success) {
+                    call.respond(SimpleApiResponse(true, if (enabled) "插件已启用" else "插件已禁用"))
+                } else {
+                    call.respond(HttpStatusCode.NotFound,
+                        SimpleApiResponse(false, "插件不存在"))
+                }
+            }
+            
             // 上传插件JAR (从 plugin.yml 获取版本，新版本覆盖旧版本)
             post("/plugins/{id}/upload") {
                 val id = call.parameters["id"]?.toIntOrNull()
