@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 // ==================== 数据库表定义 ====================
 
 /**
- * 用户表
+ * 用户表（SQLite 默认复用删除的ID）
  */
 object Users : IntIdTable("users") {
     val username = varchar("username", 50).uniqueIndex()
@@ -22,7 +22,7 @@ object Users : IntIdTable("users") {
 }
 
 /**
- * 插件表
+ * 插件表（SQLite 默认复用删除的ID）
  */
 object Plugins : IntIdTable("plugins") {
     val name = varchar("name", 100).uniqueIndex()
@@ -37,10 +37,10 @@ object Plugins : IntIdTable("plugins") {
 }
 
 /**
- * 授权码表
+ * 授权码表（SQLite 默认复用删除的ID）
  */
 object LicenseCodes : IntIdTable("license_codes") {
-    val code = varchar("code", 30).uniqueIndex()  // 30位授权码
+    val code = varchar("code", 20).uniqueIndex()  // 20位授权码
     val userId = reference("user_id", Users).nullable()  // 绑定的用户
     val pluginId = reference("plugin_id", Plugins)  // 对应的插件
     val expiresAt = datetime("expires_at").nullable()  // 过期时间,null为永久
@@ -51,7 +51,7 @@ object LicenseCodes : IntIdTable("license_codes") {
 }
 
 /**
- * 设备绑定表
+ * 设备绑定表（SQLite 默认复用删除的ID）
  * 绑定 IP/MAC/机器码, 三选二匹配即可通过验证
  */
 object DeviceBindings : IntIdTable("device_bindings") {
@@ -64,7 +64,7 @@ object DeviceBindings : IntIdTable("device_bindings") {
 }
 
 /**
- * 用户授权关联表 (用户-插件授权关系)
+ * 用户授权关联表（SQLite 默认复用删除的ID）
  * 同一用户可以拥有同一插件的多个授权码
  */
 object UserPluginAuth : IntIdTable("user_plugin_auth") {
@@ -76,7 +76,7 @@ object UserPluginAuth : IntIdTable("user_plugin_auth") {
 }
 
 /**
- * 操作日志表
+ * 操作日志表（SQLite 默认复用删除的ID）
  */
 object AuditLogs : IntIdTable("audit_logs") {
     val userId = reference("user_id", Users).nullable()
@@ -88,7 +88,7 @@ object AuditLogs : IntIdTable("audit_logs") {
 }
 
 /**
- * 系统配置表
+ * 系统配置表（SQLite 默认复用删除的ID）
  */
 object SystemConfig : IntIdTable("system_config") {
     val key = varchar("config_key", 50).uniqueIndex()
@@ -97,11 +97,33 @@ object SystemConfig : IntIdTable("system_config") {
 }
 
 /**
- * 邮箱验证码表
+ * 插件置换配置表（SQLite 默认复用删除的ID）
+ */
+object PluginExchangeConfigs : IntIdTable("plugin_exchange_configs") {
+    val fromPluginId = reference("from_plugin_id", Plugins)  // 源插件
+    val toPluginId = reference("to_plugin_id", Plugins)  // 目标插件
+    val enabled = bool("enabled").default(true)  // 是否启用
+    val createdAt = datetime("created_at")
+}
+
+/**
+ * 插件领取配置表（SQLite 默认复用删除的ID）
+ */
+object PluginClaimConfigs : IntIdTable("plugin_claim_configs") {
+    val pluginId = reference("plugin_id", Plugins)  // 可领取的插件
+    val requiredPluginId = reference("required_plugin_id", Plugins).nullable()  // 需要的插件（null表示不需要）
+    val requiredAuthCount = integer("required_auth_count").default(1)  // 需要的授权码数量
+    val excludePluginIds = text("exclude_plugin_ids").default("")  // 排除的插件ID列表（逗号分隔）
+    val enabled = bool("enabled").default(true)  // 是否启用
+    val createdAt = datetime("created_at")
+}
+
+/**
+ * 邮箱验证码表（SQLite 默认复用删除的ID）
  */
 object VerificationCodes : IntIdTable("verification_codes") {
     val email = varchar("email", 100)
-    val code = varchar("code", 10)  // 6位验证码
+    val code = varchar("code", 6)  // 6位验证码
     val type = varchar("type", 20)  // REGISTER, FORGOT_PASSWORD
     val expiresAt = datetime("expires_at")  // 过期时间
     val used = bool("used").default(false)  // 是否已使用
@@ -221,6 +243,15 @@ data class ApiResponse<T>(
     val success: Boolean,
     val message: String? = null,
     val data: T? = null
+)
+
+/**
+ * 用于无数据返回的响应（避免使用 Nothing 类型导致序列化失败）
+ */
+@Serializable
+data class SimpleApiResponse(
+    val success: Boolean,
+    val message: String? = null
 )
 
 @Serializable
@@ -343,4 +374,72 @@ data class ExchangePluginRequest(
 data class ClaimPluginRequest(
     val targetPluginId: Int,
     val excludePlugins: List<Int>? = null  // 排除的插件 ID 列表
+)
+
+@Serializable
+data class CreateExchangeConfigRequest(
+    val fromPluginId: Int,
+    val toPluginId: Int,
+    val enabled: Boolean = true
+)
+
+@Serializable
+data class ExchangeConfigDTO(
+    val id: Int,
+    val fromPluginId: Int,
+    val fromPluginName: String,
+    val fromPluginDisplayName: String,
+    val toPluginId: Int,
+    val toPluginName: String,
+    val toPluginDisplayName: String,
+    val enabled: Boolean,
+    val createdAt: String
+)
+
+@Serializable
+data class UserExchangeRequest(
+    val exchangeConfigId: Int
+)
+
+@Serializable
+data class CreateClaimConfigRequest(
+    val pluginId: Int,
+    val requiredPluginId: Int? = null,
+    val requiredAuthCount: Int = 1,
+    val excludePluginIds: List<Int> = emptyList(),  // 排除的插件ID列表
+    val enabled: Boolean = true
+)
+
+@Serializable
+data class ClaimConfigDTO(
+    val id: Int,
+    val pluginId: Int,
+    val pluginName: String,
+    val pluginDisplayName: String,
+    val requiredPluginId: Int?,
+    val requiredPluginName: String?,
+    val requiredPluginDisplayName: String?,
+    val requiredAuthCount: Int,
+    val excludePluginIds: List<Int>,  // 排除的插件ID列表
+    val enabled: Boolean,
+    val createdAt: String
+)
+
+/**
+ * 用户可领取插件DTO（用于用户端展示）
+ */
+@Serializable
+data class UserClaimablePluginDTO(
+    val id: Int,
+    val name: String,
+    val displayName: String,
+    val description: String,
+    val version: String,
+    val requiredAuthCount: Int,
+    val requiredPluginId: Int?,
+    val requiredPluginName: String,
+    val excludePluginIds: List<Int>,
+    val claimed: Boolean,
+    val canClaim: Boolean,
+    val configId: Int
 )

@@ -39,16 +39,16 @@ fun Route.adminRoutes() {
                 
                 if (request.newPassword.length < 6) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "密码长度不能少于6位"))
+                        SimpleApiResponse(false, "密码长度不能少于6位"))
                     return@post
                 }
                 
                 val success = UserService.changePassword(request.userId, request.newPassword)
                 if (success) {
-                    call.respond(ApiResponse<Nothing>(true, "密码修改成功"))
+                    call.respond(SimpleApiResponse(true, "密码修改成功"))
                 } else {
                     call.respond(HttpStatusCode.NotFound,
-                        ApiResponse<Nothing>(false, "用户不存在"))
+                        SimpleApiResponse(false, "用户不存在"))
                 }
             }
             
@@ -60,7 +60,7 @@ fun Route.adminRoutes() {
                 // 检查是否为超级管理员
                 if (!UserService.isSuperAdmin(userId)) {
                     call.respond(HttpStatusCode.Forbidden,
-                        ApiResponse<Nothing>(false, "只有超级管理员才能创建管理员账户"))
+                        SimpleApiResponse(false, "只有超级管理员才能创建管理员账户"))
                     return@post
                 }
                 
@@ -68,13 +68,13 @@ fun Route.adminRoutes() {
                 
                 if (request.username.isBlank()) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "用户名不能为空"))
+                        SimpleApiResponse(false, "用户名不能为空"))
                     return@post
                 }
                 
                 if (request.password.length < 6) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "密码长度不能少于6位"))
+                        SimpleApiResponse(false, "密码长度不能少于6位"))
                     return@post
                 }
                 
@@ -85,7 +85,7 @@ fun Route.adminRoutes() {
                     },
                     onFailure = { e ->
                         call.respond(HttpStatusCode.BadRequest,
-                            ApiResponse<Nothing>(false, e.message))
+                            SimpleApiResponse(false, e.message))
                     }
                 )
             }
@@ -97,37 +97,37 @@ fun Route.adminRoutes() {
                 
                 if (!UserService.isSuperAdmin(userId)) {
                     call.respond(HttpStatusCode.Forbidden,
-                        ApiResponse<Nothing>(false, "只有超级管理员才能封禁/解封用户"))
+                        SimpleApiResponse(false, "只有超级管理员才能封禁/解封用户"))
                     return@post
                 }
                 
                 val targetUserId = call.parameters["id"]?.toIntOrNull()
                 if (targetUserId == null) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的用户ID"))
+                        SimpleApiResponse(false, "无效的用户ID"))
                     return@post
                 }
                 
                 // 不能封禁自己
                 if (targetUserId == userId) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "不能封禁自己"))
+                        SimpleApiResponse(false, "不能封禁自己"))
                     return@post
                 }
                 
                 // 检查目标用户是否为超级管理员
                 if (UserService.isSuperAdmin(targetUserId)) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "不能封禁超级管理员"))
+                        SimpleApiResponse(false, "不能封禁超级管理员"))
                     return@post
                 }
                 
                 val success = UserService.toggleBan(targetUserId, true)
                 if (success) {
-                    call.respond(ApiResponse<Nothing>(true, "用户已封禁"))
+                    call.respond(SimpleApiResponse(true, "用户已封禁"))
                 } else {
                     call.respond(HttpStatusCode.NotFound,
-                        ApiResponse<Nothing>(false, "用户不存在"))
+                        SimpleApiResponse(false, "用户不存在"))
                 }
             }
             
@@ -138,23 +138,23 @@ fun Route.adminRoutes() {
                 
                 if (!UserService.isSuperAdmin(userId)) {
                     call.respond(HttpStatusCode.Forbidden,
-                        ApiResponse<Nothing>(false, "只有超级管理员才能封禁/解封用户"))
+                        SimpleApiResponse(false, "只有超级管理员才能封禁/解封用户"))
                     return@post
                 }
                 
                 val targetUserId = call.parameters["id"]?.toIntOrNull()
                 if (targetUserId == null) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的用户ID"))
+                        SimpleApiResponse(false, "无效的用户ID"))
                     return@post
                 }
                 
                 val success = UserService.toggleBan(targetUserId, false)
                 if (success) {
-                    call.respond(ApiResponse<Nothing>(true, "用户已解封"))
+                    call.respond(SimpleApiResponse(true, "用户已解封"))
                 } else {
                     call.respond(HttpStatusCode.NotFound,
-                        ApiResponse<Nothing>(false, "用户不存在"))
+                        SimpleApiResponse(false, "用户不存在"))
                 }
             }
             
@@ -165,38 +165,38 @@ fun Route.adminRoutes() {
                             
                 if (!UserService.isSuperAdmin(userId)) {
                     call.respond(HttpStatusCode.Forbidden,
-                        ApiResponse<Nothing>(false, "只有超级管理员才能设置管理员"))
+                        SimpleApiResponse(false, "只有超级管理员才能设置管理员"))
                     return@post
                 }
                             
                 val targetUserId = call.parameters["id"]?.toIntOrNull()
                 if (targetUserId == null) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的用户 ID"))
+                        SimpleApiResponse(false, "无效的用户 ID"))
                     return@post
                 }
                             
                 // 不能修改自己的权限
                 if (targetUserId == userId) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "不能修改自己的权限"))
+                        SimpleApiResponse(false, "不能修改自己的权限"))
                     return@post
                 }
                             
                 // 不能修改超级管理员的权限
                 if (UserService.isSuperAdmin(targetUserId)) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "不能修改超级管理员的权限"))
+                        SimpleApiResponse(false, "不能修改超级管理员的权限"))
                     return@post
                 }
                             
                 val isAdmin = call.request.queryParameters["isAdmin"]?.toBoolean() ?: false
                 val success = UserService.setAdmin(targetUserId, isAdmin)
                 if (success) {
-                    call.respond(ApiResponse<Nothing>(true, if (isAdmin) "已设置为管理员" else "已取消管理员"))
+                    call.respond(SimpleApiResponse(true, if (isAdmin) "已设置为管理员" else "已取消管理员"))
                 } else {
                     call.respond(HttpStatusCode.NotFound,
-                        ApiResponse<Nothing>(false, "用户不存在"))
+                        SimpleApiResponse(false, "用户不存在"))
                 }
             }
                         
@@ -207,37 +207,37 @@ fun Route.adminRoutes() {
                             
                 if (!UserService.isSuperAdmin(userId)) {
                     call.respond(HttpStatusCode.Forbidden,
-                        ApiResponse<Nothing>(false, "只有超级管理员才能删除用户"))
+                        SimpleApiResponse(false, "只有超级管理员才能删除用户"))
                     return@delete
                 }
                             
                 val targetUserId = call.parameters["id"]?.toIntOrNull()
                 if (targetUserId == null) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的用户 ID"))
+                        SimpleApiResponse(false, "无效的用户 ID"))
                     return@delete
                 }
                             
                 // 不能删除自己
                 if (targetUserId == userId) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "不能删除自己"))
+                        SimpleApiResponse(false, "不能删除自己"))
                     return@delete
                 }
                             
                 // 不能删除超级管理员
                 if (UserService.isSuperAdmin(targetUserId)) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "不能删除超级管理员"))
+                        SimpleApiResponse(false, "不能删除超级管理员"))
                     return@delete
                 }
                             
                 val success = UserService.deleteUser(targetUserId)
                 if (success) {
-                    call.respond(ApiResponse<Nothing>(true, "用户已删除"))
+                    call.respond(SimpleApiResponse(true, "用户已删除"))
                 } else {
                     call.respond(HttpStatusCode.NotFound,
-                        ApiResponse<Nothing>(false, "用户不存在"))
+                        SimpleApiResponse(false, "用户不存在"))
                 }
             }
             
@@ -259,7 +259,7 @@ fun Route.adminRoutes() {
                     },
                     onFailure = { e ->
                         call.respond(HttpStatusCode.BadRequest,
-                            ApiResponse<Nothing>(false, e.message))
+                            SimpleApiResponse(false, e.message))
                     }
                 )
             }
@@ -269,7 +269,7 @@ fun Route.adminRoutes() {
                 val id = call.parameters["id"]?.toIntOrNull()
                 if (id == null) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的插件ID"))
+                        SimpleApiResponse(false, "无效的插件ID"))
                     return@put
                 }
                 
@@ -281,7 +281,7 @@ fun Route.adminRoutes() {
                     },
                     onFailure = { e ->
                         call.respond(HttpStatusCode.BadRequest,
-                            ApiResponse<Nothing>(false, e.message))
+                            SimpleApiResponse(false, e.message))
                     }
                 )
             }
@@ -291,16 +291,16 @@ fun Route.adminRoutes() {
                 val id = call.parameters["id"]?.toIntOrNull()
                 if (id == null) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的插件ID"))
+                        SimpleApiResponse(false, "无效的插件ID"))
                     return@delete
                 }
                 
                 val success = PluginService.deletePlugin(id)
                 if (success) {
-                    call.respond(ApiResponse<Nothing>(true, "插件删除成功"))
+                    call.respond(SimpleApiResponse(true, "插件删除成功"))
                 } else {
                     call.respond(HttpStatusCode.NotFound,
-                        ApiResponse<Nothing>(false, "插件不存在"))
+                        SimpleApiResponse(false, "插件不存在"))
                 }
             }
             
@@ -309,14 +309,14 @@ fun Route.adminRoutes() {
                 val id = call.parameters["id"]?.toIntOrNull()
                 if (id == null) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的插件ID"))
+                        SimpleApiResponse(false, "无效的插件ID"))
                     return@post
                 }
                 
                 val plugin = PluginService.getPluginById(id)
                 if (plugin == null) {
                     call.respond(HttpStatusCode.NotFound,
-                        ApiResponse<Nothing>(false, "插件不存在"))
+                        SimpleApiResponse(false, "插件不存在"))
                     return@post
                 }
                 
@@ -363,10 +363,10 @@ fun Route.adminRoutes() {
                     if (uploadResult!!.success) {
                         call.respond(ApiResponse(true, uploadResult!!.message, mapOf("version" to uploadResult!!.version)))
                     } else {
-                        call.respond(HttpStatusCode.BadRequest, ApiResponse<Nothing>(false, uploadResult!!.message))
+                        call.respond(HttpStatusCode.BadRequest, SimpleApiResponse(false, uploadResult!!.message))
                     }
                 } else {
-                    call.respond(HttpStatusCode.BadRequest, ApiResponse<Nothing>(false, "未收到文件"))
+                    call.respond(HttpStatusCode.BadRequest, SimpleApiResponse(false, "未收到文件"))
                 }
             }
             
@@ -376,13 +376,135 @@ fun Route.adminRoutes() {
                 val result = PluginService.exchangePlugin(request.fromPluginId, request.toPluginId)
                 result.fold(
                     onSuccess = { message ->
-                        call.respond(ApiResponse<Nothing>(true, message))
+                        call.respond(SimpleApiResponse(true, message))
                     },
                     onFailure = { e ->
                         call.respond(HttpStatusCode.BadRequest,
-                            ApiResponse<Nothing>(false, e.message))
+                            SimpleApiResponse(false, e.message))
                     }
                 )
+            }
+            
+            // ==================== 插件置换配置管理 ====================
+            
+            // 获取所有置换配置
+            get("/exchange-configs") {
+                val configs = PluginExchangeService.getAllExchangeConfigs()
+                call.respond(ApiResponse(true, data = configs))
+            }
+            
+            // 创建置换配置
+            post("/exchange-configs") {
+                val request = call.receive<CreateExchangeConfigRequest>()
+                val result = PluginExchangeService.createExchangeConfig(request)
+                result.fold(
+                    onSuccess = { config ->
+                        call.respond(ApiResponse(true, "创建成功", config))
+                    },
+                    onFailure = { e ->
+                        call.respond(HttpStatusCode.BadRequest,
+                            SimpleApiResponse(false, e.message))
+                    }
+                )
+            }
+            
+            // 禁用/启用置换配置
+            put("/exchange-configs/{id}/toggle") {
+                val id = call.parameters["id"]?.toIntOrNull()
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest,
+                        SimpleApiResponse(false, "无效的配置ID"))
+                    return@put
+                }
+                
+                val enabled = call.request.queryParameters["enabled"]?.toBoolean() ?: true
+                val success = PluginExchangeService.toggleExchangeConfig(id, enabled)
+                
+                if (success) {
+                    call.respond(SimpleApiResponse(true, if (enabled) "已启用" else "已禁用"))
+                } else {
+                    call.respond(HttpStatusCode.NotFound,
+                        SimpleApiResponse(false, "配置不存在"))
+                }
+            }
+            
+            // 删除置换配置
+            delete("/exchange-configs/{id}") {
+                val id = call.parameters["id"]?.toIntOrNull()
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest,
+                        SimpleApiResponse(false, "无效的配置ID"))
+                    return@delete
+                }
+                
+                val success = PluginExchangeService.deleteExchangeConfig(id)
+                if (success) {
+                    call.respond(SimpleApiResponse(true, "删除成功"))
+                } else {
+                    call.respond(HttpStatusCode.NotFound,
+                        SimpleApiResponse(false, "配置不存在"))
+                }
+            }
+            
+            // ==================== 插件领取配置管理 ====================
+            
+            // 获取所有领取配置
+            get("/claim-configs") {
+                val configs = PluginClaimService.getAllClaimConfigs()
+                call.respond(ApiResponse(true, data = configs))
+            }
+            
+            // 创建领取配置
+            post("/claim-configs") {
+                val request = call.receive<CreateClaimConfigRequest>()
+                val result = PluginClaimService.createClaimConfig(request)
+                result.fold(
+                    onSuccess = { config ->
+                        call.respond(ApiResponse(true, "创建成功", config))
+                    },
+                    onFailure = { e ->
+                        call.respond(HttpStatusCode.BadRequest,
+                            SimpleApiResponse(false, e.message))
+                    }
+                )
+            }
+            
+            // 切换领取配置启用状态
+            put("/claim-configs/{id}/toggle") {
+                val id = call.parameters["id"]?.toIntOrNull()
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest,
+                        SimpleApiResponse(false, "无效的配置ID"))
+                    return@put
+                }
+                
+                val enabled = call.request.queryParameters["enabled"]?.toBoolean() ?: true
+                val success = PluginClaimService.toggleClaimConfig(id, enabled)
+                
+                if (success) {
+                    call.respond(SimpleApiResponse(true, if (enabled) "已启用" else "已禁用"))
+                } else {
+                    call.respond(HttpStatusCode.NotFound,
+                        SimpleApiResponse(false, "配置不存在"))
+                }
+            }
+            
+            // 删除领取配置
+            delete("/claim-configs/{id}") {
+                val id = call.parameters["id"]?.toIntOrNull()
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest,
+                        SimpleApiResponse(false, "无效的配置ID"))
+                    return@delete
+                }
+                
+                val success = PluginClaimService.deleteClaimConfig(id)
+                if (success) {
+                    call.respond(SimpleApiResponse(true, "删除成功"))
+                } else {
+                    call.respond(HttpStatusCode.NotFound,
+                        SimpleApiResponse(false, "配置不存在"))
+                }
             }
             
             // ==================== 授权码管理 ====================
@@ -420,7 +542,7 @@ fun Route.adminRoutes() {
                     },
                     onFailure = { e ->
                         call.respond(HttpStatusCode.BadRequest,
-                            ApiResponse<Nothing>(false, e.message))
+                            SimpleApiResponse(false, e.message))
                     }
                 )
             }
@@ -434,11 +556,11 @@ fun Route.adminRoutes() {
                 val result = LicenseService.grantLicense(request, adminId)
                 result.fold(
                     onSuccess = {
-                        call.respond(ApiResponse<Nothing>(true, "授权成功"))
+                        call.respond(SimpleApiResponse(true, "授权成功"))
                     },
                     onFailure = { e ->
                         call.respond(HttpStatusCode.BadRequest,
-                            ApiResponse<Nothing>(false, e.message))
+                            SimpleApiResponse(false, e.message))
                     }
                 )
             }
@@ -448,7 +570,7 @@ fun Route.adminRoutes() {
                 val id = call.parameters["id"]?.toIntOrNull()
                 if (id == null) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的授权码ID"))
+                        SimpleApiResponse(false, "无效的授权码ID"))
                     return@put
                 }
                 
@@ -456,10 +578,10 @@ fun Route.adminRoutes() {
                 val success = LicenseService.toggleLicense(id, enabled)
                 
                 if (success) {
-                    call.respond(ApiResponse<Nothing>(true, if (enabled) "已启用" else "已禁用"))
+                    call.respond(SimpleApiResponse(true, if (enabled) "已启用" else "已禁用"))
                 } else {
                     call.respond(HttpStatusCode.NotFound,
-                        ApiResponse<Nothing>(false, "授权码不存在"))
+                        SimpleApiResponse(false, "授权码不存在"))
                 }
             }
             
@@ -468,23 +590,23 @@ fun Route.adminRoutes() {
                 val id = call.parameters["id"]?.toIntOrNull()
                 if (id == null) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的授权码ID"))
+                        SimpleApiResponse(false, "无效的授权码ID"))
                     return@put
                 }
                 
                 val maxBindings = call.request.queryParameters["maxBindings"]?.toIntOrNull()
                 if (maxBindings == null || maxBindings < 0) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的绑定数量"))
+                        SimpleApiResponse(false, "无效的绑定数量"))
                     return@put
                 }
                 
                 val success = LicenseService.updateMaxBindings(id, maxBindings)
                 if (success) {
-                    call.respond(ApiResponse<Nothing>(true, "绑定数量已修改为 $maxBindings"))
+                    call.respond(SimpleApiResponse(true, "绑定数量已修改为 $maxBindings"))
                 } else {
                     call.respond(HttpStatusCode.NotFound,
-                        ApiResponse<Nothing>(false, "授权码不存在"))
+                        SimpleApiResponse(false, "授权码不存在"))
                 }
             }
             
@@ -493,16 +615,16 @@ fun Route.adminRoutes() {
                 val id = call.parameters["id"]?.toIntOrNull()
                 if (id == null) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的授权码ID"))
+                        SimpleApiResponse(false, "无效的授权码ID"))
                     return@delete
                 }
                 
                 val success = LicenseService.deleteLicense(id)
                 if (success) {
-                    call.respond(ApiResponse<Nothing>(true, "授权码删除成功"))
+                    call.respond(SimpleApiResponse(true, "授权码删除成功"))
                 } else {
                     call.respond(HttpStatusCode.NotFound,
-                        ApiResponse<Nothing>(false, "授权码不存在"))
+                        SimpleApiResponse(false, "授权码不存在"))
                 }
             }
             
@@ -514,14 +636,14 @@ fun Route.adminRoutes() {
                 result.fold(
                     onSuccess = { unbinded ->
                         if (unbinded) {
-                            call.respond(ApiResponse<Nothing>(true, "解绑成功"))
+                            call.respond(SimpleApiResponse(true, "解绑成功"))
                         } else {
-                            call.respond(ApiResponse<Nothing>(true, "没有绑定的设备"))
+                            call.respond(SimpleApiResponse(true, "没有绑定的设备"))
                         }
                     },
                     onFailure = { e ->
                         call.respond(HttpStatusCode.BadRequest,
-                            ApiResponse<Nothing>(false, e.message))
+                            SimpleApiResponse(false, e.message))
                     }
                 )
             }
@@ -531,12 +653,12 @@ fun Route.adminRoutes() {
                 val userId = call.parameters["id"]?.toIntOrNull()
                 if (userId == null) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的用户ID"))
+                        SimpleApiResponse(false, "无效的用户ID"))
                     return@post
                 }
                 
                 val count = AuthService.adminUnbindUser(userId)
-                call.respond(ApiResponse<Nothing>(true, "已解绑 $count 个设备"))
+                call.respond(SimpleApiResponse(true, "已解绑 $count 个设备"))
             }
             
             // 删除指定用户的所有授权码
@@ -544,18 +666,18 @@ fun Route.adminRoutes() {
                 val userId = call.parameters["id"]?.toIntOrNull()
                 if (userId == null) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的用户ID"))
+                        SimpleApiResponse(false, "无效的用户ID"))
                     return@delete
                 }
                 
                 val count = LicenseService.deleteUserLicenses(userId)
-                call.respond(ApiResponse<Nothing>(true, "已删除 $count 个授权码"))
+                call.respond(SimpleApiResponse(true, "已删除 $count 个授权码"))
             }
             
             // 解绑所有用户的所有设备
             post("/unbind-all") {
                 val count = AuthService.adminUnbindAll()
-                call.respond(ApiResponse<Nothing>(true, "已解绑全部 $count 个设备"))
+                call.respond(SimpleApiResponse(true, "已解绑全部 $count 个设备"))
             }
             
             // ==================== 统计信息 ====================
@@ -572,16 +694,16 @@ fun Route.adminRoutes() {
                 val hours = call.request.queryParameters["hours"]?.toIntOrNull()
                 if (hours == null || hours < 0) {
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, "无效的冷却时间"))
+                        SimpleApiResponse(false, "无效的冷却时间"))
                     return@post
                 }
                 
                 val success = AuthService.setUnbindCooldownHours(hours)
                 if (success) {
-                    call.respond(ApiResponse<Nothing>(true, "解绑冷却时间已设置为 ${hours} 小时"))
+                    call.respond(SimpleApiResponse(true, "解绑冷却时间已设置为 ${hours} 小时"))
                 } else {
                     call.respond(HttpStatusCode.InternalServerError,
-                        ApiResponse<Nothing>(false, "设置失败"))
+                        SimpleApiResponse(false, "设置失败"))
                 }
             }
         }

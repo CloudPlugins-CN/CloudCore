@@ -268,7 +268,7 @@ object PluginService {
     suspend fun getAllAvailablePlugins(): List<PluginSimpleDTO> = dbQuery {
         Plugins.selectAll()
             .where { Plugins.enabled eq true }
-            .orderBy(Plugins.createdAt to SortOrder.DESC)
+            .orderBy(Plugins.id to SortOrder.ASC)
             .map { row ->
                 PluginSimpleDTO(
                     id = row[Plugins.id].value,
@@ -306,11 +306,10 @@ object PluginService {
         licenses.forEach { license ->
             LicenseCodes.update({ LicenseCodes.id eq license[LicenseCodes.id] }) {
                 it[pluginId] = toPluginId
-                it[updatedAt] = LocalDateTime.now()
             }
             count++
         }
         
-        Result.success("已将 $count 个授权码从 ${fromPlugin[displayName]} 置换为 ${toPlugin[displayName]}")
+        Result.success("已将 $count 个授权码从 ${fromPlugin[Plugins.displayName]} 置换为 ${toPlugin[Plugins.displayName]}")
     }
 }

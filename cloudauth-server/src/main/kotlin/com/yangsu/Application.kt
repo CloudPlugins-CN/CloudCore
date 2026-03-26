@@ -4,6 +4,7 @@ import com.yangsu.config.AppConfig
 import com.yangsu.config.DatabaseFactory
 import com.yangsu.config.configureJwt
 import com.yangsu.model.ApiResponse
+import com.yangsu.model.SimpleApiResponse
 import com.yangsu.route.*
 import com.yangsu.service.PluginService
 import io.ktor.http.*
@@ -71,7 +72,7 @@ fun Application.configurePlugins() {
         exception<Throwable> { call, cause ->
             call.respond(
                 HttpStatusCode.InternalServerError,
-                ApiResponse<Nothing>(false, cause.message ?: "服务器内部错误")
+                SimpleApiResponse(false, cause.message ?: "服务器内部错误")
             )
         }
     }

@@ -218,13 +218,19 @@ object UserService {
             
         // 获取用户当前拥有的所有授权码（排除指定插件）
         val excludeList = excludePlugins ?: emptyList()
-        val condition = (UserPluginAuth.userId eq userId) and 
-                       (UserPluginAuth.pluginId notInList excludeList)
-            
-        val userLicenses = UserPluginAuth.join(LicenseCodes, on = { UserPluginAuth.licenseId eq LicenseCodes.id })
-            .select(UserPluginAuth.licenseId, LicenseCodes.pluginId)
-            .where { condition }
-            .toList()
+        val userLicenses = if (excludeList.isEmpty()) {
+            UserPluginAuth
+                .innerJoin(LicenseCodes, { UserPluginAuth.licenseId }, { LicenseCodes.id })
+                .select(UserPluginAuth.licenseId, LicenseCodes.pluginId)
+                .where { UserPluginAuth.userId eq userId }
+                .toList()
+        } else {
+            UserPluginAuth
+                .innerJoin(LicenseCodes, { UserPluginAuth.licenseId }, { LicenseCodes.id })
+                .select(UserPluginAuth.licenseId, LicenseCodes.pluginId)
+                .where { (UserPluginAuth.userId eq userId) and (LicenseCodes.pluginId notInList excludeList) }
+                .toList()
+        }
             
         val totalCount = userLicenses.size
         val ownedPluginIds = userLicenses.map { it[LicenseCodes.pluginId] }.toSet()
@@ -236,6 +242,15 @@ object UserService {
             
         if (!hasRequiredPlugin && totalCount < 1) {
             return@dbQuery Result.failure(Exception("不满足领取条件，需要拥有至少一个插件的授权码"))
+        }
+            
+        // 检查用户是否已经领取过该插件
+        val alreadyClaimed = UserPluginAuth.selectAll()
+            .where { (UserPluginAuth.userId eq userId) and (UserPluginAuth.pluginId eq targetPluginId) }
+            .count() > 0
+            
+        if (alreadyClaimed) {
+            return@dbQuery Result.failure(Exception("你已经领取过该插件的授权码"))
         }
             
         // 生成一个新的授权码给用户
@@ -253,14 +268,58 @@ object UserService {
             
         // 关联用户和插件
         UserPluginAuth.insert {
-            it[userId] = userId
-            it[pluginId] = targetPluginId
-            it[licenseId] = licenseId
-            it[grantedAt] = now
-            it[grantedBy] = userId  // 自己领取
+            it[UserPluginAuth.userId] = userId
+            it[UserPluginAuth.pluginId] = targetPluginId
+            it[UserPluginAuth.licenseId] = licenseId.value
+            it[UserPluginAuth.grantedAt] = now
+            it[UserPluginAuth.grantedBy] = userId  // 自己领取
         }
             
-        Result.success("成功领取 ${targetPlugin[displayName]} 授权码：$licenseCode")
+        Result.success("成功领取 ${targetPlugin[Plugins.displayName]} 授权码：$licenseCode")
+    }
+    
+    /**
+     * 获取可领取的插件列表
+     */
+    suspend fun getClaimablePlugins(userId: Int): List<Map<String, Any>> = dbQuery {
+        // 获取用户当前拥有的所有授权码
+        val userLicenses = UserPluginAuth
+            .innerJoin(LicenseCodes, { UserPluginAuth.licenseId }, { LicenseCodes.id })
+            .select(UserPluginAuth.licenseId, LicenseCodes.pluginId)
+            .where { UserPluginAuth.userId eq userId }
+            .distinct()
+            .toList()
+        
+        val totalCount = userLicenses.size
+        val ownedPluginIds = userLicenses.map { row -> row[LicenseCodes.pluginId].value }.toSet()
+        
+        // 获取所有插件
+        val allPlugins = Plugins.selectAll().toList()
+        
+        // 获取用户已领取的插件 ID
+        val claimedPluginIds = UserPluginAuth.selectAll()
+            .where { UserPluginAuth.userId eq userId }
+            .map { it[UserPluginAuth.pluginId].value }
+            .toSet()
+        
+        // 过滤出可领取的插件
+        return@dbQuery allPlugins
+            .filter { plugin -> 
+                val pluginId = plugin[Plugins.id].value
+                // 用户还未领取的插件
+                !claimedPluginIds.contains(pluginId)
+            }
+            .map { plugin ->
+                mapOf(
+                    "id" to plugin[Plugins.id].value,
+                    "name" to plugin[Plugins.name],
+                    "displayName" to plugin[Plugins.displayName],
+                    "description" to (plugin[Plugins.description] ?: ""),
+                    "version" to plugin[Plugins.version],
+                    "requiredAuthCount" to 1,  // 简化为需要 1 个授权码
+                    "claimed" to false
+                )
+            }
     }
         
     /**

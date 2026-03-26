@@ -22,7 +22,7 @@ object DatabaseFactory {
         )
         
         transaction {
-            // 创建所有表
+            // 创建所有表（如果不存在）
             SchemaUtils.create(
                 Users,
                 Plugins,
@@ -31,9 +31,14 @@ object DatabaseFactory {
                 UserPluginAuth,
                 AuditLogs,
                 SystemConfig,
-                VerificationCodes
+                VerificationCodes,
+                PluginExchangeConfigs,
+                PluginClaimConfigs
             )
             
+            // 数据库迁移：添加缺失的列
+            migrateDatabase()
+
             // 创建默认管理员账户 (如果不存在)
             createDefaultAdmin()
             // 创建默认配置
@@ -144,4 +149,83 @@ object DatabaseFactory {
     }
     
     fun <T> dbQuery(block: () -> T): T = transaction { block() }
+    
+    /**
+     * 数据库迁移：添加缺失的表和列
+     * 程序更新时会自动检查并创建缺失的数据库结构，防止数据丢失
+     */
+    private fun Transaction.migrateDatabase() {
+        try {
+            println("Checking database migrations...")
+            
+            // 1. 检查并创建缺失的表（SchemaUtils.create 已经处理了 IF NOT EXISTS）
+            // 这里额外确保所有表都存在
+            val requiredTables = listOf(
+                "users", "plugins", "license_codes", "device_bindings",
+                "user_plugin_auth", "audit_logs", "system_config",
+                "verification_codes", "plugin_exchange_configs", "plugin_claim_configs"
+            )
+            
+            requiredTables.forEach { tableName ->
+                if (!checkTableExists(tableName)) {
+                    println("Warning: Table '$tableName' does not exist. It will be created by SchemaUtils.")
+                }
+            }
+            
+            // 2. 检查 plugin_claim_configs 表是否有 exclude_plugin_ids 列
+            if (checkTableExists("plugin_claim_configs")) {
+                val hasExcludeColumn = checkColumnExists("plugin_claim_configs", "exclude_plugin_ids")
+                if (!hasExcludeColumn) {
+                    exec("ALTER TABLE plugin_claim_configs ADD COLUMN exclude_plugin_ids TEXT DEFAULT ''")
+                    println("Database migration: Added exclude_plugin_ids column to plugin_claim_configs table")
+                }
+            }
+            
+            // 3. 检查 user_plugin_auth 表是否有 granted_at 和 granted_by 列
+            if (checkTableExists("user_plugin_auth")) {
+                val hasGrantedAt = checkColumnExists("user_plugin_auth", "granted_at")
+                if (!hasGrantedAt) {
+                    exec("ALTER TABLE user_plugin_auth ADD COLUMN granted_at DATETIME DEFAULT CURRENT_TIMESTAMP")
+                    println("Database migration: Added granted_at column to user_plugin_auth table")
+                }
+                
+                val hasGrantedBy = checkColumnExists("user_plugin_auth", "granted_by")
+                if (!hasGrantedBy) {
+                    exec("ALTER TABLE user_plugin_auth ADD COLUMN granted_by INTEGER REFERENCES users(id)")
+                    println("Database migration: Added granted_by column to user_plugin_auth table")
+                }
+            }
+            
+            println("Database migration check completed.")
+        } catch (e: Exception) {
+            println("Database migration failed: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * 检查表是否存在
+     */
+    private fun Transaction.checkTableExists(tableName: String): Boolean {
+        return try {
+            val result = exec("SELECT name FROM sqlite_master WHERE type='table' AND name='$tableName'") { rs ->
+                rs.next()
+            }
+            result != null
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
+    /**
+     * 检查表中是否存在指定列
+     */
+    private fun Transaction.checkColumnExists(tableName: String, columnName: String): Boolean {
+        return try {
+            exec("SELECT $columnName FROM $tableName LIMIT 1") {}
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }

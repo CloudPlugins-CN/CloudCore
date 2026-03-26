@@ -19,14 +19,14 @@ fun Route.authRoutes() {
             // 验证邮箱格式
             if (!request.email.matches(Regex("^[A-Za-z0-9+_.-]+@(.+)$"))) {
                 call.respond(HttpStatusCode.BadRequest,
-                    ApiResponse<Nothing>(false, "邮箱格式不正确"))
+                    SimpleApiResponse(false, "邮箱格式不正确"))
                 return@post
             }
             
             // 验证类型
             if (request.type !in listOf("REGISTER", "FORGOT_PASSWORD")) {
                 call.respond(HttpStatusCode.BadRequest,
-                    ApiResponse<Nothing>(false, "无效的验证码类型"))
+                    SimpleApiResponse(false, "无效的验证码类型"))
                 return@post
             }
             
@@ -34,7 +34,7 @@ fun Route.authRoutes() {
             if (request.type == "REGISTER") {
                 if (UserService.emailExists(request.email)) {
                     call.respond(HttpStatusCode.Conflict,
-                        ApiResponse<Nothing>(false, "邮箱已被注册"))
+                        SimpleApiResponse(false, "邮箱已被注册"))
                     return@post
                 }
             }
@@ -43,7 +43,7 @@ fun Route.authRoutes() {
             if (request.type == "FORGOT_PASSWORD") {
                 if (!UserService.emailExists(request.email)) {
                     call.respond(HttpStatusCode.NotFound,
-                        ApiResponse<Nothing>(false, "邮箱未注册"))
+                        SimpleApiResponse(false, "邮箱未注册"))
                     return@post
                 }
             }
@@ -51,11 +51,11 @@ fun Route.authRoutes() {
             val result = EmailService.sendVerificationCode(request.email, request.type)
             result.fold(
                 onSuccess = { msg ->
-                    call.respond(ApiResponse<Nothing>(true, msg))
+                    call.respond(SimpleApiResponse(true, msg))
                 },
                 onFailure = { e ->
                     call.respond(HttpStatusCode.InternalServerError,
-                        ApiResponse<Nothing>(false, e.message))
+                        SimpleApiResponse(false, e.message))
                 }
             )
         }
@@ -66,20 +66,20 @@ fun Route.authRoutes() {
             
             if (request.username.length < 3 || request.username.length > 20) {
                 call.respond(HttpStatusCode.BadRequest, 
-                    ApiResponse<Nothing>(false, "用户名长度需要在3-20个字符之间"))
+                    SimpleApiResponse(false, "用户名长度需要在3-20个字符之间"))
                 return@post
             }
             
             if (request.password.length < 6) {
                 call.respond(HttpStatusCode.BadRequest,
-                    ApiResponse<Nothing>(false, "密码长度至少6个字符"))
+                    SimpleApiResponse(false, "密码长度至少6个字符"))
                 return@post
             }
             
             // 验证邮箱格式
             if (!request.email.matches(Regex("^[A-Za-z0-9+_.-]+@(.+)$"))) {
                 call.respond(HttpStatusCode.BadRequest,
-                    ApiResponse<Nothing>(false, "邮箱格式不正确"))
+                    SimpleApiResponse(false, "邮箱格式不正确"))
                 return@post
             }
             
@@ -87,7 +87,7 @@ fun Route.authRoutes() {
             val codeValid = EmailService.verifyCode(request.email, request.verificationCode, "REGISTER")
             if (!codeValid) {
                 call.respond(HttpStatusCode.BadRequest,
-                    ApiResponse<Nothing>(false, "验证码无效或已过期"))
+                    SimpleApiResponse(false, "验证码无效或已过期"))
                 return@post
             }
             
@@ -98,7 +98,7 @@ fun Route.authRoutes() {
                 },
                 onFailure = { e ->
                     call.respond(HttpStatusCode.Conflict,
-                        ApiResponse<Nothing>(false, e.message))
+                        SimpleApiResponse(false, e.message))
                 }
             )
         }
@@ -115,7 +115,7 @@ fun Route.authRoutes() {
                 },
                 onFailure = { e ->
                     // 使用 200 OK 返回错误信息，避免 401 日志
-                    call.respond(ApiResponse<Nothing>(false, e.message ?: "用户名或密码错误"))
+                    call.respond(SimpleApiResponse(false, e.message ?: "用户名或密码错误"))
                 }
             )
         }
@@ -127,13 +127,13 @@ fun Route.authRoutes() {
             // 验证邮箱格式
             if (!request.email.matches(Regex("^[A-Za-z0-9+_.-]+@(.+)$"))) {
                 call.respond(HttpStatusCode.BadRequest,
-                    ApiResponse<Nothing>(false, "邮箱格式不正确"))
+                    SimpleApiResponse(false, "邮箱格式不正确"))
                 return@post
             }
             
             if (request.newPassword.length < 6) {
                 call.respond(HttpStatusCode.BadRequest,
-                    ApiResponse<Nothing>(false, "密码长度至少6个字符"))
+                    SimpleApiResponse(false, "密码长度至少6个字符"))
                 return@post
             }
             
@@ -141,18 +141,18 @@ fun Route.authRoutes() {
             val codeValid = EmailService.verifyCode(request.email, request.verificationCode, "FORGOT_PASSWORD")
             if (!codeValid) {
                 call.respond(HttpStatusCode.BadRequest,
-                    ApiResponse<Nothing>(false, "验证码无效或已过期"))
+                    SimpleApiResponse(false, "验证码无效或已过期"))
                 return@post
             }
             
             val result = UserService.resetPasswordByEmail(request.email, request.newPassword)
             result.fold(
                 onSuccess = {
-                    call.respond(ApiResponse<Nothing>(true, "密码重置成功"))
+                    call.respond(SimpleApiResponse(true, "密码重置成功"))
                 },
                 onFailure = { e ->
                     call.respond(HttpStatusCode.BadRequest,
-                        ApiResponse<Nothing>(false, e.message))
+                        SimpleApiResponse(false, e.message))
                 }
             )
         }

@@ -130,6 +130,74 @@ object EmailService {
     )
     
     /**
+     * 发送领取授权码邮件
+     * @param email 用户邮箱
+     * @param username 用户名
+     * @param license 授权码信息
+     */
+    fun sendClaimLicenseEmail(email: String, username: String, license: LicenseEmailInfo): Result<String> {
+        // 获取SMTP配置
+        val smtpConfig = getSmtpConfig()
+        if (smtpConfig == null) {
+            return Result.failure(Exception("邮件服务未配置"))
+        }
+        
+        try {
+            val subject = "CloudPlugins - 您已成功领取授权码"
+            
+            val bindingsText = if (license.maxBindings == 0) "不限" else "${license.maxBindings}"
+            
+            val content = """
+                <div style="font-family: 'Microsoft YaHei', sans-serif; max-width: 700px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #67c23a; border-bottom: 2px solid #67c23a; padding-bottom: 10px;">CloudPlugins 授权系统</h2>
+                    <p>尊敬的 <strong>$username</strong>，</p>
+                    <p>恭喜您成功领取插件授权码！</p>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
+                        <thead>
+                            <tr style="background: #67c23a; color: white;">
+                                <th style="padding: 12px 15px; text-align: left;">插件</th>
+                                <th style="padding: 12px 15px; text-align: left;">授权码</th>
+                                <th style="padding: 12px 15px; text-align: center;">最大绑定数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">
+                                    <strong>${license.pluginName}</strong> - ${license.displayName}
+                                </td>
+                                <td style="padding: 12px 15px; border-bottom: 1px solid #eee; font-family: monospace; font-size: 14px; color: #67c23a;">
+                                    ${license.licenseCode}
+                                </td>
+                                <td style="padding: 12px 15px; border-bottom: 1px solid #eee; text-align: center;">
+                                    $bindingsText
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <strong>温馨提示：</strong>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>请妥善保管您的授权码，切勿泄露给他人</li>
+                            <li>授权码可在 CloudCore 插件配置文件中使用</li>
+                            <li>如有任何问题，请联系管理员</li>
+                        </ul>
+                    </div>
+                    
+                    <p style="color: #999; font-size: 12px;">此邮件由系统自动发送，请勿回复。</p>
+                </div>
+            """.trimIndent()
+            
+            sendEmail(smtpConfig, email, subject, content)
+            return Result.success("领取授权码邮件已发送")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return Result.failure(Exception("邮件发送失败: ${e.message}"))
+        }
+    }
+    
+    /**
      * 发送授权码邮件
      * @param email 用户邮箱
      * @param username 用户名

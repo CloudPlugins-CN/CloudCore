@@ -88,14 +88,14 @@ fun Route.clientRoutes() {
             val name = call.parameters["name"]
             if (name.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest,
-                    ApiResponse<Nothing>(false, "无效的插件名"))
+                    SimpleApiResponse(false, "无效的插件名"))
                 return@get
             }
             
             val plugin = PluginService.getPluginByName(name)
             if (plugin == null) {
                 call.respond(HttpStatusCode.NotFound,
-                    ApiResponse<Nothing>(false, "插件不存在"))
+                    SimpleApiResponse(false, "插件不存在"))
                 return@get
             }
             

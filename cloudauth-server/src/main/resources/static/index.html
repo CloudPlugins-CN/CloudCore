@@ -126,6 +126,8 @@
                 <small>{{ isAdmin ? (isSuperAdmin ? '超级管理员' : '管理员') : '用户' }}</small>
             </div>
             <div class="menu-item" :class="{active: currentPage==='dashboard'}" @click="currentPage='dashboard'" v-if="isAdmin">📊 仪表盘</div>
+            <div class="menu-item" :class="{active: currentPage==='userdash'}" @click="currentPage='userdash'" v-if="!isAdmin">📊 仪表盘</div>
+            <div class="menu-item" :class="{active: currentPage==='pluginlist'}" @click="currentPage='pluginlist'">📦 插件列表</div>
             <div class="menu-item" :class="{active: currentPage==='plugins'}" @click="currentPage='plugins'" v-if="isAdmin">🔌 插件管理</div>
             <div class="menu-item" :class="{active: currentPage==='licenses'}" @click="currentPage='licenses'" v-if="isAdmin">🔑 授权码管理</div>
             <div class="menu-item" :class="{active: currentPage==='users'}" @click="currentPage='users'" v-if="isAdmin">👥 用户管理</div>
@@ -136,6 +138,33 @@
             <div class="header">
                 <span>欢迎, {{ username }}</span>
                 <button class="btn btn-danger btn-small" @click="logout">退出登录</button>
+            </div>
+
+            <!-- 公开插件列表 -->
+            <div v-if="currentPage==='pluginlist'" class="card">
+                <div class="card-title">可用插件</div>
+                <table>
+                    <thead><tr><th>ID</th><th>插件名</th><th>显示名</th><th>描述</th><th>版本</th></tr></thead>
+                    <tbody>
+                        <tr v-for="p in publicPlugins" :key="p.id">
+                            <td>{{ p.id }}</td>
+                            <td>{{ p.name }}</td>
+                            <td>{{ p.displayName }}</td>
+                            <td>{{ p.description || '-' }}</td>
+                            <td>{{ p.version }}</td>
+                        </tr>
+                        <tr v-if="!publicPlugins.length"><td colspan="5" style="text-align:center;color:#999">暂无数据</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 用户仪表盘 -->
+            <div v-if="currentPage==='userdash' && !isAdmin" class="card">
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-value">{{ userStats.totalLicenses }}</div><div class="stat-label">我的授权</div></div>
+                    <div class="stat-card"><div class="stat-value">{{ userStats.totalPlugins }}</div><div class="stat-label">我的插件</div></div>
+                    <div class="stat-card"><div class="stat-value">{{ userStats.totalBindings }}</div><div class="stat-label">绑定设备</div></div>
+                </div>
             </div>
 
             <div v-if="currentPage==='dashboard' && isAdmin">
@@ -164,6 +193,8 @@
                 <div class="card-title">插件管理</div>
                 <div class="toolbar">
                     <button class="btn btn-primary" @click="showPluginDialog=true">创建插件</button>
+                    <button class="btn btn-warning" @click="showExchangeConfigDialog=true">置换配置</button>
+                    <button class="btn btn-success" @click="showClaimConfigDialog=true;loadClaimConfigs()">领取配置</button>
                     <button class="btn" @click="loadPlugins">刷新</button>
                 </div>
                 <table>
@@ -244,7 +275,11 @@
             <div v-if="currentPage==='myauth'" class="card">
                 <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
                     <span>我的授权</span>
-                    <button class="btn btn-danger btn-small" @click="userUnbindAll" v-if="myPlugins.some(p=>p.bindings.length)">解绑全部设备</button>
+                    <div style="display:flex;gap:10px">
+                        <button class="btn btn-warning btn-small" @click="openUserExchangeDialog">插件置换</button>
+                        <button class="btn btn-success btn-small" @click="showClaimDialog=true;loadClaimablePlugins()">领取插件</button>
+                        <button class="btn btn-danger btn-small" @click="userUnbindAll" v-if="myPlugins.some(p=>p.bindings.length)">解绑全部设备</button>
+                    </div>
                 </div>
                 <table>
                     <thead><tr><th>插件名</th><th>显示名</th><th>版本</th><th>授权码</th><th>过期时间</th><th>绑定设备</th><th>操作</th></tr></thead>
@@ -310,8 +345,15 @@
                 <label>选择插件</label>
                 <select v-model="genForm.pluginId"><option :value="null" disabled>请选择插件</option><option v-for="p in plugins" :key="p.id" :value="p.id">{{ p.displayName }}</option></select>
             </div>
-            <div class="form-group"><label>授权给用户</label>
-                <select v-model="genForm.username"><option :value="null">通用授权码</option><option v-for="u in users" :key="u.id" :value="u.username">{{ u.username }}</option></select>
+            <div class="form-group"><label>授权给用户（可选，留空为通用码）</label>
+                <div style="position:relative">
+                    <input v-model="genForm.username" placeholder="输入用户名筛选或直接选择" @input="onUsernameInput" @focus="onUserSelectFocus" @blur="hideUserSelect">
+                    <div v-if="showUserSelect && filteredUsers.length" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-radius:4px;max-height:200px;overflow-y:auto;z-index:1000;margin-top:2px">
+                        <div v-for="u in filteredUsers" :key="u.id" style="padding:8px 12px;cursor:pointer;transition:all 0.2s" @click="selectUser(u.username)" @mouseover="$event.target.style.background='#f5f7fa'" @mouseout="$event.target.style.background='white'">
+                            {{ u.username }}
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="form-group" v-if="!genForm.username"><label>自定义授权码（可选）</label>
                 <input v-model="genForm.customCode" placeholder="留空则随机生成">
@@ -382,8 +424,8 @@
         <div class="modal">
             <div class="modal-title">修改绑定数量</div>
             <div style="margin-bottom:15px;padding:10px;background:#f5f7fa;border-radius:4px;font-size:13px">
-                <div>授权码: <span class="license-code">{{ bindingForm.code }}</span></div>
-                <div style="margin-top:5px">当前绑定: {{ bindingForm.currentBindings }} 个设备</div>
+                <div>授权码：<span class="license-code">{{ bindingForm.code }}</span></div>
+                <div style="margin-top:5px">当前绑定：{{ bindingForm.currentBindings }} 个设备</div>
             </div>
             <div class="form-group"><label>最大绑定数 (0=不限)</label><input v-model.number="bindingForm.maxBindings" type="number" min="0" max="100"></div>
             <div class="modal-footer">
@@ -392,10 +434,225 @@
             </div>
         </div>
     </div>
+
+    <!-- 新增置换配置弹窗 -->
+    <div v-if="showAddExchangeDialog" class="modal-overlay" @click.self="showAddExchangeDialog=false">
+        <div class="modal">
+            <div class="modal-title">新增插件置换配置</div>
+            <div class="form-group">
+                <label>源插件</label>
+                <select v-model="addExchangeForm.fromPluginId">
+                    <option :value="null" disabled>请选择源插件</option>
+                    <option v-for="p in plugins" :key="p.id" :value="p.id">{{ p.displayName }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>目标插件</label>
+                <select v-model="addExchangeForm.toPluginId">
+                    <option :value="null" disabled>请选择目标插件</option>
+                    <option v-for="p in plugins" :key="p.id" :value="p.id">{{ p.displayName }}</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" @click="showAddExchangeDialog=false">取消</button>
+                <button class="btn btn-primary" @click="doAddExchangeConfig" :disabled="loading||!addExchangeForm.fromPluginId||!addExchangeForm.toPluginId">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 领取配置弹窗（管理员） -->
+    <div v-if="showClaimConfigDialog" class="modal-overlay" @click.self="showClaimConfigDialog=false">
+        <div class="modal" style="width:800px">
+            <div class="modal-title">插件领取配置</div>
+            <div style="margin-bottom:15px">
+                <button class="btn btn-primary btn-small" @click="openAddClaimDialog">新增领取配置</button>
+            </div>
+            <table style="margin-bottom:15px">
+                <thead><tr><th>可领取插件</th><th>领取条件</th><th>排除插件</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+                <tbody>
+                    <tr v-for="config in claimConfigs" :key="config.id">
+                        <td>{{ config.pluginDisplayName }}</td>
+                        <td>
+                            <span v-if="config.requiredPluginId">
+                                拥有 {{ config.requiredPluginDisplayName }}
+                            </span>
+                            <span v-else>
+                                拥有 {{ config.requiredAuthCount }} 个授权码
+                            </span>
+                        </td>
+                        <td>
+                            <span v-if="config.excludePluginIds && config.excludePluginIds.length" style="font-size:12px;color:#666">
+                                排除 {{ config.excludePluginIds.length }} 个插件
+                            </span>
+                            <span v-else style="font-size:12px;color:#999">无</span>
+                        </td>
+                        <td><span :class="['tag', config.enabled?'tag-success':'tag-danger']">{{ config.enabled?'启用':'禁用' }}</span></td>
+                        <td>{{ config.createdAt }}</td>
+                        <td style="white-space:nowrap">
+                            <button class="btn btn-small" @click="toggleClaimConfig(config)">{{ config.enabled?'禁用':'启用' }}</button>
+                            <button class="btn btn-danger btn-small" @click="deleteClaimConfigById(config.id)">删除</button>
+                        </td>
+                    </tr>
+                    <tr v-if="!claimConfigs.length"><td colspan="6" style="text-align:center;color:#999">暂无配置</td></tr>
+                </tbody>
+            </table>
+            <div class="modal-footer">
+                <button class="btn" @click="showClaimConfigDialog=false">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增领取配置弹窗（管理员） -->
+    <div v-if="showAddClaimDialog" class="modal-overlay" @click.self="showAddClaimDialog=false">
+        <div class="modal" style="width:500px">
+            <div class="modal-title">新增领取配置</div>
+            <div class="form-group">
+                <label>可领取的插件</label>
+                <select v-model="addClaimForm.pluginId">
+                    <option :value="null" disabled>请选择插件</option>
+                    <option v-for="p in plugins" :key="p.id" :value="p.id">{{ p.displayName }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>领取条件类型</label>
+                <select v-model="addClaimForm.conditionType">
+                    <option value="authCount">拥有指定数量授权码</option>
+                    <option value="hasPlugin">拥有指定插件</option>
+                </select>
+            </div>
+            <div class="form-group" v-if="addClaimForm.conditionType === 'authCount'">
+                <label>需要授权码数量</label>
+                <input type="number" v-model.number="addClaimForm.requiredAuthCount" min="1" placeholder="例如：1">
+            </div>
+            <div class="form-group" v-if="addClaimForm.conditionType === 'hasPlugin'">
+                <label>需要拥有的插件</label>
+                <select v-model="addClaimForm.requiredPluginId">
+                    <option :value="null" disabled>请选择插件</option>
+                    <option v-for="p in plugins" :key="p.id" :value="p.id">{{ p.displayName }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>排除的插件（这些插件不计入授权码数量）</label>
+                <div style="position:relative">
+                    <input v-model="addClaimForm.excludePluginInput" placeholder="输入插件名筛选或直接选择" @input="onExcludePluginInput" @focus="onExcludePluginFocus" @blur="hideExcludePluginSelect" style="width:100%">
+                    <div v-if="showExcludePluginSelect && filteredExcludePlugins.length" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-radius:4px;max-height:200px;overflow-y:auto;z-index:1000;margin-top:2px">
+                        <div v-for="p in filteredExcludePlugins" :key="p.id" style="padding:8px 12px;cursor:pointer;transition:all 0.2s" @click="addExcludePlugin(p)" @mouseover="$event.target.style.background='#f5f7fa'" @mouseout="$event.target.style.background='white'">
+                            {{ p.displayName }}
+                        </div>
+                    </div>
+                </div>
+                <div v-if="addClaimForm.excludePluginIds.length > 0" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
+                    <span v-for="pid in addClaimForm.excludePluginIds" :key="pid" class="tag tag-info" style="display:flex;align-items:center;gap:5px;">
+                        {{ getPluginName(pid) }}
+                        <span style="cursor:pointer;font-weight:bold;" @click="removeExcludePlugin(pid)">×</span>
+                    </span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" @click="showAddClaimDialog=false">取消</button>
+                <button class="btn btn-primary" @click="doAddClaimConfig" :disabled="loading||!addClaimForm.pluginId||(!addClaimForm.requiredPluginId && addClaimForm.conditionType==='hasPlugin')">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 置换配置弹窗（管理员） -->
+    <div v-if="showExchangeConfigDialog" class="modal-overlay" @click.self="showExchangeConfigDialog=false">
+        <div class="modal" style="width:600px">
+            <div class="modal-title">插件置换配置</div>
+            <div style="margin-bottom:15px">
+                <button class="btn btn-primary btn-small" @click="openAddExchangeDialog">新增置换</button>
+            </div>
+            <table style="margin-bottom:15px">
+                <thead><tr><th>源插件</th><th>目标插件</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+                <tbody>
+                    <tr v-for="config in exchangeConfigs" :key="config.id">
+                        <td>{{ config.fromPluginDisplayName }}</td>
+                        <td>{{ config.toPluginDisplayName }}</td>
+                        <td><span :class="['tag', config.enabled?'tag-success':'tag-danger']">{{ config.enabled?'启用':'禁用' }}</span></td>
+                        <td>{{ config.createdAt }}</td>
+                        <td style="white-space:nowrap">
+                            <button class="btn btn-small" @click="toggleExchangeConfig(config)">{{ config.enabled?'禁用':'启用' }}</button>
+                            <button class="btn btn-danger btn-small" @click="deleteExchangeConfigById(config.id)">删除</button>
+                        </td>
+                    </tr>
+                    <tr v-if="!exchangeConfigs.length"><td colspan="5" style="text-align:center;color:#999">暂无配置</td></tr>
+                </tbody>
+            </table>
+            <div class="modal-footer">
+                <button class="btn" @click="showExchangeConfigDialog=false">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户置换弹窗 -->
+    <div v-if="showUserExchangeDialog" class="modal-overlay" @click.self="showUserExchangeDialog=false">
+        <div class="modal">
+            <div class="modal-title">插件置换</div>
+            <div style="margin-bottom:15px;padding:10px;background:#fffbe6;border:1px solid #ffe58f;border-radius:4px;font-size:13px">
+                <div style="color:#b46a00">⚠️ 置换说明：</div>
+                <div style="color:#666;margin-top:5px;line-height:1.6">• 置换会将您的源插件授权码转换为目标插件授权码</div>
+                <div style="color:#666;line-height:1.6">• 授权码本身不会改变，只会变更所属插件</div>
+                <div style="color:#666;line-height:1.6">• 置换后无法恢复，请谨慎操作</div>
+            </div>
+            <div class="form-group">
+                <label>选择置换方案</label>
+                <select v-model="userExchangeForm.exchangeConfigId">
+                    <option :value="null" disabled>请选择可置换的方案</option>
+                    <option v-for="config in availableExchangeConfigs" :key="config.id" :value="config.id">
+                        {{ config.fromPluginDisplayName }} → {{ config.toPluginDisplayName }}
+                    </option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" @click="showUserExchangeDialog=false">取消</button>
+                <button class="btn btn-warning" @click="doUserExchange" :disabled="loading||!userExchangeForm.exchangeConfigId">执行置换</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 插件领取弹窗 -->
+    <div v-if="showClaimDialog" class="modal-overlay" @click.self="showClaimDialog=false">
+        <div class="modal">
+            <div class="modal-title">领取插件</div>
+            <div style="margin-bottom:15px;padding:10px;background:#f0f9eb;border:1px solid #c2e7b0;border-radius:4px;font-size:13px">
+                <div style="color:#529b2e">📦 可领取的插件</div>
+                <div style="color:#666;margin-top:5px;line-height:1.6">• 满足条件的插件可以免费领取</div>
+                <div style="color:#666;line-height:1.6">• 每个插件只能领取一次</div>
+            </div>
+            <table style="margin-bottom:15px">
+                <thead><tr><th>插件名</th><th>显示名</th><th>描述</th><th>领取条件</th><th>操作</th></tr></thead>
+                <tbody>
+                    <tr v-for="plugin in claimablePlugins" :key="plugin.id">
+                        <td>{{ plugin.name }}</td>
+                        <td>{{ plugin.displayName }}</td>
+                        <td>{{ plugin.description || '-' }}</td>
+                        <td>
+                            <span v-if="plugin.requiredPluginId" style="font-size:12px;color:#666">
+                                拥有 {{ plugin.requiredPluginName }}
+                            </span>
+                            <span v-else-if="plugin.requiredAuthCount>0" style="font-size:12px;color:#666">
+                                拥有 {{ plugin.requiredAuthCount }} 个授权码
+                            </span>
+                            <span v-else style="font-size:12px;color:#999">无门槛</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-success btn-small" @click="claimPlugin(plugin.configId)" :disabled="!plugin.canClaim">
+                                {{ plugin.canClaim ? '领取' : '未满足条件' }}
+                            </button>
+                        </td>
+                    </tr>
+                    <tr v-if="!claimablePlugins.length"><td colspan="5" style="text-align:center;color:#999">暂无可领取插件</td></tr>
+                </tbody>
+            </table>
+            <div class="modal-footer">
+                <button class="btn" @click="showClaimDialog=false">关闭</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-const { createApp, ref, onMounted } = Vue;
+const { createApp, ref, onMounted, nextTick } = Vue;
 createApp({
     setup() {
         const isLoggedIn = ref(false), isAdmin = ref(false), isSuperAdmin = ref(false), username = ref(''), token = ref(''), loading = ref(false);
@@ -411,6 +668,28 @@ createApp({
         const stats = ref({totalUsers:0,totalPlugins:0,totalLicenses:0,activeLicenses:0,unbindCooldownHours:24});
         const cooldownHours = ref(24);
         const plugins = ref([]), licenses = ref([]), users = ref([]), myPlugins = ref([]);
+        // 新增功能相关变量
+        const publicPlugins = ref([]); // 公开插件列表
+        const userStats = ref({totalLicenses:0,totalPlugins:0,totalBindings:0}); // 用户仪表盘统计
+        const exchangeConfigs = ref([]); // 置换配置列表（管理员）
+        const availableExchangeConfigs = ref([]); // 可用置换配置（用户）
+        const claimablePlugins = ref([]); // 可领取插件
+        const userExchangeForm = ref({exchangeConfigId:null}); // 用户置换表单
+        const showExchangeConfigDialog = ref(false); // 显示置换配置弹窗
+        const showUserExchangeDialog = ref(false); // 显示用户置换弹窗
+        const showClaimDialog = ref(false); // 显示领取弹窗
+        const showUserSelect = ref(false); // 显示用户选择下拉框
+        const filteredUsers = ref([]); // 过滤后的用户列表
+        // 新增置换配置对话框
+        const showAddExchangeDialog = ref(false);
+        const addExchangeForm = ref({fromPluginId:null,toPluginId:null});
+        // 领取配置相关变量
+        const showClaimConfigDialog = ref(false);
+        const showAddClaimDialog = ref(false);
+        const claimConfigs = ref([]);
+        const addClaimForm = ref({pluginId:null,conditionType:'authCount',requiredAuthCount:1,requiredPluginId:null,excludePluginIds:[],excludePluginInput:''});
+        const showExcludePluginSelect = ref(false);
+        const filteredExcludePlugins = ref([]);
 
         const showMsg = (text, type='success') => { msg.value = {text,type}; setTimeout(()=>msg.value=null, 3000); };
         const api = axios.create({baseURL:'/api'});
@@ -474,16 +753,74 @@ createApp({
         };
 
         const logout = () => { isLoggedIn.value = false; token.value = ''; localStorage.clear(); };
-        const loadData = () => { if(isAdmin.value){loadStats();loadPlugins();loadLicenses();loadUsers();} loadMyAuth(); };
+        const loadData = () => { if(isAdmin.value){loadStats();loadPlugins();loadLicenses();loadUsers();loadExchangeConfigs();} loadMyAuth(); };
         const loadStats = async () => { try { const r = await api.get('/admin/stats'); if(r.data.success){ stats.value = r.data.data; cooldownHours.value = r.data.data.unbindCooldownHours || 24; } } catch(e){} };
-        const loadPlugins = async () => { try { const r = await api.get('/admin/plugins'); if(r.data.success) plugins.value = r.data.data; } catch(e){} };
+        const loadPlugins = async () => {
+            try {
+                const r = await api.get('/admin/plugins');
+                if(r.data.success) {
+                    plugins.value = r.data.data || [];
+                    console.log('插件列表已加载:', plugins.value.length, '个插件');
+                }
+            } catch(e){
+                console.error('加载插件列表失败:', e);
+            }
+        };
         const loadLicenses = async () => { try { const r = await api.get('/admin/licenses'); if(r.data.success) licenses.value = r.data.data; } catch(e){} };
         const loadUsers = async () => { try { const r = await api.get('/admin/users'); if(r.data.success) users.value = r.data.data; } catch(e){} };
         const loadMyAuth = async () => { try { const r = await api.get('/user/auth'); if(r.data.success) myPlugins.value = r.data.data.plugins; } catch(e){} };
+        // 新增功能的数据加载方法
+        const loadPublicPlugins = async () => { try { const r = await api.get('/public/plugins'); if(r.data.success) publicPlugins.value = r.data.data; } catch(e){} };
+        const loadUserStats = async () => { try { const r = await api.get('/user/dashboard'); if(r.data.success) userStats.value = r.data.data; } catch(e){} };
+        const loadExchangeConfigs = async () => { try { const r = await api.get('/admin/exchange-configs'); if(r.data.success) exchangeConfigs.value = r.data.data; } catch(e){} };
+        const loadAvailableExchangeConfigs = async () => {
+            try {
+                const r = await api.get('/user/exchange-configs');
+                console.log('加载置换配置:', r.data);
+                if(r.data.success) {
+                    availableExchangeConfigs.value = r.data.data || [];
+                    console.log('可用置换配置:', availableExchangeConfigs.value);
+                }
+            } catch(e){
+                console.error('加载置换配置失败:', e);
+            }
+        };
+        const loadClaimablePlugins = async () => {
+            try {
+                console.log('开始加载可领取插件...');
+                const r = await api.get('/user/claimable-plugins');
+                console.log('可领取插件接口返回:', r.data);
+                if(r.data.success) {
+                    claimablePlugins.value = r.data.data || [];
+                    console.log('可领取插件已加载:', claimablePlugins.value.length, '个');
+                } else {
+                    console.error('加载可领取插件失败:', r.data.message);
+                }
+            } catch(e) {
+                console.error('加载可领取插件异常:', e);
+            }
+        };
+        const loadClaimConfigs = async () => { try { const r = await api.get('/admin/claim-configs'); if(r.data.success) claimConfigs.value = r.data.data; } catch(e){} };
 
         const createPlugin = async () => {
             loading.value = true;
-            try { const r = await api.post('/admin/plugins', pluginForm.value); if(r.data.success){showMsg('创建成功');showPluginDialog.value=false;loadPlugins();loadStats();pluginForm.value={displayName:''};} }
+            try {
+                const r = await api.post('/admin/plugins', pluginForm.value);
+                if(r.data.success){
+                    showMsg('创建成功');
+                    showPluginDialog.value=false;
+                    pluginForm.value={displayName:''};
+                    // 强制刷新插件列表（管理员）
+                    plugins.value = [];
+                    await nextTick();
+                    await loadPlugins();
+                    // 同时刷新公开插件列表
+                    await loadPublicPlugins();
+                    await loadStats();
+                    console.log('创建后插件列表:', plugins.value);
+                    console.log('创建后公开插件列表:', publicPlugins.value);
+                }
+            }
             catch(e){showMsg(e.response?.data?.message||'创建失败','error');}
             loading.value = false;
         };
@@ -569,23 +906,226 @@ createApp({
             catch(e){showMsg(e.response?.data?.message||'解绑失败','error');}
         };
         const userUnbindAll = async () => {
-            if(!confirm('确定解绑所有设备? 解绑后会触发冷却时间，影响后续单独解绑!')) return;
+            if(!confirm('确定解绑所有设备？解绑后会触发冷却时间，影响后续单独解绑!')) return;
             try { const r = await api.post('/user/unbind-all'); if(r.data.success){showMsg(r.data.message);loadMyAuth();} else{showMsg(r.data.message,'error');} }
             catch(e){showMsg(e.response?.data?.message||'解绑失败','error');}
         };
         const verifyToken = async () => { try { const r = await api.get('/user/verify'); if(!r.data.success){logout();showMsg('登录已失效','error');} } catch(e){logout();} };
 
+        // 新增功能的方法
+        const openAddExchangeDialog = () => {
+            if(plugins.value.length < 2) { showMsg('至少需要两个插件才能配置置换', 'error'); return; }
+            addExchangeForm.value = {fromPluginId:null,toPluginId:null};
+            showExchangeConfigDialog.value = false;  // 关闭置换配置弹窗
+            showAddExchangeDialog.value = true;
+        };
+        const openAddClaimDialog = () => {
+            if(plugins.value.length < 1) { showMsg('至少需要一个插件才能配置领取', 'error'); return; }
+            addClaimForm.value = {pluginId:null,conditionType:'authCount',requiredAuthCount:1,requiredPluginId:null,excludePluginIds:[],excludePluginInput:''};
+            showClaimConfigDialog.value = false;  // 关闭领取配置弹窗
+            showAddClaimDialog.value = true;
+        };
+        const getPluginName = (pid) => {
+            const p = plugins.value.find(p => p.id === pid);
+            return p ? p.displayName : `插件#${pid}`;
+        };
+        const onExcludePluginFocus = () => {
+            const input = addClaimForm.value.excludePluginInput || '';
+            if(input) {
+                filteredExcludePlugins.value = plugins.value.filter(p => 
+                    p.displayName.toLowerCase().includes(input.toLowerCase()) &&
+                    !addClaimForm.value.excludePluginIds.includes(p.id) &&
+                    p.id !== addClaimForm.value.pluginId
+                );
+            } else {
+                filteredExcludePlugins.value = plugins.value.filter(p => 
+                    !addClaimForm.value.excludePluginIds.includes(p.id) &&
+                    p.id !== addClaimForm.value.pluginId
+                );
+            }
+            showExcludePluginSelect.value = true;
+        };
+        const onExcludePluginInput = () => {
+            const input = addClaimForm.value.excludePluginInput || '';
+            if(input) {
+                filteredExcludePlugins.value = plugins.value.filter(p => 
+                    p.displayName.toLowerCase().includes(input.toLowerCase()) &&
+                    !addClaimForm.value.excludePluginIds.includes(p.id) &&
+                    p.id !== addClaimForm.value.pluginId
+                );
+            } else {
+                filteredExcludePlugins.value = plugins.value.filter(p => 
+                    !addClaimForm.value.excludePluginIds.includes(p.id) &&
+                    p.id !== addClaimForm.value.pluginId
+                );
+            }
+            showExcludePluginSelect.value = true;
+        };
+        const addExcludePlugin = (p) => {
+            if(!addClaimForm.value.excludePluginIds.includes(p.id)) {
+                addClaimForm.value.excludePluginIds.push(p.id);
+            }
+            addClaimForm.value.excludePluginInput = '';
+            showExcludePluginSelect.value = false;
+        };
+        const removeExcludePlugin = (pid) => {
+            const idx = addClaimForm.value.excludePluginIds.indexOf(pid);
+            if(idx > -1) {
+                addClaimForm.value.excludePluginIds.splice(idx, 1);
+            }
+        };
+        const hideExcludePluginSelect = () => { setTimeout(() => { showExcludePluginSelect.value = false; }, 200); };
+        const doAddClaimConfig = async () => {
+            if(!addClaimForm.value.pluginId) {
+                showMsg('请选择可领取的插件', 'error'); return;
+            }
+            if(addClaimForm.value.conditionType === 'hasPlugin' && !addClaimForm.value.requiredPluginId) {
+                showMsg('请选择需要拥有的插件', 'error'); return;
+            }
+            loading.value = true;
+            try {
+                const request = {
+                    pluginId: addClaimForm.value.pluginId,
+                    requiredAuthCount: addClaimForm.value.conditionType === 'authCount' ? addClaimForm.value.requiredAuthCount : 1,
+                    requiredPluginId: addClaimForm.value.conditionType === 'hasPlugin' ? addClaimForm.value.requiredPluginId : null,
+                    excludePluginIds: addClaimForm.value.excludePluginIds || [],
+                    enabled: true
+                };
+                const r = await api.post('/admin/claim-configs', request);
+                if(r.data.success) {
+                    showMsg('领取配置创建成功');
+                    showAddClaimDialog.value = false;
+                    addClaimForm.value = {pluginId:null,conditionType:'authCount',requiredAuthCount:1,requiredPluginId:null,excludePluginIds:[],excludePluginInput:''};
+                    await loadClaimConfigs();
+                    showClaimConfigDialog.value = true;  // 重新打开领取配置弹窗
+                }
+                else { showMsg(r.data.message, 'error'); }
+            } catch(e) { showMsg(e.response?.data?.message || '创建失败', 'error'); }
+            loading.value = false;
+        };
+        const toggleClaimConfig = async (config) => {
+            loading.value = true;
+            try {
+                const r = await api.put(`/admin/claim-configs/${config.id}/toggle?enabled=${!config.enabled}`);
+                if(r.data.success) { showMsg(r.data.message); loadClaimConfigs(); }
+                else { showMsg(r.data.message, 'error'); }
+            } catch(e) { showMsg(e.response?.data?.message || '操作失败', 'error'); }
+            loading.value = false;
+        };
+        const deleteClaimConfigById = async (id) => {
+            if(!confirm('确定删除此领取配置？')) return;
+            try { const r = await api.delete(`/admin/claim-configs/${id}`); if(r.data.success){showMsg('删除成功');loadClaimConfigs();} else{showMsg(r.data.message,'error');} }
+            catch(e){showMsg(e.response?.data?.message||'删除失败','error');}
+        };
+        const doAddExchangeConfig = async () => {
+            if(!addExchangeForm.value.fromPluginId || !addExchangeForm.value.toPluginId) {
+                showMsg('请选择源插件和目标插件', 'error'); return;
+            }
+            if(addExchangeForm.value.fromPluginId === addExchangeForm.value.toPluginId) {
+                showMsg('源插件和目标插件不能相同', 'error'); return;
+            }
+            loading.value = true;
+            try {
+                const r = await api.post('/admin/exchange-configs', {
+                    fromPluginId: addExchangeForm.value.fromPluginId,
+                    toPluginId: addExchangeForm.value.toPluginId,
+                    enabled: true
+                });
+                if(r.data.success) {
+                    showMsg('置换配置创建成功');
+                    showAddExchangeDialog.value = false;
+                    addExchangeForm.value = {fromPluginId:null,toPluginId:null};
+                    await loadExchangeConfigs();
+                    showExchangeConfigDialog.value = true;  // 重新打开置换配置弹窗
+                }
+                else { showMsg(r.data.message, 'error'); }
+            } catch(e) { showMsg(e.response?.data?.message || '创建失败', 'error'); }
+            loading.value = false;
+        };
+        const toggleExchangeConfig = async (config) => {
+            loading.value = true;
+            try {
+                const r = await api.put(`/admin/exchange-configs/${config.id}/toggle?enabled=${!config.enabled}`);
+                if(r.data.success) { showMsg(r.data.message); loadExchangeConfigs(); }
+                else { showMsg(r.data.message, 'error'); }
+            } catch(e) { showMsg(e.response?.data?.message || '操作失败', 'error'); }
+            loading.value = false;
+        };
+        const deleteExchangeConfigById = async (id) => {
+            if(!confirm('确定删除此置换配置？')) return;
+            try { const r = await api.delete(`/admin/exchange-configs/${id}`); if(r.data.success){showMsg('删除成功');loadExchangeConfigs();} else{showMsg(r.data.message,'error');} }
+            catch(e){showMsg(e.response?.data?.message||'删除失败','error');}
+        };
+        const openUserExchangeDialog = async () => {
+            userExchangeForm.value = {exchangeConfigId:null};
+            await loadAvailableExchangeConfigs();
+            showUserExchangeDialog.value = true;
+        };
+        const doUserExchange = async () => {
+            if(!userExchangeForm.value.exchangeConfigId) { showMsg('请选择置换方案', 'error'); return; }
+            loading.value = true;
+            try {
+                const r = await api.post('/user/exchange', { exchangeConfigId: userExchangeForm.value.exchangeConfigId });
+                if(r.data.success) { showMsg(r.data.message); showUserExchangeDialog.value = false; loadMyAuth(); userExchangeForm.value = {exchangeConfigId:null}; }
+                else { showMsg(r.data.message, 'error'); }
+            } catch(e) { showMsg(e.response?.data?.message || '置换失败', 'error'); }
+            loading.value = false;
+        };
+        const claimPlugin = async (configId) => {
+            if(!configId) { showMsg('无效的领取配置', 'error'); return; }
+            loading.value = true;
+            try {
+                const r = await api.post('/user/claim', { configId });
+                if(r.data.success) { showMsg(r.data.message); loadClaimablePlugins(); loadMyAuth(); }
+                else { showMsg(r.data.message, 'error'); }
+            } catch(e) { showMsg(e.response?.data?.message || '领取失败', 'error'); }
+            loading.value = false;
+        };
+        const onUserSelectFocus = () => {
+            // 获得焦点时显示所有用户
+            const input = genForm.value.username || '';
+            if(input) {
+                filteredUsers.value = users.value.filter(u => u.username.toLowerCase().includes(input.toLowerCase()));
+            } else {
+                filteredUsers.value = users.value;
+            }
+            showUserSelect.value = true;
+        };
+        const onUsernameInput = () => {
+            const input = genForm.value.username || '';
+            // 输入时实时过滤
+            if(input) {
+                filteredUsers.value = users.value.filter(u => u.username.toLowerCase().includes(input.toLowerCase()));
+            } else {
+                filteredUsers.value = users.value;
+            }
+            showUserSelect.value = true;
+        };
+        const selectUser = (username) => {
+            genForm.value.username = username;
+            showUserSelect.value = false;
+        };
+        const hideUserSelect = () => { setTimeout(() => { showUserSelect.value = false; }, 200); };
+
         onMounted(() => {
             const t = localStorage.getItem('token');
             if(t){ token.value=t; username.value=localStorage.getItem('username')||''; isAdmin.value=localStorage.getItem('isAdmin')==='true'; isSuperAdmin.value=localStorage.getItem('isSuperAdmin')==='true'; isLoggedIn.value=true; currentPage.value=isAdmin.value?'dashboard':'myauth'; verifyToken(); loadData(); }
+            // 加载公开插件列表（无需登录）
+            loadPublicPlugins();
         });
 
         return { isLoggedIn,isAdmin,isSuperAdmin,username,loading,authTab,currentPage,msg,loginForm,registerForm,forgotForm,regCodeCooldown,forgotCodeCooldown,
             pluginForm,editForm,genForm,pwdForm,bindingForm,showPluginDialog,showEditDialog,showGenDialog,showUploadDialog,showPwdDialog,codesDialog,showBindingDialog,
             uploadPlugin,selectedFile,uploading,generatedCodes,stats,plugins,licenses,users,myPlugins,cooldownHours,
+            publicPlugins,userStats,exchangeConfigs,availableExchangeConfigs,claimablePlugins,userExchangeForm,
+            showExchangeConfigDialog,showUserExchangeDialog,showClaimDialog,showUserSelect,filteredUsers,
+            showAddExchangeDialog,addExchangeForm,openAddExchangeDialog,doAddExchangeConfig,
+            showClaimConfigDialog,showAddClaimDialog,claimConfigs,addClaimForm,openAddClaimDialog,doAddClaimConfig,toggleClaimConfig,deleteClaimConfigById,loadClaimConfigs,loadClaimablePlugins,
+            showExcludePluginSelect,filteredExcludePlugins,onExcludePluginFocus,onExcludePluginInput,addExcludePlugin,removeExcludePlugin,hideExcludePluginSelect,getPluginName,
             login,register,resetPassword,sendRegisterCode,sendForgotCode,logout,loadPlugins,loadLicenses,createPlugin,editPlugin,updatePlugin,deletePlugin,
             openUpload,onFileChange,onDrop,formatSize,doUpload,generateLicenses,toggleLicense,deleteLicense,openBindingEdit,updateBindings,openPwd,changePwd,saveCooldown,
-            userUnbind,userUnbindAll,adminUnbindUser,adminUnbindAll,deleteUserLicenses,toggleBan,toggleAdmin,deleteUser };
+            userUnbind,userUnbindAll,adminUnbindUser,adminUnbindAll,deleteUserLicenses,toggleBan,toggleAdmin,deleteUser,
+            toggleExchangeConfig,deleteExchangeConfigById,openUserExchangeDialog,doUserExchange,claimPlugin,onUsernameInput,onUserSelectFocus,selectUser,hideUserSelect };
     }
 }).mount('#app');
 </script>
