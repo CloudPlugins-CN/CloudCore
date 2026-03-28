@@ -18,7 +18,7 @@ CloudCore/
 - 语言：Kotlin
 - Web框架：Ktor 3.0
 - 数据库：SQLite + Exposed ORM
-- 前端：Vue 3 (单页面应用)
+- 前端：Vue 3
 - 邮件：Jakarta Mail
 
 **功能：**
