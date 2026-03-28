@@ -380,6 +380,435 @@
         .link:hover {
             text-decoration: underline;
         }
+
+        /* 菜单容器 */
+        .menu {
+            display: block;
+        }
+
+        /* 桌面端/移动端显示控制 */
+        .desktop-only {
+            display: table-cell;
+        }
+
+        .mobile-only {
+            display: none;
+        }
+
+        /* 汉堡菜单按钮默认隐藏 */
+        .hamburger-btn,
+        .mobile-header,
+        .sidebar-overlay,
+        .mobile-logout {
+            display: none;
+        }
+
+        /* ==================== 移动端适配 ==================== */
+        @media (max-width: 768px) {
+            /* 登录框适配 */
+            .login-box {
+                width: 90%;
+                padding: 30px 20px;
+                margin: 20px;
+            }
+
+            .login-title {
+                font-size: 20px;
+            }
+
+            /* 侧边栏改为汉堡菜单 */
+            .main-container {
+                flex-direction: column;
+                position: relative;
+            }
+
+            .sidebar {
+                width: 180px;
+                position: fixed;
+                top: 0;
+                left: -180px;
+                height: 100vh;
+                z-index: 1000;
+                transition: left 0.3s ease;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 999;
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            .sidebar-header {
+                display: block;
+                padding: 15px;
+            }
+
+            .sidebar-header h2 {
+                font-size: 16px;
+            }
+
+            .menu {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                overflow-y: auto;
+            }
+
+            .menu-item {
+                padding: 18px 20px;
+                font-size: 15px;
+                border-bottom: 1px solid #3a4a5e;
+                white-space: nowrap;
+            }
+
+            .menu-item:hover, .menu-item.active {
+                background: #409EFF;
+            }
+
+            /* 移动端退出登录样式 */
+            .mobile-logout {
+                display: block;
+                margin-top: auto;
+                border-top: 2px solid #3a4a5e;
+                color: #f56c6c;
+                font-weight: bold;
+            }
+
+            /* 汉堡菜单按钮 */
+            .hamburger-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+                background: transparent;
+                color: #304156;
+                border: none;
+                font-size: 22px;
+                cursor: pointer;
+                margin-right: 10px;
+                padding: 0;
+            }
+
+            .mobile-header {
+                display: flex;
+                align-items: center;
+                padding: 10px 15px;
+                background: white;
+                margin: -10px -10px 15px -10px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .mobile-header-title {
+                font-size: 16px;
+                font-weight: bold;
+                flex: 1;
+            }
+
+            /* 主内容区域 */
+            .main-content {
+                padding: 10px;
+                overflow-x: hidden;
+            }
+
+            .header {
+                display: none;
+            }
+
+            .header {
+                padding: 12px 15px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .header h1 {
+                font-size: 16px;
+            }
+
+            /* 统计卡片改为2列 */
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 15px 10px;
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+
+            .stat-label {
+                font-size: 12px;
+            }
+
+            /* 卡片样式 */
+            .card {
+                padding: 15px;
+                overflow-x: hidden;
+            }
+
+            .card-title {
+                font-size: 15px;
+                margin-bottom: 12px;
+            }
+
+            /* 工具栏 */
+            .toolbar {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .toolbar .btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            /* 桌面端/移动端显示控制 */
+            .desktop-only {
+                display: none !important;
+            }
+
+            .mobile-only {
+                display: table-cell !important;
+            }
+
+            /* 表格改为卡片式 */
+            table {
+                display: block;
+                font-size: 13px;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tbody {
+                display: block;
+            }
+
+            tr {
+                display: block;
+                background: white;
+                border: 1px solid #ebeef5;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                padding: 12px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+
+            td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 0;
+                border: none;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            td:last-child {
+                border-bottom: none;
+                padding-top: 12px;
+                margin-top: 8px;
+                border-top: 1px dashed #ddd;
+                justify-content: flex-end;
+                gap: 8px;
+            }
+
+            /* 点击展开更多内容 */
+            .mobile-summary {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                cursor: pointer;
+            }
+
+            .mobile-detail {
+                display: none;
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px dashed #ddd;
+            }
+
+            .mobile-detail.show {
+                display: block;
+            }
+
+            .mobile-detail-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 6px 0;
+                font-size: 12px;
+            }
+
+            .mobile-detail-label {
+                color: #666;
+            }
+
+            .mobile-detail-value {
+                color: #333;
+                text-align: right;
+            }
+
+            .expand-icon {
+                color: #999;
+                font-size: 12px;
+                transition: transform 0.3s;
+            }
+
+            .expand-icon.rotated {
+                transform: rotate(180deg);
+            }
+
+            /* 按钮组 */
+            .btn-small {
+                padding: 6px 12px;
+                font-size: 12px;
+                margin: 0;
+            }
+
+            /* 弹窗适配 */
+            .modal {
+                width: 95%;
+                padding: 15px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .modal-title {
+                font-size: 16px;
+                margin-bottom: 15px;
+            }
+
+            .form-group {
+                margin-bottom: 12px;
+            }
+
+            .form-group label {
+                font-size: 13px;
+            }
+
+            .form-group input,
+            .form-group select {
+                padding: 10px 12px;
+                font-size: 16px; /* 防止iOS缩放 */
+            }
+
+            .modal-footer {
+                margin-top: 15px;
+            }
+
+            .modal-footer .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            /* 标签 */
+            .tag {
+                padding: 3px 8px;
+                font-size: 12px;
+            }
+
+            /* 消息提示 */
+            .msg {
+                width: 90%;
+                text-align: center;
+                padding: 12px 20px;
+                font-size: 14px;
+                top: 10px;
+            }
+
+            /* 上传区域 */
+            .upload-area {
+                padding: 30px 15px !important;
+            }
+
+            /* 输入框组 */
+            .input-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .input-group button {
+                width: 100%;
+            }
+
+            /* 标签页 */
+            .tabs {
+                margin-bottom: 15px;
+            }
+
+            .tab {
+                padding: 10px 15px;
+                font-size: 14px;
+                flex: 1;
+                text-align: center;
+            }
+
+            /* 用户仪表盘 */
+            .user-dashboard {
+                padding: 15px;
+            }
+
+            .user-dashboard h2 {
+                font-size: 18px;
+            }
+
+            .user-dashboard p {
+                font-size: 13px;
+            }
+
+            /* 授权码样式 */
+            .license-code {
+                font-size: 11px;
+                word-break: break-all;
+            }
+        }
+
+        /* 超小屏幕适配 */
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .menu-item {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 6px 4px;
+                font-size: 11px;
+            }
+
+            .btn-small {
+                padding: 3px 6px;
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .menu {
+                display: flex;
+            }
+        }
     </style>
 </head>
 <body>
@@ -453,34 +882,50 @@
     </div>
 
     <div v-else class="main-container">
-        <div class="sidebar">
+        <!-- 移动端遮罩层 -->
+        <div class="sidebar-overlay" :class="{show: mobileMenuOpen}" @click="mobileMenuOpen = false"></div>
+        
+        <!-- 侧边栏 -->
+        <div class="sidebar" :class="{open: mobileMenuOpen}">
             <div class="sidebar-header">
                 <h2>CloudPlugins</h2>
                 <small>{{ isAdmin ? (isSuperAdmin ? '超级管理员' : '管理员') : '用户' }}</small>
             </div>
-            <div class="menu-item" :class="{active: currentPage==='dashboard'}" @click="currentPage='dashboard'"
-                 v-if="isAdmin">📊 仪表盘
-            </div>
-            <div class="menu-item" :class="{active: currentPage==='userdash'}" @click="currentPage='userdash'"
-                 v-if="!isAdmin">📊 仪表盘
-            </div>
-            <div class="menu-item" :class="{active: currentPage==='pluginlist'}" @click="currentPage='pluginlist'">📦
-                插件列表
-            </div>
-            <div class="menu-item" :class="{active: currentPage==='plugins'}" @click="currentPage='plugins'"
-                 v-if="isAdmin">🔌 插件管理
-            </div>
-            <div class="menu-item" :class="{active: currentPage==='licenses'}" @click="currentPage='licenses'"
-                 v-if="isAdmin">🔑 授权码管理
-            </div>
-            <div class="menu-item" :class="{active: currentPage==='users'}" @click="currentPage='users'" v-if="isAdmin">
-                👥 用户管理
-            </div>
-            <div class="menu-item" :class="{active: currentPage==='myauth'}" @click="currentPage='myauth'">📋 我的授权
+            <div class="menu">
+                <div class="menu-item" :class="{active: currentPage==='dashboard'}" @click="currentPage='dashboard'; mobileMenuOpen = false"
+                     v-if="isAdmin">📊 仪表盘
+                </div>
+                <div class="menu-item" :class="{active: currentPage==='userdash'}" @click="currentPage='userdash'; mobileMenuOpen = false"
+                     v-if="!isAdmin">📊 仪表盘
+                </div>
+                <div class="menu-item" :class="{active: currentPage==='pluginlist'}" @click="currentPage='pluginlist'; mobileMenuOpen = false">📦
+                    插件列表
+                </div>
+                <div class="menu-item" :class="{active: currentPage==='plugins'}" @click="currentPage='plugins'; mobileMenuOpen = false"
+                     v-if="isAdmin">🔌 插件管理
+                </div>
+                <div class="menu-item" :class="{active: currentPage==='licenses'}" @click="currentPage='licenses'; mobileMenuOpen = false"
+                     v-if="isAdmin">🔑 授权码管理
+                </div>
+                <div class="menu-item" :class="{active: currentPage==='users'}" @click="currentPage='users'; mobileMenuOpen = false" v-if="isAdmin">
+                    👥 用户管理
+                </div>
+                <div class="menu-item" :class="{active: currentPage==='myauth'}" @click="currentPage='myauth'; mobileMenuOpen = false">📋 我的授权
+                </div>
+                <!-- 移动端退出登录 -->
+                <div class="menu-item mobile-logout" @click="logout">🚪 退出登录</div>
             </div>
         </div>
 
         <div class="main-content">
+            <!-- 移动端顶部标题栏 -->
+            <div class="mobile-header">
+                <button class="hamburger-btn" @click="mobileMenuOpen = true">☰</button>
+                <span class="mobile-header-title">{{ pageTitle }}</span>
+                <span style="color:#666;font-size:13px;">{{ username }}</span>
+            </div>
+            
+            <!-- 桌面端头部 -->
             <div class="header">
                 <span>欢迎, {{ username }}</span>
                 <button class="btn btn-danger btn-small" @click="logout">退出登录</button>
@@ -502,17 +947,35 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="p in publicPlugins" :key="p.id">
-                        <td>{{ p.id }}</td>
-                        <td>{{ p.name }}</td>
-                        <td>{{ p.displayName }}</td>
-                        <td>{{ p.author || '-' }}</td>
-                        <td>{{ parseFloat(p.price) > 0 ? '¥' + p.price : '免费' }}</td>
-                        <td>{{ p.description || '-' }}</td>
-                        <td>{{ p.version }}</td>
+                    <tr v-for="p in publicPlugins" :key="p.id" :class="{'mobile-expanded': p._expanded}">
+                        <!-- 桌面端 -->
+                        <td class="desktop-only">{{ p.id }}</td>
+                        <td class="desktop-only">{{ p.name }}</td>
+                        <td class="desktop-only">{{ p.displayName }}</td>
+                        <td class="desktop-only">{{ p.author || '-' }}</td>
+                        <td class="desktop-only">{{ parseFloat(p.price) > 0 ? '¥' + p.price : '免费' }}</td>
+                        <td class="desktop-only">{{ p.description || '-' }}</td>
+                        <td class="desktop-only">{{ p.version }}</td>
+                        <!-- 移动端 -->
+                        <td class="mobile-only" colspan="7" style="padding:0;border:none;">
+                            <div class="mobile-summary" @click="p._expanded = !p._expanded">
+                                <div>
+                                    <strong>{{ p.displayName }}</strong>
+                                    <span style="color:#409EFF;margin-left:8px">{{ parseFloat(p.price) > 0 ? '¥' + p.price : '免费' }}</span>
+                                </div>
+                                <span class="expand-icon" :class="{rotated: p._expanded}">▼</span>
+                            </div>
+                            <div class="mobile-detail" :class="{show: p._expanded}">
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">ID</span><span class="mobile-detail-value">{{ p.id }}</span></div>
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">插件名</span><span class="mobile-detail-value">{{ p.name }}</span></div>
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">作者</span><span class="mobile-detail-value">{{ p.author || '-' }}</span></div>
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">版本</span><span class="mobile-detail-value">{{ p.version }}</span></div>
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">描述</span><span class="mobile-detail-value">{{ p.description || '-' }}</span></div>
+                            </div>
+                        </td>
                     </tr>
                     <tr v-if="!publicPlugins.length">
-                        <td colspan="5" style="text-align:center;color:#999">暂无数据</td>
+                        <td colspan="7" style="text-align:center;color:#999">暂无数据</td>
                     </tr>
                     </tbody>
                 </table>
@@ -597,27 +1060,76 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="p in plugins" :key="p.id">
-                        <td>{{ p.id }}</td>
-                        <td><span v-if="p.jarUploaded">{{ p.name }}</span><span v-else
+                    <tr v-for="p in plugins" :key="p.id" :class="{'mobile-expanded': p._expanded}">
+                        <!-- 桌面端显示 -->
+                        <td class="desktop-only">{{ p.id }}</td>
+                        <td class="desktop-only"><span v-if="p.jarUploaded">{{ p.name }}</span><span v-else
                                                                                 class="tag tag-warning">待上传</span>
                         </td>
-                        <td>{{ p.displayName }}</td>
-                        <td>{{ p.author || '-' }}</td>
-                        <td>{{ parseFloat(p.price) > 0 ? '¥' + p.price : '免费' }}</td>
-                        <td>{{ p.description || '-' }}</td>
-                        <td>{{ p.version }}</td>
-                        <td><span :class="['tag', p.enabled?'tag-success':'tag-danger']">{{ p.enabled ? '启用' : '禁用'
+                        <td class="desktop-only">{{ p.displayName }}</td>
+                        <td class="desktop-only">{{ p.author || '-' }}</td>
+                        <td class="desktop-only">{{ parseFloat(p.price) > 0 ? '¥' + p.price : '免费' }}</td>
+                        <td class="desktop-only">{{ p.description || '-' }}</td>
+                        <td class="desktop-only">{{ p.version }}</td>
+                        <td class="desktop-only"><span :class="['tag', p.enabled?'tag-success':'tag-danger']">{{ p.enabled ? '启用' : '禁用'
                             }}</span></td>
-                        <td>{{ p.createdAt }}</td>
-                        <td>{{ p.updatedAt }}</td>
-                        <td style="white-space:nowrap">
+                        <td class="desktop-only">{{ p.createdAt }}</td>
+                        <td class="desktop-only">{{ p.updatedAt }}</td>
+                        <td class="desktop-only" style="white-space:nowrap">
                             <button class="btn btn-small" @click="editPlugin(p)">编辑</button>
                             <button class="btn btn-primary btn-small" @click="openUpload(p)">上传</button>
                             <button class="btn btn-small" :class="p.enabled?'btn-warning':'btn-success'"
                                     @click="togglePlugin(p)">{{ p.enabled ? '禁用' : '启用' }}
                             </button>
                             <button class="btn btn-danger btn-small" @click="deletePlugin(p)">删除</button>
+                        </td>
+                        <!-- 移动端显示 -->
+                        <td class="mobile-only" colspan="11" style="padding:0;border:none;">
+                            <div class="mobile-summary" @click="p._expanded = !p._expanded">
+                                <div>
+                                    <strong>{{ p.displayName }}</strong>
+                                    <span :class="['tag', p.enabled?'tag-success':'tag-danger']" style="margin-left:8px">{{ p.enabled ? '启用' : '禁用' }}</span>
+                                </div>
+                                <span class="expand-icon" :class="{rotated: p._expanded}">▼</span>
+                            </div>
+                            <div class="mobile-detail" :class="{show: p._expanded}">
+                                <div class="mobile-detail-row">
+                                    <span class="mobile-detail-label">ID</span>
+                                    <span class="mobile-detail-value">{{ p.id }}</span>
+                                </div>
+                                <div class="mobile-detail-row">
+                                    <span class="mobile-detail-label">插件名</span>
+                                    <span class="mobile-detail-value">{{ p.jarUploaded ? p.name : '待上传' }}</span>
+                                </div>
+                                <div class="mobile-detail-row">
+                                    <span class="mobile-detail-label">作者</span>
+                                    <span class="mobile-detail-value">{{ p.author || '-' }}</span>
+                                </div>
+                                <div class="mobile-detail-row">
+                                    <span class="mobile-detail-label">价格</span>
+                                    <span class="mobile-detail-value">{{ parseFloat(p.price) > 0 ? '¥' + p.price : '免费' }}</span>
+                                </div>
+                                <div class="mobile-detail-row">
+                                    <span class="mobile-detail-label">版本</span>
+                                    <span class="mobile-detail-value">{{ p.version }}</span>
+                                </div>
+                                <div class="mobile-detail-row">
+                                    <span class="mobile-detail-label">描述</span>
+                                    <span class="mobile-detail-value">{{ p.description || '-' }}</span>
+                                </div>
+                                <div class="mobile-detail-row">
+                                    <span class="mobile-detail-label">创建时间</span>
+                                    <span class="mobile-detail-value">{{ p.createdAt }}</span>
+                                </div>
+                                <div class="mobile-detail-row" style="padding-top:10px;border-top:1px dashed #ddd;margin-top:8px;justify-content:flex-end;gap:8px;">
+                                    <button class="btn btn-small" @click.stop="editPlugin(p)">编辑</button>
+                                    <button class="btn btn-primary btn-small" @click.stop="openUpload(p)">上传</button>
+                                    <button class="btn btn-small" :class="p.enabled?'btn-warning':'btn-success'"
+                                            @click.stop="togglePlugin(p)">{{ p.enabled ? '禁用' : '启用' }}
+                                    </button>
+                                    <button class="btn btn-danger btn-small" @click.stop="deletePlugin(p)">删除</button>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     <tr v-if="!plugins.length">
@@ -646,21 +1158,41 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="l in licenses" :key="l.id">
-                        <td>{{ l.id }}</td>
-                        <td><span class="license-code">{{ l.code }}</span></td>
-                        <td>{{ l.pluginName }}</td>
-                        <td><span v-if="!l.username" class="tag tag-info">通用</span><span v-else>{{ l.username
-                            }}</span></td>
-                        <td>{{ l.maxBindings === 0 ? '不限' : (l.currentBindings + '/' + l.maxBindings) }}</td>
-                        <td><span :class="['tag', l.enabled?'tag-success':'tag-danger']">{{ l.enabled ? '有效' : '禁用'
-                            }}</span></td>
-                        <td style="white-space:nowrap">
+                    <tr v-for="l in licenses" :key="l.id" :class="{'mobile-expanded': l._expanded}">
+                        <!-- 桌面端 -->
+                        <td class="desktop-only">{{ l.id }}</td>
+                        <td class="desktop-only"><span class="license-code">{{ l.code }}</span></td>
+                        <td class="desktop-only">{{ l.pluginName }}</td>
+                        <td class="desktop-only"><span v-if="!l.username" class="tag tag-info">通用</span><span v-else>{{ l.username }}</span></td>
+                        <td class="desktop-only">{{ l.maxBindings === 0 ? '不限' : (l.currentBindings + '/' + l.maxBindings) }}</td>
+                        <td class="desktop-only"><span :class="['tag', l.enabled?'tag-success':'tag-danger']">{{ l.enabled ? '有效' : '禁用' }}</span></td>
+                        <td class="desktop-only" style="white-space:nowrap">
                             <button class="btn btn-small" @click="openBindingEdit(l)">修改</button>
                             <button class="btn btn-small" :class="l.enabled?'btn-warning':'btn-success'"
                                     @click="toggleLicense(l)">{{ l.enabled ? '禁用' : '启用' }}
                             </button>
                             <button class="btn btn-danger btn-small" @click="deleteLicense(l)">删除</button>
+                        </td>
+                        <!-- 移动端 -->
+                        <td class="mobile-only" colspan="7" style="padding:0;border:none;">
+                            <div class="mobile-summary" @click="l._expanded = !l._expanded">
+                                <div>
+                                    <span class="license-code">{{ l.code }}</span>
+                                    <span :class="['tag', l.enabled?'tag-success':'tag-danger']" style="margin-left:8px">{{ l.enabled ? '有效' : '禁用' }}</span>
+                                </div>
+                                <span class="expand-icon" :class="{rotated: l._expanded}">▼</span>
+                            </div>
+                            <div class="mobile-detail" :class="{show: l._expanded}">
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">ID</span><span class="mobile-detail-value">{{ l.id }}</span></div>
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">插件</span><span class="mobile-detail-value">{{ l.pluginName }}</span></div>
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">用户</span><span class="mobile-detail-value">{{ l.username || '通用' }}</span></div>
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">绑定</span><span class="mobile-detail-value">{{ l.maxBindings === 0 ? '不限' : (l.currentBindings + '/' + l.maxBindings) }}</span></div>
+                                <div class="mobile-detail-row" style="padding-top:10px;border-top:1px dashed #ddd;margin-top:8px;justify-content:flex-end;gap:8px;">
+                                    <button class="btn btn-small" @click.stop="openBindingEdit(l)">修改</button>
+                                    <button class="btn btn-small" :class="l.enabled?'btn-warning':'btn-success'" @click.stop="toggleLicense(l)">{{ l.enabled ? '禁用' : '启用' }}</button>
+                                    <button class="btn btn-danger btn-small" @click.stop="deleteLicense(l)">删除</button>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     <tr v-if="!licenses.length">
@@ -685,33 +1217,45 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="u in users" :key="u.id">
-                        <td>{{ u.id }}</td>
-                        <td>{{ u.username }}</td>
-                        <td>{{ u.email || '-' }}</td>
-                        <td><span
-                                :class="['tag', u.isSuperAdmin?'tag-danger':(u.isAdmin?'tag-warning':'')]">{{ u.isSuperAdmin ? '超级管理员' : (u.isAdmin ? '管理员' : '用户')
-                            }}</span></td>
-                        <td><span :class="['tag', u.banned?'tag-danger':'tag-success']">{{ u.banned ? '已封禁' : '正常'
-                            }}</span></td>
-                        <td>{{ u.createdAt }}</td>
-                        <td style="white-space:nowrap">
+                    <tr v-for="u in users" :key="u.id" :class="{'mobile-expanded': u._expanded}">
+                        <!-- 桌面端 -->
+                        <td class="desktop-only">{{ u.id }}</td>
+                        <td class="desktop-only">{{ u.username }}</td>
+                        <td class="desktop-only">{{ u.email || '-' }}</td>
+                        <td class="desktop-only"><span :class="['tag', u.isSuperAdmin?'tag-danger':(u.isAdmin?'tag-warning':'')]">{{ u.isSuperAdmin ? '超级管理员' : (u.isAdmin ? '管理员' : '用户') }}</span></td>
+                        <td class="desktop-only"><span :class="['tag', u.banned?'tag-danger':'tag-success']">{{ u.banned ? '已封禁' : '正常' }}</span></td>
+                        <td class="desktop-only">{{ u.createdAt }}</td>
+                        <td class="desktop-only" style="white-space:nowrap">
                             <button class="btn btn-small" @click="openPwd(u)">修改密码</button>
-                            <button class="btn btn-warning btn-small" @click="adminUnbindUser(u)" v-if="!u.isAdmin">
-                                解绑设备
-                            </button>
+                            <button class="btn btn-warning btn-small" @click="adminUnbindUser(u)" v-if="!u.isAdmin">解绑设备</button>
                             <button class="btn btn-danger btn-small" @click="deleteUserLicenses(u)">删除授权</button>
-                            <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-small"
-                                    :class="u.banned?'btn-success':'btn-danger'" @click="toggleBan(u)">
-                                {{ u.banned ? '解封账号' : '账号封禁' }}
-                            </button>
-                            <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-small"
-                                    :class="u.isAdmin?'':'btn-primary'" @click="toggleAdmin(u)">
-                                {{ u.isAdmin ? '取消管理' : '设为管理' }}
-                            </button>
-                            <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-danger btn-small"
-                                    @click="deleteUser(u)">删除用户
-                            </button>
+                            <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-small" :class="u.banned?'btn-success':'btn-danger'" @click="toggleBan(u)">{{ u.banned ? '解封账号' : '账号封禁' }}</button>
+                            <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-small" :class="u.isAdmin?'':'btn-primary'" @click="toggleAdmin(u)">{{ u.isAdmin ? '取消管理' : '设为管理' }}</button>
+                            <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-danger btn-small" @click="deleteUser(u)">删除用户</button>
+                        </td>
+                        <!-- 移动端 -->
+                        <td class="mobile-only" colspan="7" style="padding:0;border:none;">
+                            <div class="mobile-summary" @click="u._expanded = !u._expanded">
+                                <div>
+                                    <strong>{{ u.username }}</strong>
+                                    <span :class="['tag', u.isSuperAdmin?'tag-danger':(u.isAdmin?'tag-warning':'')]">{{ u.isSuperAdmin ? '超管' : (u.isAdmin ? '管理' : '用户') }}</span>
+                                    <span :class="['tag', u.banned?'tag-danger':'tag-success']" style="margin-left:4px">{{ u.banned ? '封禁' : '正常' }}</span>
+                                </div>
+                                <span class="expand-icon" :class="{rotated: u._expanded}">▼</span>
+                            </div>
+                            <div class="mobile-detail" :class="{show: u._expanded}">
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">ID</span><span class="mobile-detail-value">{{ u.id }}</span></div>
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">邮箱</span><span class="mobile-detail-value">{{ u.email || '-' }}</span></div>
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">注册时间</span><span class="mobile-detail-value">{{ u.createdAt }}</span></div>
+                                <div class="mobile-detail-row" style="padding-top:10px;border-top:1px dashed #ddd;margin-top:8px;justify-content:flex-end;gap:8px;flex-wrap:wrap;">
+                                    <button class="btn btn-small" @click.stop="openPwd(u)">修改密码</button>
+                                    <button class="btn btn-warning btn-small" @click.stop="adminUnbindUser(u)" v-if="!u.isAdmin">解绑设备</button>
+                                    <button class="btn btn-danger btn-small" @click.stop="deleteUserLicenses(u)">删除授权</button>
+                                    <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-small" :class="u.banned?'btn-success':'btn-danger'" @click.stop="toggleBan(u)">{{ u.banned ? '解封' : '封禁' }}</button>
+                                    <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-small" :class="u.isAdmin?'':'btn-primary'" @click.stop="toggleAdmin(u)">{{ u.isAdmin ? '取消管理' : '设管理' }}</button>
+                                    <button v-if="isSuperAdmin && !u.isSuperAdmin" class="btn btn-danger btn-small" @click.stop="deleteUser(u)">删除</button>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     </tbody>
@@ -744,26 +1288,48 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="p in myPlugins" :key="p.pluginId">
-                        <td>{{ p.pluginName }}</td>
-                        <td>{{ p.displayName }}</td>
-                        <td>{{ p.version }}</td>
-                        <td><span class="license-code">{{ p.licenseCode }}</span></td>
-                        <td>{{ p.expiresAt || '永久' }}</td>
-                        <td>
+                    <tr v-for="p in myPlugins" :key="p.pluginId" :class="{'mobile-expanded': p._expanded}">
+                        <!-- 桌面端 -->
+                        <td class="desktop-only">{{ p.pluginName }}</td>
+                        <td class="desktop-only">{{ p.displayName }}</td>
+                        <td class="desktop-only">{{ p.version }}</td>
+                        <td class="desktop-only"><span class="license-code">{{ p.licenseCode }}</span></td>
+                        <td class="desktop-only">{{ p.expiresAt || '永久' }}</td>
+                        <td class="desktop-only">
                             <div v-if="p.bindings.length">
-                                <div v-for="b in p.bindings" :key="b.id"
-                                     style="margin-bottom:5px;padding:5px;background:#f5f7fa;border-radius:4px;font-size:12px">
+                                <div v-for="b in p.bindings" :key="b.id" style="margin-bottom:5px;padding:5px;background:#f5f7fa;border-radius:4px;font-size:12px">
                                     <div>IP: {{ b.ip || '-' }} | MAC: {{ b.mac || '-' }}</div>
                                     <div style="margin-top:3px">绑定: {{ b.createdAt }}</div>
                                 </div>
                             </div>
                             <span v-else style="color:#999">未绑定</span>
                         </td>
-                        <td style="white-space:nowrap">
-                            <button v-for="b in p.bindings" :key="'unbind-'+b.id" class="btn btn-danger btn-small"
-                                    @click="userUnbind(b.id)">解绑
-                            </button>
+                        <td class="desktop-only" style="white-space:nowrap">
+                            <button v-for="b in p.bindings" :key="'unbind-'+b.id" class="btn btn-danger btn-small" @click="userUnbind(b.id)">解绑</button>
+                        </td>
+                        <!-- 移动端 -->
+                        <td class="mobile-only" colspan="7" style="padding:0;border:none;">
+                            <div class="mobile-summary" @click="p._expanded = !p._expanded">
+                                <div>
+                                    <strong>{{ p.displayName }}</strong>
+                                    <span style="color:#666;font-size:12px;margin-left:8px">{{ p.expiresAt || '永久' }}</span>
+                                </div>
+                                <span class="expand-icon" :class="{rotated: p._expanded}">▼</span>
+                            </div>
+                            <div class="mobile-detail" :class="{show: p._expanded}">
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">插件名</span><span class="mobile-detail-value">{{ p.pluginName }}</span></div>
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">版本</span><span class="mobile-detail-value">{{ p.version }}</span></div>
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">授权码</span><span class="mobile-detail-value license-code">{{ p.licenseCode }}</span></div>
+                                <div class="mobile-detail-row"><span class="mobile-detail-label">绑定设备</span><span class="mobile-detail-value">{{ p.bindings.length }}个</span></div>
+                                <div v-if="p.bindings.length" style="margin-top:8px;padding:8px;background:#f5f7fa;border-radius:4px;">
+                                    <div v-for="b in p.bindings" :key="b.id" style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #eee;font-size:12px;">
+                                        <div>IP: {{ b.ip || '-' }} | MAC: {{ b.mac || '-' }}</div>
+                                        <div style="margin-top:3px;color:#999">绑定: {{ b.createdAt }}</div>
+                                        <button class="btn btn-danger btn-small" style="margin-top:5px;" @click.stop="userUnbind(b.id)">解绑</button>
+                                    </div>
+                                </div>
+                                <div v-else style="margin-top:8px;color:#999;font-size:12px;">未绑定设备</div>
+                            </div>
                         </td>
                     </tr>
                     <tr v-if="!myPlugins.length">
@@ -1387,6 +1953,21 @@
             const filteredExcludePlugins = ref([]);
             const showEditExcludePluginSelect = ref(false);
             const filteredEditExcludePlugins = ref([]);
+            const mobileMenuOpen = ref(false);
+
+            // 页面标题计算属性
+            const pageTitle = Vue.computed(() => {
+                const titles = {
+                    'dashboard': '📊 仪表盘',
+                    'userdash': '📊 仪表盘',
+                    'pluginlist': '📦 插件列表',
+                    'plugins': '🔌 插件管理',
+                    'licenses': '🔑 授权码管理',
+                    'users': '👥 用户管理',
+                    'myauth': '📋 我的授权'
+                };
+                return titles[currentPage.value] || 'CloudPlugins';
+            });
 
             const showMsg = (text, type = 'success') => {
                 msg.value = {text, type};
@@ -1802,6 +2383,12 @@
                     if (r.data.success) {
                         showMsg(r.data.message);
                         loadPlugins();
+                        plugins.value = [];
+                        await nextTick();
+                        await loadPlugins();
+                        // 同时刷新公开插件列表
+                        await loadPublicPlugins();
+                        await loadStats();
                     }
                 } catch (e) {
                     showMsg('操作失败', 'error');
@@ -2529,6 +3116,8 @@
                 addEditExcludePlugin,
                 removeEditExcludePlugin,
                 hideEditExcludePluginSelect,
+                mobileMenuOpen,
+                pageTitle,
                 getPluginName,
                 login,
                 register,
