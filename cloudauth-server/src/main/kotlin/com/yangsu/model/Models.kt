@@ -31,6 +31,8 @@ object Plugins : IntIdTable("plugins") {
     val version = varchar("version", 20)
     val jarPath = varchar("jar_path", 500)  // 插件JAR文件路径
     val mainClass = varchar("main_class", 200)  // 插件主类
+    val author = varchar("author", 100).nullable()  // 插件作者
+    val price = decimal("price", 10, 2).default(java.math.BigDecimal.ZERO)  // 插件价格
     val enabled = bool("enabled").default(true)
     val createdAt = datetime("created_at")
     val updatedAt = datetime("updated_at")
@@ -161,7 +163,8 @@ data class ForgotPasswordRequest(
 
 @Serializable
 data class CreatePluginRequest(
-    val displayName: String
+    val displayName: String,
+    val price: Double = 0.0
 )
 
 @Serializable
@@ -171,6 +174,8 @@ data class UpdatePluginRequest(
     val description: String? = null,
     val version: String? = null,
     val mainClass: String? = null,
+    val author: String? = null,
+    val price: String? = null,  // 改为字符串类型，支持空值
     val enabled: Boolean? = null
 )
 
@@ -281,6 +286,8 @@ data class PluginDTO(
     val description: String?,
     val version: String,
     val mainClass: String,
+    val author: String?,  // 插件作者
+    val price: String,    // 插件价格（格式化为字符串）
     val enabled: Boolean,
     val createdAt: String,
     val updatedAt: String,
@@ -361,7 +368,9 @@ data class PluginSimpleDTO(
     val name: String,
     val displayName: String,
     val description: String?,
-    val version: String
+    val version: String,
+    val author: String?,  // 插件作者
+    val price: String     // 插件价格
 )
 
 @Serializable
@@ -381,6 +390,13 @@ data class CreateExchangeConfigRequest(
     val fromPluginId: Int,
     val toPluginId: Int,
     val enabled: Boolean = true
+)
+
+@Serializable
+data class UpdateExchangeConfigRequest(
+    val fromPluginId: Int? = null,
+    val toPluginId: Int? = null,
+    val enabled: Boolean? = null
 )
 
 @Serializable
@@ -408,6 +424,15 @@ data class CreateClaimConfigRequest(
     val requiredAuthCount: Int = 1,
     val excludePluginIds: List<Int> = emptyList(),  // 排除的插件ID列表
     val enabled: Boolean = true
+)
+
+@Serializable
+data class UpdateClaimConfigRequest(
+    val pluginId: Int? = null,
+    val requiredPluginId: Int? = null,
+    val requiredAuthCount: Int? = null,
+    val excludePluginIds: List<Int>? = null,
+    val enabled: Boolean? = null
 )
 
 @Serializable

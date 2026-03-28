@@ -196,6 +196,21 @@ object DatabaseFactory {
                 }
             }
             
+            // 4. 检查 plugins 表是否有 author 和 price 列
+            if (checkTableExists("plugins")) {
+                val hasAuthor = checkColumnExists("plugins", "author")
+                if (!hasAuthor) {
+                    exec("ALTER TABLE plugins ADD COLUMN author VARCHAR(100)")
+                    println("Database migration: Added author column to plugins table")
+                }
+                
+                val hasPrice = checkColumnExists("plugins", "price")
+                if (!hasPrice) {
+                    exec("ALTER TABLE plugins ADD COLUMN price DECIMAL(10, 2) DEFAULT 0.00")
+                    println("Database migration: Added price column to plugins table")
+                }
+            }
+            
             println("Database migration check completed.")
         } catch (e: Exception) {
             println("Database migration failed: ${e.message}")

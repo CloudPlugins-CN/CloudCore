@@ -495,6 +495,8 @@
                         <th>ID</th>
                         <th>插件名</th>
                         <th>显示名</th>
+                        <th>作者</th>
+                        <th>价格</th>
                         <th>描述</th>
                         <th>版本</th>
                     </tr>
@@ -504,6 +506,8 @@
                         <td>{{ p.id }}</td>
                         <td>{{ p.name }}</td>
                         <td>{{ p.displayName }}</td>
+                        <td>{{ p.author || '-' }}</td>
+                        <td>{{ parseFloat(p.price) > 0 ? '¥' + p.price : '免费' }}</td>
                         <td>{{ p.description || '-' }}</td>
                         <td>{{ p.version }}</td>
                     </tr>
@@ -582,6 +586,8 @@
                         <th>ID</th>
                         <th>插件名</th>
                         <th>显示名</th>
+                        <th>作者</th>
+                        <th>价格</th>
                         <th>描述</th>
                         <th>版本</th>
                         <th>状态</th>
@@ -597,6 +603,8 @@
                                                                                 class="tag tag-warning">待上传</span>
                         </td>
                         <td>{{ p.displayName }}</td>
+                        <td>{{ p.author || '-' }}</td>
+                        <td>{{ parseFloat(p.price) > 0 ? '¥' + p.price : '免费' }}</td>
                         <td>{{ p.description || '-' }}</td>
                         <td>{{ p.version }}</td>
                         <td><span :class="['tag', p.enabled?'tag-success':'tag-danger']">{{ p.enabled ? '启用' : '禁用'
@@ -613,7 +621,7 @@
                         </td>
                     </tr>
                     <tr v-if="!plugins.length">
-                        <td colspan="9" style="text-align:center;color:#999">暂无数据</td>
+                        <td colspan="11" style="text-align:center;color:#999">暂无数据</td>
                     </tr>
                     </tbody>
                 </table>
@@ -773,6 +781,8 @@
             <div class="modal-title">创建插件</div>
             <div class="form-group"><label>展示名</label><input v-model="pluginForm.displayName"
                                                                 placeholder="用户可见的名称"></div>
+            <div class="form-group"><label>价格</label><input v-model.number="pluginForm.price" type="number" min="0" step="0.01"
+                                                               placeholder="插件价格（默认0免费）"></div>
             <div class="modal-footer">
                 <button class="btn" @click="showPluginDialog=false">取消</button>
                 <button class="btn btn-primary" @click="createPlugin" :disabled="loading">创建</button>
@@ -785,6 +795,8 @@
             <div class="modal-title">编辑插件</div>
             <div class="form-group"><label>插件名</label><input v-model="editForm.name"></div>
             <div class="form-group"><label>展示名</label><input v-model="editForm.displayName"></div>
+            <div class="form-group"><label>作者</label><input v-model="editForm.author" placeholder="插件作者"></div>
+            <div class="form-group"><label>价格</label><input v-model.number="editForm.price" type="number" min="0" step="0.01" placeholder="插件价格"></div>
             <div class="form-group"><label>版本</label><input v-model="editForm.version"></div>
             <div class="form-group"><label>描述</label><input v-model="editForm.description"></div>
             <div class="form-group"><label>主类</label><input v-model="editForm.mainClass"></div>
@@ -947,6 +959,33 @@
         </div>
     </div>
 
+    <!-- 编辑置换配置弹窗 -->
+    <div v-if="showEditExchangeDialog" class="modal-overlay" @click.self="showEditExchangeDialog=false">
+        <div class="modal">
+            <div class="modal-title">编辑插件置换配置</div>
+            <div class="form-group">
+                <label>源插件</label>
+                <select v-model="editExchangeForm.fromPluginId">
+                    <option :value="null" disabled>请选择源插件</option>
+                    <option v-for="p in plugins" :key="p.id" :value="p.id">{{ p.displayName }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>目标插件</label>
+                <select v-model="editExchangeForm.toPluginId">
+                    <option :value="null" disabled>请选择目标插件</option>
+                    <option v-for="p in plugins" :key="p.id" :value="p.id">{{ p.displayName }}</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" @click="showEditExchangeDialog=false">取消</button>
+                <button class="btn btn-primary" @click="doEditExchangeConfig"
+                        :disabled="loading||!editExchangeForm.fromPluginId||!editExchangeForm.toPluginId">保存
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 领取配置弹窗（管理员） -->
     <div v-if="showClaimConfigDialog" class="modal-overlay" @click.self="showClaimConfigDialog=false">
         <div class="modal" style="width:800px">
@@ -988,6 +1027,7 @@
                         }}</span></td>
                     <td>{{ config.createdAt }}</td>
                     <td style="white-space:nowrap">
+                        <button class="btn btn-small" @click="openEditClaimDialog(config)">编辑</button>
                         <button class="btn btn-small" @click="toggleClaimConfig(config)">
                             {{ config.enabled ? '禁用' : '启用' }}
                         </button>
@@ -1069,6 +1109,70 @@
         </div>
     </div>
 
+    <!-- 编辑领取配置弹窗（管理员） -->
+    <div v-if="showEditClaimDialog" class="modal-overlay" @click.self="showEditClaimDialog=false">
+        <div class="modal" style="width:500px">
+            <div class="modal-title">编辑领取配置</div>
+            <div class="form-group">
+                <label>可领取的插件</label>
+                <select v-model="editClaimForm.pluginId">
+                    <option :value="null" disabled>请选择插件</option>
+                    <option v-for="p in plugins" :key="p.id" :value="p.id">{{ p.displayName }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>领取条件类型</label>
+                <select v-model="editClaimForm.conditionType">
+                    <option value="authCount">拥有指定数量授权码</option>
+                    <option value="hasPlugin">拥有指定插件</option>
+                </select>
+            </div>
+            <div class="form-group" v-if="editClaimForm.conditionType === 'authCount'">
+                <label>需要授权码数量</label>
+                <input type="number" v-model.number="editClaimForm.requiredAuthCount" min="1" placeholder="例如：1">
+            </div>
+            <div class="form-group" v-if="editClaimForm.conditionType === 'hasPlugin'">
+                <label>需要拥有的插件</label>
+                <select v-model="editClaimForm.requiredPluginId">
+                    <option :value="null" disabled>请选择插件</option>
+                    <option v-for="p in plugins" :key="p.id" :value="p.id">{{ p.displayName }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>排除的插件（这些插件不计入授权码数量）</label>
+                <div style="position:relative">
+                    <input v-model="editClaimForm.excludePluginInput" placeholder="输入插件名筛选或直接选择"
+                           @input="onEditExcludePluginInput" @focus="onEditExcludePluginFocus" @blur="hideEditExcludePluginSelect"
+                           style="width:100%">
+                    <div v-if="showEditExcludePluginSelect && filteredEditExcludePlugins.length"
+                         style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-radius:4px;max-height:200px;overflow-y:auto;z-index:1000;margin-top:2px">
+                        <div v-for="p in filteredEditExcludePlugins" :key="p.id"
+                             style="padding:8px 12px;cursor:pointer;transition:all 0.2s" @click="addEditExcludePlugin(p)"
+                             @mouseover="$event.target.style.background='#f5f7fa'"
+                             @mouseout="$event.target.style.background='white'">
+                            {{ p.displayName }}
+                        </div>
+                    </div>
+                </div>
+                <div v-if="editClaimForm.excludePluginIds.length > 0"
+                     style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
+                    <span v-for="pid in editClaimForm.excludePluginIds" :key="pid" class="tag tag-info"
+                          style="display:flex;align-items:center;gap:5px;">
+                        {{ getPluginName(pid) }}
+                        <span style="cursor:pointer;font-weight:bold;" @click="removeEditExcludePlugin(pid)">×</span>
+                    </span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" @click="showEditClaimDialog=false">取消</button>
+                <button class="btn btn-primary" @click="doEditClaimConfig"
+                        :disabled="loading||!editClaimForm.pluginId||(!editClaimForm.requiredPluginId && editClaimForm.conditionType==='hasPlugin')">
+                    保存
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 置换配置弹窗（管理员） -->
     <div v-if="showExchangeConfigDialog" class="modal-overlay" @click.self="showExchangeConfigDialog=false">
         <div class="modal" style="width:600px">
@@ -1095,6 +1199,7 @@
                         }}</span></td>
                     <td>{{ config.createdAt }}</td>
                     <td style="white-space:nowrap">
+                        <button class="btn btn-small" @click="openEditExchangeDialog(config)">编辑</button>
                         <button class="btn btn-small" @click="toggleExchangeConfig(config)">
                             {{ config.enabled ? '禁用' : '启用' }}
                         </button>
@@ -1205,10 +1310,12 @@
             const registerForm = ref({username: '', password: '', email: '', verificationCode: ''});
             const forgotForm = ref({email: '', verificationCode: '', newPassword: ''});
             const regCodeCooldown = ref(0), forgotCodeCooldown = ref(0);
-            const pluginForm = ref({displayName: ''}), editForm = ref({
+            const pluginForm = ref({displayName: '', price: 0}), editForm = ref({
                 id: null,
                 name: '',
                 displayName: '',
+                author: '',
+                price: 0,
                 version: '',
                 description: '',
                 mainClass: '',
@@ -1251,9 +1358,13 @@
             // 新增置换配置对话框
             const showAddExchangeDialog = ref(false);
             const addExchangeForm = ref({fromPluginId: null, toPluginId: null});
+            // 编辑置换配置对话框
+            const showEditExchangeDialog = ref(false);
+            const editExchangeForm = ref({id: null, fromPluginId: null, toPluginId: null});
             // 领取配置相关变量
             const showClaimConfigDialog = ref(false);
             const showAddClaimDialog = ref(false);
+            const showEditClaimDialog = ref(false);
             const claimConfigs = ref([]);
             const addClaimForm = ref({
                 pluginId: null,
@@ -1263,8 +1374,19 @@
                 excludePluginIds: [],
                 excludePluginInput: ''
             });
+            const editClaimForm = ref({
+                id: null,
+                pluginId: null,
+                conditionType: 'authCount',
+                requiredAuthCount: 1,
+                requiredPluginId: null,
+                excludePluginIds: [],
+                excludePluginInput: ''
+            });
             const showExcludePluginSelect = ref(false);
             const filteredExcludePlugins = ref([]);
+            const showEditExcludePluginSelect = ref(false);
+            const filteredEditExcludePlugins = ref([]);
 
             const showMsg = (text, type = 'success') => {
                 msg.value = {text, type};
@@ -1550,6 +1672,8 @@
                     id: p.id,
                     name: p.name,
                     displayName: p.displayName,
+                    author: p.author || '',
+                    price: p.price || 0,
                     version: p.version,
                     description: p.description || '',
                     mainClass: p.mainClass,
@@ -2093,6 +2217,143 @@
                     showMsg(e.response?.data?.message || '删除失败', 'error');
                 }
             };
+            const openEditExchangeDialog = (config) => {
+                editExchangeForm.value = {
+                    id: config.id,
+                    fromPluginId: config.fromPluginId,
+                    toPluginId: config.toPluginId
+                };
+                showExchangeConfigDialog.value = false;  // 关闭配置弹窗
+                showEditExchangeDialog.value = true;
+            };
+            const doEditExchangeConfig = async () => {
+                if (!editExchangeForm.value.fromPluginId || !editExchangeForm.value.toPluginId) {
+                    showMsg('请选择源插件和目标插件', 'error');
+                    return;
+                }
+                if (editExchangeForm.value.fromPluginId === editExchangeForm.value.toPluginId) {
+                    showMsg('源插件和目标插件不能相同', 'error');
+                    return;
+                }
+                loading.value = true;
+                try {
+                    const r = await api.put(`/admin/exchange-configs/${editExchangeForm.value.id}`, {
+                        fromPluginId: editExchangeForm.value.fromPluginId,
+                        toPluginId: editExchangeForm.value.toPluginId
+                    });
+                    if (r.data.success) {
+                        showMsg('置换配置更新成功');
+                        showEditExchangeDialog.value = false;
+                        editExchangeForm.value = {id: null, fromPluginId: null, toPluginId: null};
+                        await loadExchangeConfigs();
+                        showExchangeConfigDialog.value = true;
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '更新失败', 'error');
+                }
+                loading.value = false;
+            };
+            const openEditClaimDialog = (config) => {
+                editClaimForm.value = {
+                    id: config.id,
+                    pluginId: config.pluginId,
+                    conditionType: config.requiredPluginId ? 'hasPlugin' : 'authCount',
+                    requiredAuthCount: config.requiredAuthCount,
+                    requiredPluginId: config.requiredPluginId,
+                    excludePluginIds: config.excludePluginIds || [],
+                    excludePluginInput: ''
+                };
+                showClaimConfigDialog.value = false;  // 关闭配置弹窗
+                showEditClaimDialog.value = true;
+            };
+            const doEditClaimConfig = async () => {
+                if (!editClaimForm.value.pluginId) {
+                    showMsg('请选择可领取的插件', 'error');
+                    return;
+                }
+                if (editClaimForm.value.conditionType === 'hasPlugin' && !editClaimForm.value.requiredPluginId) {
+                    showMsg('请选择需要拥有的插件', 'error');
+                    return;
+                }
+                loading.value = true;
+                try {
+                    const request = {
+                        pluginId: editClaimForm.value.pluginId,
+                        requiredAuthCount: editClaimForm.value.conditionType === 'authCount' ? editClaimForm.value.requiredAuthCount : 1,
+                        requiredPluginId: editClaimForm.value.conditionType === 'hasPlugin' ? editClaimForm.value.requiredPluginId : null,
+                        excludePluginIds: editClaimForm.value.excludePluginIds || []
+                    };
+                    const r = await api.put(`/admin/claim-configs/${editClaimForm.value.id}`, request);
+                    if (r.data.success) {
+                        showMsg('领取配置更新成功');
+                        showEditClaimDialog.value = false;
+                        editClaimForm.value = {
+                            id: null,
+                            pluginId: null,
+                            conditionType: 'authCount',
+                            requiredAuthCount: 1,
+                            requiredPluginId: null,
+                            excludePluginIds: [],
+                            excludePluginInput: ''
+                        };
+                        await loadClaimConfigs();
+                        showClaimConfigDialog.value = true;
+                    } else {
+                        showMsg(r.data.message, 'error');
+                    }
+                } catch (e) {
+                    showMsg(e.response?.data?.message || '更新失败', 'error');
+                }
+                loading.value = false;
+            };
+            const onEditExcludePluginFocus = () => {
+                const input = editClaimForm.value.excludePluginInput || '';
+                if (input) {
+                    filteredEditExcludePlugins.value = plugins.value.filter(p => 
+                        p.displayName.toLowerCase().includes(input.toLowerCase()) &&
+                        !editClaimForm.value.excludePluginIds.includes(p.id)
+                    );
+                } else {
+                    filteredEditExcludePlugins.value = plugins.value.filter(p => 
+                        !editClaimForm.value.excludePluginIds.includes(p.id)
+                    );
+                }
+                showEditExcludePluginSelect.value = true;
+            };
+            const onEditExcludePluginInput = () => {
+                const input = editClaimForm.value.excludePluginInput || '';
+                if (input) {
+                    filteredEditExcludePlugins.value = plugins.value.filter(p => 
+                        p.displayName.toLowerCase().includes(input.toLowerCase()) &&
+                        !editClaimForm.value.excludePluginIds.includes(p.id)
+                    );
+                } else {
+                    filteredEditExcludePlugins.value = plugins.value.filter(p => 
+                        !editClaimForm.value.excludePluginIds.includes(p.id)
+                    );
+                }
+                showEditExcludePluginSelect.value = true;
+            };
+            const addEditExcludePlugin = (plugin) => {
+                if (!editClaimForm.value.excludePluginIds.includes(plugin.id)) {
+                    editClaimForm.value.excludePluginIds.push(plugin.id);
+                }
+                editClaimForm.value.excludePluginInput = '';
+                showEditExcludePluginSelect.value = false;
+            };
+            const removeEditExcludePlugin = (pluginId) => {
+                const index = editClaimForm.value.excludePluginIds.indexOf(pluginId);
+                if (index > -1) {
+                    editClaimForm.value.excludePluginIds.splice(index, 1);
+                }
+            };
+            const hideEditExcludePluginSelect = () => {
+                setTimeout(() => {
+                    showEditExcludePluginSelect.value = false;
+                }, 200);
+            };
             const openUserExchangeDialog = async () => {
                 userExchangeForm.value = {exchangeConfigId: null};
                 await loadAvailableExchangeConfigs();
@@ -2236,12 +2497,20 @@
                 addExchangeForm,
                 openAddExchangeDialog,
                 doAddExchangeConfig,
+                showEditExchangeDialog,
+                editExchangeForm,
+                openEditExchangeDialog,
+                doEditExchangeConfig,
                 showClaimConfigDialog,
                 showAddClaimDialog,
+                showEditClaimDialog,
                 claimConfigs,
                 addClaimForm,
+                editClaimForm,
                 openAddClaimDialog,
+                openEditClaimDialog,
                 doAddClaimConfig,
+                doEditClaimConfig,
                 toggleClaimConfig,
                 deleteClaimConfigById,
                 loadClaimConfigs,
@@ -2253,6 +2522,13 @@
                 addExcludePlugin,
                 removeExcludePlugin,
                 hideExcludePluginSelect,
+                showEditExcludePluginSelect,
+                filteredEditExcludePlugins,
+                onEditExcludePluginFocus,
+                onEditExcludePluginInput,
+                addEditExcludePlugin,
+                removeEditExcludePlugin,
+                hideEditExcludePluginSelect,
                 getPluginName,
                 login,
                 register,

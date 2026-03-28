@@ -2,9 +2,11 @@ package com.yangsu.service
 
 import com.yangsu.config.DatabaseFactory.dbQuery
 import com.yangsu.model.*
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -220,6 +222,99 @@ object PluginClaimService {
             it[enabled] = isEnabled
         }
         true
+    }
+    
+    /**
+     * 更新领取配置（管理员）
+     */
+    suspend fun updateClaimConfig(id: Int, request: UpdateClaimConfigRequest): Result<ClaimConfigDTO> = dbQuery {
+        val config = PluginClaimConfigs.selectAll()
+            .where { PluginClaimConfigs.id eq id }
+            .singleOrNull()
+        
+        if (config == null) {
+            return@dbQuery Result.failure(Exception("领取配置不存在"))
+        }
+        
+        // 如果要更新插件ID，检查插件是否存在
+        val pluginId = request.pluginId ?: config[PluginClaimConfigs.pluginId].value
+        val requiredPluginId = request.requiredPluginId ?: config[PluginClaimConfigs.requiredPluginId]?.value
+        
+        if (request.pluginId != null) {
+            val plugin = Plugins.selectAll().where { Plugins.id eq pluginId }.singleOrNull()
+            if (plugin == null) {
+                return@dbQuery Result.failure(Exception("插件不存在"))
+            }
+            
+            // 检查是否已存在相同的领取配置（排除当前配置）
+            val exists = PluginClaimConfigs.selectAll()
+                .where { 
+                    (PluginClaimConfigs.pluginId eq pluginId) and
+                    (PluginClaimConfigs.id neq id)
+                }
+                .count() > 0
+            
+            if (exists) {
+                return@dbQuery Result.failure(Exception("该插件的领取配置已存在"))
+            }
+        }
+        
+        if (request.requiredPluginId != null) {
+            val requiredPlugin = Plugins.selectAll().where { Plugins.id eq requiredPluginId }.singleOrNull()
+            if (requiredPlugin == null) {
+                return@dbQuery Result.failure(Exception("要求的插件不存在"))
+            }
+        }
+        
+        // 更新配置 - 使用原始SQL避免类型问题
+        val updates = mutableListOf<String>()
+        request.pluginId?.let { updates.add("plugin_id = $it") }
+        request.requiredPluginId?.let { updates.add("required_plugin_id = $it") } ?: run { updates.add("required_plugin_id = NULL") }
+        request.requiredAuthCount?.let { updates.add("required_auth_count = $it") }
+        request.excludePluginIds?.let { updates.add("exclude_plugin_ids = '${it.joinToString(",")}'") }
+        request.enabled?.let { updates.add("enabled = ${if (it) 1 else 0}") }
+        
+        if (updates.isNotEmpty()) {
+            TransactionManager.current().exec("UPDATE plugin_claim_configs SET ${updates.joinToString(", ")} WHERE id = $id")
+        }
+        
+        // 查询更新后的数据
+        val updatedConfig = PluginClaimConfigs.selectAll()
+            .where { PluginClaimConfigs.id eq id }
+            .singleOrNull()
+        
+        if (updatedConfig == null) {
+            return@dbQuery Result.failure(Exception("更新失败"))
+        }
+        
+        val plugin = Plugins.selectAll().where { Plugins.id eq pluginId }.singleOrNull()
+            ?: return@dbQuery Result.failure(Exception("插件信息不完整"))
+        
+        val requiredPlugin = requiredPluginId?.let {
+            Plugins.selectAll().where { Plugins.id eq it }.singleOrNull()
+        }
+        
+        // 处理可能没有 excludePluginIds 字段的旧数据
+        val excludeIdsStr = try {
+            updatedConfig[PluginClaimConfigs.excludePluginIds]
+        } catch (e: Exception) {
+            ""
+        }
+        val excludeIds = if (excludeIdsStr.isBlank()) emptyList() else excludeIdsStr.split(",").map { it.toInt() }
+        
+        Result.success(ClaimConfigDTO(
+            id = updatedConfig[PluginClaimConfigs.id].value,
+            pluginId = pluginId,
+            pluginName = plugin[Plugins.name],
+            pluginDisplayName = plugin[Plugins.displayName],
+            requiredPluginId = requiredPluginId,
+            requiredPluginName = requiredPlugin?.get(Plugins.name),
+            requiredPluginDisplayName = requiredPlugin?.get(Plugins.displayName),
+            requiredAuthCount = request.requiredAuthCount ?: updatedConfig[PluginClaimConfigs.requiredAuthCount],
+            excludePluginIds = request.excludePluginIds ?: excludeIds,
+            enabled = request.enabled ?: updatedConfig[PluginClaimConfigs.enabled],
+            createdAt = updatedConfig[PluginClaimConfigs.createdAt].format(dateFormatter)
+        ))
     }
     
     /**

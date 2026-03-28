@@ -27,7 +27,7 @@ class AuthManager(private val config: CloudConfig) {
     
     /** 已验证的插件信息 */
     private val verifiedPlugins = mutableMapOf<String, VerifiedPlugin>()
-    
+
     init {
         httpClient = OkHttpClient.Builder()
             .connectTimeout(config.connectTimeout.toLong(), TimeUnit.SECONDS)
@@ -52,10 +52,10 @@ class AuthManager(private val config: CloudConfig) {
             if (config.debug) {
                 DeviceInfo.printInfo()
             }
-            
+
             var successCount = 0
             var failCount = 0
-            
+
             for (licenseCode in config.licenseCodes) {
                 val result = verifySingleLicense(licenseCode, deviceInfo)
                 if (result != null) {

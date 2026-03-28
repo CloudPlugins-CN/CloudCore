@@ -31,27 +31,20 @@ class MyPlugin : JavaPlugin() {
     private lateinit var configManager: CloudConfigManager
     
     override fun onEnable() {
-        // 步骤 1: 检查 CloudCore 是否就绪
-        if (!CloudCoreAPI.isReady()) {
-            CloudCoreAPI.severe(name, "CloudCore 未运行，插件无法启动!")
-            isEnabled = false
-            return
-        }
-        
-        // 步骤 2: 检查自身授权
+        // 步骤 1: 检查自身授权
         if (!CloudCoreAPI.isAuthorized(name)) {
             CloudCoreAPI.severe(name, "未找到有效授权，请联系管理员获取授权码")
             isEnabled = false
             return
         }
         
-        // 步骤 3: 初始化配置管理器
+        // 步骤 2: 初始化配置管理器
         configManager = CloudConfigManager.of(this)
         
-        // 步骤 4: 保存默认配置
+        // 步骤 3: 保存默认配置
         configManager.saveDefaultConfig()
         
-        // 步骤 5: 读取配置
+        // 步骤 4: 读取配置
         val config = configManager.getConfig()
         val debug = config.getBoolean("debug", false)
         
@@ -226,27 +219,7 @@ authorizedPlugins.forEach { auth ->
 }
 ```
 
-### 3. 检查 CloudCore 状态
-
-```kotlin
-// 检查 CloudCore 是否已准备就绪
-if (CloudCoreAPI.isReady()) {
-    // CloudCore 已完成初始化
-    CloudCoreAPI.info("MyPlugin", "CloudCore 运行正常")
-} else {
-    CloudCoreAPI.warning("MyPlugin", "CloudCore 尚未完成初始化")
-}
-
-// 检查 CloudCore 配置是否完整
-if (CloudCoreAPI.isConfigured()) {
-    val serverUrl = CloudCoreAPI.getServerUrl()
-    CloudCoreAPI.info("MyPlugin", "授权服务器：$serverUrl")
-} else {
-    CloudCoreAPI.warning("MyPlugin", "CloudCore 配置不完整")
-}
-```
-
-### 4. 完整的授权验证示例
+### 3. 完整的授权验证示例
 
 ```kotlin
 package com.example.myplugin
@@ -257,15 +230,7 @@ import org.bukkit.plugin.java.JavaPlugin
 class MyCloudPlugin : JavaPlugin() {
     
     override fun onEnable() {
-        // 步骤 1: 检查 CloudCore 是否就绪
-        if (!CloudCoreAPI.isReady()) {
-            CloudCoreAPI.severe(name, "CloudCore 未运行，插件无法启动!")
-            CloudCoreAPI.severe(name, "请确保 CloudCore 已正确安装并启动")
-            isEnabled = false
-            return
-        }
-        
-        // 步骤 2: 检查自身授权
+        // 步骤 1: 检查自身授权
         if (!CloudCoreAPI.isAuthorized(name)) {
             CloudCoreAPI.severe(name, "未找到有效授权，插件已停止运行!")
             CloudCoreAPI.severe(name, "请联系管理员获取授权码并在 CloudCore/config.yml 中配置")
@@ -273,7 +238,7 @@ class MyCloudPlugin : JavaPlugin() {
             return
         }
         
-        // 步骤 3: 获取授权详细信息（可选）
+        // 步骤 2: 获取授权详细信息（可选）
         val authorization = CloudCoreAPI.getAuthorization(name)
         authorization?.let {
             CloudCoreAPI.info(name, "====================================")
@@ -283,7 +248,7 @@ class MyCloudPlugin : JavaPlugin() {
             CloudCoreAPI.info(name, "====================================")
         }
         
-        // 步骤 4: 继续插件的正常加载流程...
+        // 步骤 3: 继续插件的正常加载流程...
         loadPluginFeatures()
     }
     
@@ -327,22 +292,14 @@ class DependentPlugin : JavaPlugin() {
     private val requiredPlugins = listOf("CorePlugin", "APIPlugin")
     
     override fun onEnable() {
-        // 1. 检查 CloudCore 是否运行
-        if (!CloudCoreAPI.isReady()) {
-            CloudCoreAPI.severe(name, "本插件需要 CloudCore 支持!")
-            CloudCoreAPI.severe(name, "请确保 CloudCore 已正确安装并启动")
-            isEnabled = false
-            return
-        }
-        
-        // 2. 检查自身授权
+        // 1. 检查自身授权
         if (!CloudCoreAPI.isAuthorized(name)) {
             CloudCoreAPI.severe(name, "未找到有效授权!")
             isEnabled = false
             return
         }
         
-        // 3. 检查依赖的插件是否已授权
+        // 2. 检查依赖的插件是否已授权
         val missingPlugins = requiredPlugins.filterNot { CloudCoreAPI.isAuthorized(it) }
         if (missingPlugins.isNotEmpty()) {
             CloudCoreAPI.severe(name, "缺少必要的依赖插件：${missingPlugins.joinToString(", ")}")
@@ -351,7 +308,7 @@ class DependentPlugin : JavaPlugin() {
             return
         }
         
-        // 4. 所有检查通过，正常启动
+        // 3. 所有检查通过，正常启动
         CloudCoreAPI.info(name, "所有依赖检查通过，插件启动成功!")
         enableFeatures()
     }
@@ -377,13 +334,6 @@ public class MyPlugin extends JavaPlugin {
     
     @Override
     public void onEnable() {
-        // 检查 CloudCore 状态
-        if (!CloudCoreAPI.isReady()) {
-            CloudCoreAPI.severe(getName(), "CloudCore 未运行");
-            setEnabled(false);
-            return;
-        }
-        
         // 检查授权
         if (!CloudCoreAPI.isAuthorized(getName())) {
             CloudCoreAPI.severe(getName(), "未找到有效授权");
@@ -475,9 +425,8 @@ CloudCoreAPI.severe("MyPlugin", "错误")
 7. **授权验证是异步进行的**，插件启动时应检查授权状态再决定是否启用
 8. **依赖 CloudCore 的插件** 应在 `onEnable()` 早期进行授权检查
 9. 如果插件未找到授权，建议设置 `isEnabled = false` 来禁用插件
-10. 使用 `CloudCoreAPI.isReady()` 可以快速判断 CloudCore 是否可用
-11. 授权验证采用 **IP/MAC/机器码三选二** 的绑定策略
-12. 解绑设备有 **24 小时冷却时间**
+10. 授权验证采用 **IP/MAC/机器码三选二** 的绑定策略
+11. 解绑设备有 **24 小时冷却时间**
 
 ---
 

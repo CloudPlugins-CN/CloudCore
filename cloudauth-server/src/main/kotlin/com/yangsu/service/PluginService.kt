@@ -34,6 +34,8 @@ object PluginService {
             it[version] = defaultVersion
             it[Plugins.jarPath] = jarPath
             it[mainClass] = ""
+            it[author] = null
+            it[price] = java.math.BigDecimal(request.price.toString())
             it[enabled] = true
             it[createdAt] = now
             it[updatedAt] = now
@@ -46,6 +48,8 @@ object PluginService {
             description = null,
             version = defaultVersion,
             mainClass = "",
+            author = null,
+            price = request.price.toString(),
             enabled = true,
             createdAt = now.format(dateFormatter),
             updatedAt = now.format(dateFormatter)
@@ -85,6 +89,17 @@ object PluginService {
                 it[jarPath] = "$pluginName-$ver.jar"
             }
             request.mainClass?.let { main -> it[mainClass] = main }
+            request.author?.let { author -> it[Plugins.author] = author }
+            // 处理价格：空字符串或null时默认为0
+            val priceValue = when {
+                request.price.isNullOrBlank() -> java.math.BigDecimal.ZERO
+                else -> try {
+                    java.math.BigDecimal(request.price)
+                } catch (e: NumberFormatException) {
+                    java.math.BigDecimal.ZERO
+                }
+            }
+            it[Plugins.price] = priceValue
             request.enabled?.let { en -> it[enabled] = en }
             it[updatedAt] = now
         }
@@ -112,6 +127,8 @@ object PluginService {
                     description = row[Plugins.description],
                     version = row[Plugins.version],
                     mainClass = row[Plugins.mainClass],
+                    author = row[Plugins.author],
+                    price = row[Plugins.price].stripTrailingZeros().toPlainString(),
                     enabled = row[Plugins.enabled],
                     createdAt = row[Plugins.createdAt].format(dateFormatter),
                     updatedAt = row[Plugins.updatedAt].format(dateFormatter),
@@ -131,6 +148,8 @@ object PluginService {
                 description = row[Plugins.description],
                 version = row[Plugins.version],
                 mainClass = row[Plugins.mainClass],
+                author = row[Plugins.author],
+                price = row[Plugins.price].stripTrailingZeros().toPlainString(),
                 enabled = row[Plugins.enabled],
                 createdAt = row[Plugins.createdAt].format(dateFormatter),
                 updatedAt = row[Plugins.updatedAt].format(dateFormatter),
@@ -152,6 +171,8 @@ object PluginService {
                     description = row[Plugins.description],
                     version = row[Plugins.version],
                     mainClass = row[Plugins.mainClass],
+                    author = row[Plugins.author],
+                    price = row[Plugins.price].stripTrailingZeros().toPlainString(),
                     enabled = row[Plugins.enabled],
                     createdAt = row[Plugins.createdAt].format(dateFormatter),
                     updatedAt = row[Plugins.updatedAt].format(dateFormatter),
@@ -172,6 +193,8 @@ object PluginService {
                     description = row[Plugins.description],
                     version = row[Plugins.version],
                     mainClass = row[Plugins.mainClass],
+                    author = row[Plugins.author],
+                    price = row[Plugins.price].stripTrailingZeros().toPlainString(),
                     enabled = row[Plugins.enabled],
                     createdAt = row[Plugins.createdAt].format(dateFormatter),
                     updatedAt = row[Plugins.updatedAt].format(dateFormatter)
@@ -223,7 +246,7 @@ object PluginService {
      * 从上传的 JAR 文件更新插件信息
      * @param pluginName 从 plugin.yml 获取的插件名
      */
-    fun updatePluginFromJar(id: Int, pluginName: String, newVersion: String, mainClass: String, description: String?): Boolean {
+    fun updatePluginFromJar(id: Int, pluginName: String, newVersion: String, mainClass: String, description: String?, author: String?): Boolean {
         return org.jetbrains.exposed.sql.transactions.transaction {
             val now = LocalDateTime.now()
             val currentPlugin = Plugins.selectAll().where { Plugins.id eq id }.singleOrNull()
@@ -256,6 +279,7 @@ object PluginService {
                     it[Plugins.mainClass] = mainClass
                 }
                 description?.let { desc -> it[Plugins.description] = desc }
+                author?.let { auth -> it[Plugins.author] = auth }
                 it[updatedAt] = now
             }
             true
@@ -275,7 +299,9 @@ object PluginService {
                     name = row[Plugins.name],
                     displayName = row[Plugins.displayName],
                     description = row[Plugins.description],
-                    version = row[Plugins.version]
+                    version = row[Plugins.version],
+                    author = row[Plugins.author],
+                    price = row[Plugins.price].stripTrailingZeros().toPlainString()
                 )
             }
     }

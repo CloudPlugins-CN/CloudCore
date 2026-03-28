@@ -2,9 +2,11 @@ package com.yangsu.service
 
 import com.yangsu.config.DatabaseFactory.dbQuery
 import com.yangsu.model.*
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -158,6 +160,83 @@ object PluginExchangeService {
             it[PluginExchangeConfigs.enabled] = isEnabled
         }
         true
+    }
+    
+    /**
+     * 更新置换配置（管理员）
+     */
+    suspend fun updateExchangeConfig(id: Int, request: UpdateExchangeConfigRequest): Result<ExchangeConfigDTO> = dbQuery {
+        val config = PluginExchangeConfigs.selectAll()
+            .where { PluginExchangeConfigs.id eq id }
+            .singleOrNull()
+        
+        if (config == null) {
+            return@dbQuery Result.failure(Exception("置换配置不存在"))
+        }
+        
+        // 如果要更新插件ID，检查插件是否存在
+        val fromPluginId = request.fromPluginId ?: config[PluginExchangeConfigs.fromPluginId].value
+        val toPluginId = request.toPluginId ?: config[PluginExchangeConfigs.toPluginId].value
+        
+        if (request.fromPluginId != null || request.toPluginId != null) {
+            val fromPlugin = Plugins.selectAll().where { Plugins.id eq fromPluginId }.singleOrNull()
+            val toPlugin = Plugins.selectAll().where { Plugins.id eq toPluginId }.singleOrNull()
+            
+            if (fromPlugin == null || toPlugin == null) {
+                return@dbQuery Result.failure(Exception("插件不存在"))
+            }
+            
+            // 检查是否已存在相同的置换配置（排除当前配置）
+            val exists = PluginExchangeConfigs.selectAll()
+                .where { 
+                    (PluginExchangeConfigs.fromPluginId eq fromPluginId) and
+                    (PluginExchangeConfigs.toPluginId eq toPluginId) and
+                    (PluginExchangeConfigs.id neq id)
+                }
+                .count() > 0
+            
+            if (exists) {
+                return@dbQuery Result.failure(Exception("该置换配置已存在"))
+            }
+        }
+        
+        // 更新配置 - 使用原始SQL避免类型问题
+        val updates = mutableListOf<String>()
+        request.fromPluginId?.let { updates.add("from_plugin_id = $it") }
+        request.toPluginId?.let { updates.add("to_plugin_id = $it") }
+        request.enabled?.let { updates.add("enabled = ${if (it) 1 else 0}") }
+        
+        if (updates.isNotEmpty()) {
+            TransactionManager.current().exec("UPDATE plugin_exchange_configs SET ${updates.joinToString(", ")} WHERE id = $id")
+        }
+        
+        // 查询更新后的数据
+        val updatedConfig = PluginExchangeConfigs.selectAll()
+            .where { PluginExchangeConfigs.id eq id }
+            .singleOrNull()
+        
+        if (updatedConfig == null) {
+            return@dbQuery Result.failure(Exception("更新失败"))
+        }
+        
+        val fromPlugin = Plugins.selectAll().where { Plugins.id eq fromPluginId }.singleOrNull()
+        val toPlugin = Plugins.selectAll().where { Plugins.id eq toPluginId }.singleOrNull()
+        
+        if (fromPlugin == null || toPlugin == null) {
+            return@dbQuery Result.failure(Exception("插件信息不完整"))
+        }
+        
+        Result.success(ExchangeConfigDTO(
+            id = updatedConfig[PluginExchangeConfigs.id].value,
+            fromPluginId = fromPluginId,
+            fromPluginName = fromPlugin[Plugins.name],
+            fromPluginDisplayName = fromPlugin[Plugins.displayName],
+            toPluginId = toPluginId,
+            toPluginName = toPlugin[Plugins.name],
+            toPluginDisplayName = toPlugin[Plugins.displayName],
+            enabled = request.enabled ?: updatedConfig[PluginExchangeConfigs.enabled],
+            createdAt = updatedConfig[PluginExchangeConfigs.createdAt].format(dateFormatter)
+        ))
     }
     
     /**

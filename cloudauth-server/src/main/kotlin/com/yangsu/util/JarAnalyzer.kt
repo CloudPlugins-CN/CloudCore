@@ -29,14 +29,25 @@ object JarAnalyzer {
                 jar.getInputStream(entry).use { input ->
                     val data = yaml.load<Map<String, Any?>>(input)
                     
+                    // 处理作者字段，支持单个author或authors列表
+                    val authorValue = when {
+                        data["author"] != null -> data["author"].toString()
+                        data["authors"] != null -> {
+                            when (val authors = data["authors"]) {
+                                is List<*> -> authors.filterNotNull().joinToString("、")
+                                is String -> authors
+                                else -> null
+                            }
+                        }
+                        else -> null
+                    }
+                    
                     PluginYmlInfo(
                         name = data["name"]?.toString() ?: return null,
                         version = data["version"]?.toString() ?: "1.0.0",
                         main = data["main"]?.toString() ?: "",
                         description = data["description"]?.toString(),
-                        author = (data["author"] ?: data["authors"]?.let { 
-                            (it as? List<*>)?.firstOrNull() 
-                        })?.toString()
+                        author = authorValue
                     )
                 }
             }

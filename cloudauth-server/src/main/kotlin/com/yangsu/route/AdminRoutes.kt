@@ -361,8 +361,8 @@ fun Route.adminRoutes() {
                             val newVersion = pluginInfo.version
                             
                             try {
-                                // 更新数据库中的插件信息（包括名称、版本、主类、描述）
-                                PluginService.updatePluginFromJar(id, newName, newVersion, pluginInfo.main, pluginInfo.description)
+                                // 更新数据库中的插件信息（包括名称、版本、主类、描述、作者）
+                                PluginService.updatePluginFromJar(id, newName, newVersion, pluginInfo.main, pluginInfo.description, pluginInfo.author)
                                 
                                 // 保存新版本JAR
                                 val newJarFile = PluginService.getPluginJarPath(newName, newVersion)
@@ -448,6 +448,28 @@ fun Route.adminRoutes() {
                 }
             }
             
+            // 编辑置换配置
+            put("/exchange-configs/{id}") {
+                val id = call.parameters["id"]?.toIntOrNull()
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest,
+                        SimpleApiResponse(false, "无效的配置ID"))
+                    return@put
+                }
+                
+                val request = call.receive<UpdateExchangeConfigRequest>()
+                val result = PluginExchangeService.updateExchangeConfig(id, request)
+                result.fold(
+                    onSuccess = { config ->
+                        call.respond(ApiResponse(true, "更新成功", config))
+                    },
+                    onFailure = { e ->
+                        call.respond(HttpStatusCode.BadRequest,
+                            SimpleApiResponse(false, e.message))
+                    }
+                )
+            }
+            
             // 删除置换配置
             delete("/exchange-configs/{id}") {
                 val id = call.parameters["id"]?.toIntOrNull()
@@ -507,6 +529,28 @@ fun Route.adminRoutes() {
                     call.respond(HttpStatusCode.NotFound,
                         SimpleApiResponse(false, "配置不存在"))
                 }
+            }
+            
+            // 编辑领取配置
+            put("/claim-configs/{id}") {
+                val id = call.parameters["id"]?.toIntOrNull()
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest,
+                        SimpleApiResponse(false, "无效的配置ID"))
+                    return@put
+                }
+                
+                val request = call.receive<UpdateClaimConfigRequest>()
+                val result = PluginClaimService.updateClaimConfig(id, request)
+                result.fold(
+                    onSuccess = { config ->
+                        call.respond(ApiResponse(true, "更新成功", config))
+                    },
+                    onFailure = { e ->
+                        call.respond(HttpStatusCode.BadRequest,
+                            SimpleApiResponse(false, e.message))
+                    }
+                )
             }
             
             // 删除领取配置
