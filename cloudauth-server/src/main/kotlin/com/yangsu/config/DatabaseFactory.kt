@@ -179,6 +179,13 @@ object DatabaseFactory {
                     exec("ALTER TABLE plugin_claim_configs ADD COLUMN exclude_plugin_ids TEXT DEFAULT ''")
                     println("Database migration: Added exclude_plugin_ids column to plugin_claim_configs table")
                 }
+                
+                // 2.1 检查 plugin_claim_configs 表是否有 free_plugin_not_count 列
+                val hasFreePluginNotCount = checkColumnExists("plugin_claim_configs", "free_plugin_not_count")
+                if (!hasFreePluginNotCount) {
+                    exec("ALTER TABLE plugin_claim_configs ADD COLUMN free_plugin_not_count INTEGER DEFAULT 0")
+                    println("Database migration: Added free_plugin_not_count column to plugin_claim_configs table")
+                }
             }
             
             // 3. 检查 user_plugin_auth 表是否有 granted_at 和 granted_by 列

@@ -1,5 +1,6 @@
 package com.cloudcore
 
+import com.cloudcore.attribute.AttributeManager
 import com.cloudcore.config.CloudConfig
 import com.cloudcore.loader.AuthManager
 import com.cloudcore.loader.CloudPluginLoader
@@ -72,6 +73,9 @@ object CloudCore : Plugin() {
         pluginLoader = CloudPluginLoader(cloudConfig, authManager)
 
         console().sendMessage("§cLoading §b$pluginId §6$pluginVersion")
+
+        // 初始化属性系统
+        AttributeManager.init()
 
         // 异步验证授权并加载插件
         if (cloudConfig.isConfigured()) {

@@ -14,6 +14,7 @@ plugins/CloudCore/Config/{插件名}/
 - **授权验证**：基于授权码的插件验证机制
 - **设备绑定**：IP/MAC/机器码三选二绑定策略
 - **插件加载**：自动下载和加载已授权的插件
+- **属性系统**：统一适配多种属性插件（AttributePlus, SX-Attribute, CraneAttribute）
 
 ---
 
@@ -501,5 +502,213 @@ class MyCloudPlugin : JavaPlugin() {
 
 ---
 
-**文档版本**: 1.0  
-**最后更新**: 2026-03-25
+## 🎯 属性系统 API
+
+CloudCore 提供了统一的属性系统接口，自动适配多种主流属性插件：
+
+- **AttributePlus** (v2 / v3)
+- **SX-Attribute** (v2 / v3)
+- **CraneAttribute**
+
+### 1. 基础使用
+
+```kotlin
+import com.cloudcore.api.CloudCoreAPI
+import org.bukkit.entity.Player
+
+class MyPlugin : JavaPlugin() {
+    
+    /**
+     * 为玩家添加属性
+     * @param player 目标玩家
+     * @param source 属性来源标识（用于区分不同来源的属性）
+     * @param attributes 属性列表
+     */
+    fun giveAttributes(player: Player) {
+        // 检查属性系统是否可用
+        if (!CloudCoreAPI.isAttributeAvailable()) {
+            CloudCoreAPI.warning(name, "属性系统不可用，请安装支持的属性插件")
+            return
+        }
+        
+        // 添加属性
+        CloudCoreAPI.addAttribute(
+            player = player,
+            source = "MyPlugin_Buff",  // 来源标识，用于后续移除
+            attributes = listOf(
+                "攻击力: +10",
+                "防御力: +5",
+                "生命值: +20"
+            )
+        )
+        
+        CloudCoreAPI.info(name, "已为 ${player.name} 添加属性加成")
+    }
+    
+    /**
+     * 移除玩家的属性
+     */
+    fun removeAttributes(player: Player) {
+        CloudCoreAPI.removeAttribute(player, "MyPlugin_Buff")
+        CloudCoreAPI.info(name, "已移除 ${player.name} 的属性加成")
+    }
+    
+    /**
+     * 更新属性（先移除再添加）
+     */
+    fun updateAttributes(player: Player) {
+        CloudCoreAPI.updateAttribute(
+            player = player,
+            source = "MyPlugin_Buff",
+            attributes = listOf(
+                "攻击力: +20",
+                "暴击率: +10%"
+            )
+        )
+    }
+}
+```
+
+### 2. 可变参数版本
+
+```kotlin
+// 使用 vararg 更方便
+CloudCoreAPI.addAttribute(
+    player, 
+    "MyPlugin_Buff",
+    "攻击力: +10",
+    "防御力: +5",
+    "生命值: +20"
+)
+
+// 更新属性
+CloudCoreAPI.updateAttribute(
+    player,
+    "MyPlugin_Buff",
+    "攻击力: +20",
+    "暴击率: +10%"
+)
+```
+
+### 3. 获取当前属性插件
+
+```kotlin
+// 获取当前使用的属性插件名称
+val pluginName = CloudCoreAPI.getAttributePluginName()
+CloudCoreAPI.info(name, "当前属性插件: $pluginName")
+// 输出: AttributePlus 或 SX-Attribute 或 CraneAttribute
+```
+
+### 4. 完整示例：装备系统
+
+```kotlin
+package com.example.equipment
+
+import com.cloudcore.api.CloudCoreAPI
+import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.plugin.java.JavaPlugin
+
+class EquipmentPlugin : JavaPlugin(), Listener {
+    
+    override fun onEnable() {
+        server.pluginManager.registerEvents(this, this)
+        
+        // 检查属性系统
+        if (CloudCoreAPI.isAttributeAvailable()) {
+            val pluginName = CloudCoreAPI.getAttributePluginName()
+            CloudCoreAPI.info(name, "§a属性系统已接入: §e$pluginName")
+        } else {
+            CloudCoreAPI.warning(name, "§e未检测到属性插件，装备属性功能将不可用")
+        }
+    }
+    
+    /**
+     * 玩家穿戴装备时调用
+     */
+    fun equipItem(player: Player, equipment: Equipment) {
+        if (!CloudCoreAPI.isAttributeAvailable()) return
+        
+        // 使用装备ID作为来源标识
+        val source = "Equipment_${equipment.id}"
+        
+        CloudCoreAPI.addAttribute(
+            player = player,
+            source = source,
+            attributes = equipment.attributes
+        )
+    }
+    
+    /**
+     * 玩家卸下装备时调用
+     */
+    fun unequipItem(player: Player, equipment: Equipment) {
+        if (!CloudCoreAPI.isAttributeAvailable()) return
+        
+        val source = "Equipment_${equipment.id}"
+        CloudCoreAPI.removeAttribute(player, source)
+    }
+    
+    @EventHandler
+    fun onPlayerQuit(event: PlayerQuitEvent) {
+        // 玩家退出时清理所有装备属性
+        // 注意：实际使用时需要记录玩家穿戴的装备
+    }
+}
+
+/**
+ * 装备数据类
+ */
+data class Equipment(
+    val id: String,
+    val name: String,
+    val attributes: List<String>
+)
+```
+
+### 5. Java 使用示例
+
+```java
+import com.cloudcore.api.CloudCoreAPI;
+import org.bukkit.entity.Player;
+
+public class AttributeExample {
+    
+    public void addBuff(Player player) {
+        if (!CloudCoreAPI.isAttributeAvailable()) {
+            CloudCoreAPI.warning("MyPlugin", "属性系统不可用");
+            return;
+        }
+        
+        // 添加属性
+        CloudCoreAPI.addAttribute(
+            player,
+            "MyPlugin_Buff",
+            Arrays.asList(
+                "攻击力: +10",
+                "防御力: +5"
+            )
+        );
+    }
+    
+    public void removeBuff(Player player) {
+        CloudCoreAPI.removeAttribute(player, "MyPlugin_Buff");
+    }
+}
+```
+
+### 属性系统注意事项
+
+12. **自动适配**：CloudCore 会自动检测服务器安装的属性插件，无需手动配置
+13. **来源标识**：`source` 参数用于区分不同来源的属性，同一来源的属性会被覆盖
+14. **版本兼容**：支持 AttributePlus v2/v3、SX-Attribute v2/v3、CraneAttribute
+15. **空安全**：添加空属性列表时不会执行任何操作
+16. **异常处理**：属性操作失败时会输出警告日志，不会抛出异常影响业务逻辑
+
+---
+
+**文档版本**: 1.1  
+**最后更新**: 2026-03-28

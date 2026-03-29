@@ -26,7 +26,9 @@ taboolib {
             name("SunShine")
         }
         dependencies {
-            // 无依赖
+            name("AttributePlus").optional(true)
+            name("SX-Attribute").optional(true)
+            name("CraneAttribute").optional(true)
         }
     }
     version { taboolib = "6.2.4-99fb800" }

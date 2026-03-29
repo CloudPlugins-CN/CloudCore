@@ -116,6 +116,7 @@ object PluginClaimConfigs : IntIdTable("plugin_claim_configs") {
     val requiredPluginId = reference("required_plugin_id", Plugins).nullable()  // 需要的插件（null表示不需要）
     val requiredAuthCount = integer("required_auth_count").default(1)  // 需要的授权码数量
     val excludePluginIds = text("exclude_plugin_ids").default("")  // 排除的插件ID列表（逗号分隔）
+    val freePluginNotCount = bool("free_plugin_not_count").default(false)  // 免费插件（价格为0）是否不计入授权码数量
     val enabled = bool("enabled").default(true)  // 是否启用
     val createdAt = datetime("created_at")
 }
@@ -423,6 +424,7 @@ data class CreateClaimConfigRequest(
     val requiredPluginId: Int? = null,
     val requiredAuthCount: Int = 1,
     val excludePluginIds: List<Int> = emptyList(),  // 排除的插件ID列表
+    val freePluginNotCount: Boolean = false,  // 免费插件（价格为0）是否不计入授权码数量
     val enabled: Boolean = true
 )
 
@@ -432,6 +434,7 @@ data class UpdateClaimConfigRequest(
     val requiredPluginId: Int? = null,
     val requiredAuthCount: Int? = null,
     val excludePluginIds: List<Int>? = null,
+    val freePluginNotCount: Boolean? = null,  // 免费插件（价格为0）是否不计入授权码数量
     val enabled: Boolean? = null
 )
 
@@ -446,6 +449,7 @@ data class ClaimConfigDTO(
     val requiredPluginDisplayName: String?,
     val requiredAuthCount: Int,
     val excludePluginIds: List<Int>,  // 排除的插件ID列表
+    val freePluginNotCount: Boolean,  // 免费插件（价格为0）是否不计入授权码数量
     val enabled: Boolean,
     val createdAt: String
 )

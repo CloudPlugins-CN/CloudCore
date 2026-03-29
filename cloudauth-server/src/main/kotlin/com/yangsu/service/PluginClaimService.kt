@@ -51,6 +51,7 @@ object PluginClaimService {
             it[requiredPluginId] = request.requiredPluginId
             it[requiredAuthCount] = request.requiredAuthCount
             it[excludePluginIds] = excludeIdsStr
+            it[freePluginNotCount] = request.freePluginNotCount
             it[enabled] = request.enabled
             it[createdAt] = now
         }
@@ -74,6 +75,7 @@ object PluginClaimService {
             requiredPluginDisplayName = requiredPluginInfo?.get(Plugins.displayName),
             requiredAuthCount = request.requiredAuthCount,
             excludePluginIds = request.excludePluginIds,
+            freePluginNotCount = request.freePluginNotCount,
             enabled = request.enabled,
             createdAt = now.format(dateFormatter)
         ))
@@ -110,6 +112,13 @@ object PluginClaimService {
             }
             val excludeIds = if (excludeIdsStr.isBlank()) emptyList() else excludeIdsStr.split(",").map { it.toInt() }
             
+            // 处理可能没有 freePluginNotCount 字段的旧数据
+            val freePluginNotCount = try {
+                config[PluginClaimConfigs.freePluginNotCount]
+            } catch (e: Exception) {
+                false
+            }
+            
             ClaimConfigDTO(
                 id = config[PluginClaimConfigs.id].value,
                 pluginId = pluginId,
@@ -120,6 +129,7 @@ object PluginClaimService {
                 requiredPluginDisplayName = requiredPlugin?.get(Plugins.displayName),
                 requiredAuthCount = config[PluginClaimConfigs.requiredAuthCount],
                 excludePluginIds = excludeIds,
+                freePluginNotCount = freePluginNotCount,
                 enabled = config[PluginClaimConfigs.enabled],
                 createdAt = config[PluginClaimConfigs.createdAt].format(dateFormatter)
             )
@@ -175,8 +185,25 @@ object PluginClaimService {
             }
             val excludePluginIds = if (excludeIdsStr.isBlank()) emptySet() else excludeIdsStr.split(",").map { it.toInt() }.toSet()
             
+            // 处理可能没有 freePluginNotCount 字段的旧数据
+            val freePluginNotCount = try {
+                config[PluginClaimConfigs.freePluginNotCount]
+            } catch (e: Exception) {
+                false
+            }
+            
             // 计算排除指定插件后的授权码数量
-            val validLicenses = userLicenses.filter { it[LicenseCodes.pluginId].value !in excludePluginIds }
+            var validLicenses = userLicenses.filter { it[LicenseCodes.pluginId].value !in excludePluginIds }
+            
+            // 如果设置了免费插件不计入，过滤掉价格为0的插件
+            if (freePluginNotCount) {
+                validLicenses = validLicenses.filter { license ->
+                    val pluginId = license[LicenseCodes.pluginId].value
+                    val pluginPrice = allPlugins[pluginId]?.get(Plugins.price) ?: java.math.BigDecimal.ZERO
+                    pluginPrice > java.math.BigDecimal.ZERO
+                }
+            }
+            
             val validCount = validLicenses.size
             val validOwnedPluginIds = validLicenses.map { it[LicenseCodes.pluginId].value }.toSet()
             
@@ -185,7 +212,7 @@ object PluginClaimService {
                 // 需要拥有指定插件（排除的插件不算）
                 validOwnedPluginIds.contains(requiredPluginId)
             } else {
-                // 只需要达到授权码数量要求（排除的插件不算）
+                // 只需要达到授权码数量要求（排除的插件不算，免费插件可能不计入）
                 validCount >= requiredAuthCount
             }
             
@@ -272,6 +299,7 @@ object PluginClaimService {
         request.requiredPluginId?.let { updates.add("required_plugin_id = $it") } ?: run { updates.add("required_plugin_id = NULL") }
         request.requiredAuthCount?.let { updates.add("required_auth_count = $it") }
         request.excludePluginIds?.let { updates.add("exclude_plugin_ids = '${it.joinToString(",")}'") }
+        request.freePluginNotCount?.let { updates.add("free_plugin_not_count = ${if (it) 1 else 0}") }
         request.enabled?.let { updates.add("enabled = ${if (it) 1 else 0}") }
         
         if (updates.isNotEmpty()) {
@@ -302,6 +330,13 @@ object PluginClaimService {
         }
         val excludeIds = if (excludeIdsStr.isBlank()) emptyList() else excludeIdsStr.split(",").map { it.toInt() }
         
+        // 处理可能没有 freePluginNotCount 字段的旧数据
+        val freePluginNotCount = try {
+            updatedConfig[PluginClaimConfigs.freePluginNotCount]
+        } catch (e: Exception) {
+            false
+        }
+        
         Result.success(ClaimConfigDTO(
             id = updatedConfig[PluginClaimConfigs.id].value,
             pluginId = pluginId,
@@ -312,6 +347,7 @@ object PluginClaimService {
             requiredPluginDisplayName = requiredPlugin?.get(Plugins.displayName),
             requiredAuthCount = request.requiredAuthCount ?: updatedConfig[PluginClaimConfigs.requiredAuthCount],
             excludePluginIds = request.excludePluginIds ?: excludeIds,
+            freePluginNotCount = request.freePluginNotCount ?: freePluginNotCount,
             enabled = request.enabled ?: updatedConfig[PluginClaimConfigs.enabled],
             createdAt = updatedConfig[PluginClaimConfigs.createdAt].format(dateFormatter)
         ))
@@ -345,6 +381,13 @@ object PluginClaimService {
         val requiredPluginId = config[PluginClaimConfigs.requiredPluginId]?.value
         val requiredAuthCount = config[PluginClaimConfigs.requiredAuthCount]
         
+        // 处理可能没有 freePluginNotCount 字段的旧数据
+        val freePluginNotCount = try {
+            config[PluginClaimConfigs.freePluginNotCount]
+        } catch (e: Exception) {
+            false
+        }
+        
         // 获取插件信息
         val plugin = Plugins.selectAll().where { Plugins.id eq pluginId }.singleOrNull()
             ?: return@dbQuery Result.failure(Exception("插件不存在"))
@@ -366,8 +409,21 @@ object PluginClaimService {
             .distinct()
             .toList()
         
-        val totalCount = userLicenses.size
-        val ownedPluginIds = userLicenses.map { it[LicenseCodes.pluginId].value }.toSet()
+        // 获取所有插件信息（用于判断价格）
+        val allPlugins = Plugins.selectAll().toList().associateBy { it[Plugins.id].value }
+        
+        // 如果设置了免费插件不计入，过滤掉价格为0的插件
+        var validLicenses = userLicenses
+        if (freePluginNotCount) {
+            validLicenses = userLicenses.filter { license ->
+                val ownedPluginId = license[LicenseCodes.pluginId].value
+                val pluginPrice = allPlugins[ownedPluginId]?.get(Plugins.price) ?: java.math.BigDecimal.ZERO
+                pluginPrice > java.math.BigDecimal.ZERO
+            }
+        }
+        
+        val totalCount = validLicenses.size
+        val ownedPluginIds = validLicenses.map { it[LicenseCodes.pluginId].value }.toSet()
         
         // 检查用户是否满足领取条件
         val meetsRequirement = if (requiredPluginId != null) {

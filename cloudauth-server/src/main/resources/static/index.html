@@ -1665,6 +1665,12 @@
                     </span>
                 </div>
             </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" v-model="addClaimForm.freePluginNotCount" style="width:auto;margin:0;">
+                    <span>免费插件（价格为0）不计入授权码数量</span>
+                </label>
+            </div>
             <div class="modal-footer">
                 <button class="btn" @click="showAddClaimDialog=false">取消</button>
                 <button class="btn btn-primary" @click="doAddClaimConfig"
@@ -1728,6 +1734,12 @@
                         <span style="cursor:pointer;font-weight:bold;" @click="removeEditExcludePlugin(pid)">×</span>
                     </span>
                 </div>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" v-model="editClaimForm.freePluginNotCount" style="width:auto;margin:0;">
+                    <span>免费插件（价格为0）不计入授权码数量</span>
+                </label>
             </div>
             <div class="modal-footer">
                 <button class="btn" @click="showEditClaimDialog=false">取消</button>
@@ -1938,7 +1950,8 @@
                 requiredAuthCount: 1,
                 requiredPluginId: null,
                 excludePluginIds: [],
-                excludePluginInput: ''
+                excludePluginInput: '',
+                freePluginNotCount: false
             });
             const editClaimForm = ref({
                 id: null,
@@ -1947,7 +1960,8 @@
                 requiredAuthCount: 1,
                 requiredPluginId: null,
                 excludePluginIds: [],
-                excludePluginInput: ''
+                excludePluginInput: '',
+                freePluginNotCount: false
             });
             const showExcludePluginSelect = ref(false);
             const filteredExcludePlugins = ref([]);
@@ -2617,7 +2631,8 @@
                     requiredAuthCount: 1,
                     requiredPluginId: null,
                     excludePluginIds: [],
-                    excludePluginInput: ''
+                    excludePluginInput: '',
+                    freePluginNotCount: false
                 };
                 showClaimConfigDialog.value = false;  // 关闭领取配置弹窗
                 showAddClaimDialog.value = true;
@@ -2692,6 +2707,7 @@
                         requiredAuthCount: addClaimForm.value.conditionType === 'authCount' ? addClaimForm.value.requiredAuthCount : 1,
                         requiredPluginId: addClaimForm.value.conditionType === 'hasPlugin' ? addClaimForm.value.requiredPluginId : null,
                         excludePluginIds: addClaimForm.value.excludePluginIds || [],
+                        freePluginNotCount: addClaimForm.value.freePluginNotCount,
                         enabled: true
                     };
                     const r = await api.post('/admin/claim-configs', request);
@@ -2704,7 +2720,8 @@
                             requiredAuthCount: 1,
                             requiredPluginId: null,
                             excludePluginIds: [],
-                            excludePluginInput: ''
+                            excludePluginInput: '',
+                            freePluginNotCount: false
                         };
                         await loadClaimConfigs();
                         showClaimConfigDialog.value = true;  // 重新打开领取配置弹窗
@@ -2850,7 +2867,8 @@
                     requiredAuthCount: config.requiredAuthCount,
                     requiredPluginId: config.requiredPluginId,
                     excludePluginIds: config.excludePluginIds || [],
-                    excludePluginInput: ''
+                    excludePluginInput: '',
+                    freePluginNotCount: config.freePluginNotCount || false
                 };
                 showClaimConfigDialog.value = false;  // 关闭配置弹窗
                 showEditClaimDialog.value = true;
@@ -2870,7 +2888,8 @@
                         pluginId: editClaimForm.value.pluginId,
                         requiredAuthCount: editClaimForm.value.conditionType === 'authCount' ? editClaimForm.value.requiredAuthCount : 1,
                         requiredPluginId: editClaimForm.value.conditionType === 'hasPlugin' ? editClaimForm.value.requiredPluginId : null,
-                        excludePluginIds: editClaimForm.value.excludePluginIds || []
+                        excludePluginIds: editClaimForm.value.excludePluginIds || [],
+                        freePluginNotCount: editClaimForm.value.freePluginNotCount
                     };
                     const r = await api.put(`/admin/claim-configs/${editClaimForm.value.id}`, request);
                     if (r.data.success) {
@@ -2883,7 +2902,8 @@
                             requiredAuthCount: 1,
                             requiredPluginId: null,
                             excludePluginIds: [],
-                            excludePluginInput: ''
+                            excludePluginInput: '',
+                            freePluginNotCount: false
                         };
                         await loadClaimConfigs();
                         showClaimConfigDialog.value = true;
