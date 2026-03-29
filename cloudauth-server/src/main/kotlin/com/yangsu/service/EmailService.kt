@@ -15,7 +15,7 @@ object EmailService {
     /**
      * 发送验证码邮件
      */
-    suspend fun sendVerificationCode(email: String, type: String): Result<String> {
+    fun sendVerificationCode(email: String, type: String): Result<String> {
         // 生成6位验证码（数字+大写字母组合）
         val chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         val code = (1..6).map { chars.random() }.joinToString("")
@@ -97,7 +97,7 @@ object EmailService {
     /**
      * 验证验证码
      */
-    suspend fun verifyCode(email: String, code: String, type: String): Boolean = dbQuery {
+    fun verifyCode(email: String, code: String, type: String): Boolean = dbQuery {
         val validCode = VerificationCodes.selectAll()
             .where { 
                 (VerificationCodes.email eq email) and 

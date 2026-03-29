@@ -20,7 +20,7 @@ object PluginClaimService {
     /**
      * 创建领取配置（管理员）
      */
-    suspend fun createClaimConfig(request: CreateClaimConfigRequest): Result<ClaimConfigDTO> = dbQuery {
+    fun createClaimConfig(request: CreateClaimConfigRequest): Result<ClaimConfigDTO> = dbQuery {
         // 检查插件是否存在
         val plugin = Plugins.selectAll().where { Plugins.id eq request.pluginId }.singleOrNull()
         if (plugin == null) {
@@ -84,7 +84,7 @@ object PluginClaimService {
     /**
      * 获取所有领取配置（管理员）
      */
-    suspend fun getAllClaimConfigs(): List<ClaimConfigDTO> = dbQuery {
+    fun getAllClaimConfigs(): List<ClaimConfigDTO> = dbQuery {
         // 获取所有领取配置
         val configs = PluginClaimConfigs
             .selectAll()
@@ -139,7 +139,7 @@ object PluginClaimService {
     /**
      * 获取启用的领取配置（用户可见）
      */
-    suspend fun getEnabledClaimConfigs(userId: Int): List<UserClaimablePluginDTO> = dbQuery {
+    fun getEnabledClaimConfigs(userId: Int): List<UserClaimablePluginDTO> = dbQuery {
         // 获取用户当前拥有的所有授权码
         val userLicenses = UserPluginAuth
             .innerJoin(LicenseCodes, { UserPluginAuth.licenseId }, { LicenseCodes.id })
@@ -236,7 +236,7 @@ object PluginClaimService {
     /**
      * 切换领取配置启用状态
      */
-    suspend fun toggleClaimConfig(id: Int, isEnabled: Boolean): Boolean = dbQuery {
+    fun toggleClaimConfig(id: Int, isEnabled: Boolean): Boolean = dbQuery {
         val config = PluginClaimConfigs.selectAll()
             .where { PluginClaimConfigs.id eq id }
             .singleOrNull()
@@ -254,7 +254,7 @@ object PluginClaimService {
     /**
      * 更新领取配置（管理员）
      */
-    suspend fun updateClaimConfig(id: Int, request: UpdateClaimConfigRequest): Result<ClaimConfigDTO> = dbQuery {
+    fun updateClaimConfig(id: Int, request: UpdateClaimConfigRequest): Result<ClaimConfigDTO> = dbQuery {
         val config = PluginClaimConfigs.selectAll()
             .where { PluginClaimConfigs.id eq id }
             .singleOrNull()
@@ -356,14 +356,14 @@ object PluginClaimService {
     /**
      * 删除领取配置
      */
-    suspend fun deleteClaimConfig(id: Int): Boolean = dbQuery {
+    fun deleteClaimConfig(id: Int): Boolean = dbQuery {
         PluginClaimConfigs.deleteWhere { PluginClaimConfigs.id eq id } > 0
     }
     
     /**
      * 用户领取插件 - 返回领取结果和邮件信息
      */
-    suspend fun claimPlugin(userId: Int, configId: Int): Result<ClaimResult> = dbQuery {
+    fun claimPlugin(userId: Int, configId: Int): Result<ClaimResult> = dbQuery {
         // 获取领取配置
         val config = PluginClaimConfigs.selectAll()
             .where { PluginClaimConfigs.id eq configId }

@@ -20,7 +20,7 @@ object PluginExchangeService {
     /**
      * 创建置换配置（管理员）
      */
-    suspend fun createExchangeConfig(request: CreateExchangeConfigRequest): Result<ExchangeConfigDTO> = dbQuery {
+    fun createExchangeConfig(request: CreateExchangeConfigRequest): Result<ExchangeConfigDTO> = dbQuery {
         // 检查插件是否存在
         val fromPlugin = Plugins.selectAll().where { Plugins.id eq request.fromPluginId }.singleOrNull()
         val toPlugin = Plugins.selectAll().where { Plugins.id eq request.toPluginId }.singleOrNull()
@@ -65,7 +65,7 @@ object PluginExchangeService {
     /**
      * 获取所有置换配置（管理员）
      */
-    suspend fun getAllExchangeConfigs(): List<ExchangeConfigDTO> = dbQuery {
+    fun getAllExchangeConfigs(): List<ExchangeConfigDTO> = dbQuery {
         // 获取所有置换配置
         val configs = PluginExchangeConfigs
             .selectAll()
@@ -102,7 +102,7 @@ object PluginExchangeService {
     /**
      * 获取启用的置换配置（用户可见）
      */
-    suspend fun getEnabledExchangeConfigs(): List<ExchangeConfigDTO> = dbQuery {
+    fun getEnabledExchangeConfigs(): List<ExchangeConfigDTO> = dbQuery {
         // 获取所有启用的置换配置
         val configs = PluginExchangeConfigs
             .selectAll()
@@ -140,14 +140,14 @@ object PluginExchangeService {
     /**
      * 删除置换配置（管理员）
      */
-    suspend fun deleteExchangeConfig(id: Int): Boolean = dbQuery {
+    fun deleteExchangeConfig(id: Int): Boolean = dbQuery {
         PluginExchangeConfigs.deleteWhere { PluginExchangeConfigs.id eq id } > 0
     }
     
     /**
      * 禁用/启用置换配置（管理员）
      */
-    suspend fun toggleExchangeConfig(id: Int, isEnabled: Boolean): Boolean = dbQuery {
+    fun toggleExchangeConfig(id: Int, isEnabled: Boolean): Boolean = dbQuery {
         val config = PluginExchangeConfigs.selectAll()
             .where { PluginExchangeConfigs.id eq id }
             .singleOrNull()
@@ -165,7 +165,7 @@ object PluginExchangeService {
     /**
      * 更新置换配置（管理员）
      */
-    suspend fun updateExchangeConfig(id: Int, request: UpdateExchangeConfigRequest): Result<ExchangeConfigDTO> = dbQuery {
+    fun updateExchangeConfig(id: Int, request: UpdateExchangeConfigRequest): Result<ExchangeConfigDTO> = dbQuery {
         val config = PluginExchangeConfigs.selectAll()
             .where { PluginExchangeConfigs.id eq id }
             .singleOrNull()
@@ -242,7 +242,7 @@ object PluginExchangeService {
     /**
      * 用户执行置换
      */
-    suspend fun userExchange(userId: Int, exchangeConfigId: Int): Result<String> = dbQuery {
+    fun userExchange(userId: Int, exchangeConfigId: Int): Result<String> = dbQuery {
         // 获取置换配置
         val config = PluginExchangeConfigs.selectAll()
             .where { PluginExchangeConfigs.id eq exchangeConfigId }

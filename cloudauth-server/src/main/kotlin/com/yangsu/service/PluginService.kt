@@ -20,7 +20,7 @@ object PluginService {
     
     fun getPluginsDir(): File = pluginsDir
     
-    suspend fun createPlugin(request: CreatePluginRequest): Result<PluginDTO> = dbQuery {
+    fun createPlugin(request: CreatePluginRequest): Result<PluginDTO> = dbQuery {
         val now = LocalDateTime.now()
         val defaultVersion = "1.0.0"
         // 生成临时插件名，上传JAR后会自动更新为plugin.yml中的name
@@ -56,7 +56,7 @@ object PluginService {
         ))
     }
     
-    suspend fun updatePlugin(id: Int, request: UpdatePluginRequest): Result<PluginDTO> = dbQuery {
+    fun updatePlugin(id: Int, request: UpdatePluginRequest): Result<PluginDTO> = dbQuery {
         val plugin = Plugins.selectAll()
             .where { Plugins.id eq id }
             .singleOrNull()
@@ -138,7 +138,7 @@ object PluginService {
             } ?: Result.failure(Exception("更新失败"))
     }
     
-    suspend fun getAllPlugins(): List<PluginDTO> = dbQuery {
+    fun getAllPlugins(): List<PluginDTO> = dbQuery {
         Plugins.selectAll().map { row ->
             val jarFile = getPluginJarPath(row[Plugins.name], row[Plugins.version])
             PluginDTO(
@@ -159,7 +159,7 @@ object PluginService {
         }
     }
     
-    suspend fun getPluginById(id: Int): PluginDTO? = dbQuery {
+    fun getPluginById(id: Int): PluginDTO? = dbQuery {
         Plugins.selectAll()
             .where { Plugins.id eq id }
             .singleOrNull()?.let { row ->
@@ -182,7 +182,7 @@ object PluginService {
             }
     }
     
-    suspend fun getPluginByName(name: String): PluginDTO? = dbQuery {
+    fun getPluginByName(name: String): PluginDTO? = dbQuery {
         Plugins.selectAll()
             .where { Plugins.name eq name }
             .singleOrNull()?.let { row ->
@@ -202,7 +202,7 @@ object PluginService {
             }
     }
     
-    suspend fun deletePlugin(id: Int): Boolean = dbQuery {
+    fun deletePlugin(id: Int): Boolean = dbQuery {
         // 先获取插件信息以删除JAR文件
         val plugin = Plugins.selectAll()
             .where { Plugins.id eq id }
@@ -289,7 +289,7 @@ object PluginService {
     /**
      * 获取所有可用插件（公开，无需登录）
      */
-    suspend fun getAllAvailablePlugins(): List<PluginSimpleDTO> = dbQuery {
+    fun getAllAvailablePlugins(): List<PluginSimpleDTO> = dbQuery {
         Plugins.selectAll()
             .where { Plugins.enabled eq true }
             .orderBy(Plugins.id to SortOrder.ASC)
@@ -309,7 +309,7 @@ object PluginService {
     /**
      * 切换插件启用状态
      */
-    suspend fun togglePlugin(id: Int, enabled: Boolean): Boolean = dbQuery {
+    fun togglePlugin(id: Int, enabled: Boolean): Boolean = dbQuery {
         val plugin = Plugins.selectAll()
             .where { Plugins.id eq id }
             .singleOrNull()
@@ -329,7 +329,7 @@ object PluginService {
     /**
      * 插件置换：将插件 A 的授权码转换为插件 B
      */
-    suspend fun exchangePlugin(fromPluginId: Int, toPluginId: Int): Result<String> = dbQuery {
+    fun exchangePlugin(fromPluginId: Int, toPluginId: Int): Result<String> = dbQuery {
         // 检查两个插件是否存在
         val fromPlugin = Plugins.selectAll().where { Plugins.id eq fromPluginId }.singleOrNull()
         val toPlugin = Plugins.selectAll().where { Plugins.id eq toPluginId }.singleOrNull()

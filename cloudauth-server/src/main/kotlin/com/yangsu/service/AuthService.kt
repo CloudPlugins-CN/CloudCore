@@ -8,14 +8,12 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 object AuthService {
-    
-    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-    
+
     /**
      * 验证授权并绑定设备
      * 绑定逻辑: IP/MAC/机器码 三选二匹配即可通过验证
      */
-    suspend fun verify(request: VerifyRequest): VerifyResponse = dbQuery {
+    fun verify(request: VerifyRequest): VerifyResponse = dbQuery {
         // 1. 查找用户
         val user = Users.selectAll()
             .where { Users.username eq request.username }
@@ -164,7 +162,7 @@ object AuthService {
     /**
      * 管理员解绑指定用户的所有设备
      */
-    suspend fun adminUnbindUser(userId: Int): Int = dbQuery {
+    fun adminUnbindUser(userId: Int): Int = dbQuery {
         // 查找该用户的所有授权码
         val licenseIds = LicenseCodes.selectAll()
             .where { LicenseCodes.userId eq userId }
@@ -183,14 +181,14 @@ object AuthService {
     /**
      * 管理员解绑所有用户的所有设备
      */
-    suspend fun adminUnbindAll(): Int = dbQuery {
+    fun adminUnbindAll(): Int = dbQuery {
         DeviceBindings.deleteAll()
     }
     
     /**
      * 解绑设备
      */
-    suspend fun unbind(licenseCode: String): Result<Boolean> = dbQuery {
+    fun unbind(licenseCode: String): Result<Boolean> = dbQuery {
         val license = LicenseCodes.selectAll()
             .where { LicenseCodes.code eq licenseCode }
             .singleOrNull()
@@ -210,7 +208,7 @@ object AuthService {
      * 用户解绑单个设备（检查冷却时间）
      * 冷却检查: 设备绑定时间 和 上次解绑全部时间，取较晚的一个
      */
-    suspend fun userUnbind(userId: Int, bindingId: Int): Result<Boolean> = dbQuery {
+    fun userUnbind(userId: Int, bindingId: Int): Result<Boolean> = dbQuery {
         // 查找绑定记录
         val binding = DeviceBindings.selectAll()
             .where { DeviceBindings.id eq bindingId }
@@ -263,7 +261,7 @@ object AuthService {
     /**
      * 用户解绑自己的所有设备（会触发全局冷却）
      */
-    suspend fun userUnbindAll(userId: Int): Result<Int> = dbQuery {
+    fun userUnbindAll(userId: Int): Result<Int> = dbQuery {
         // 查找该用户的所有授权码
         val licenseIds = LicenseCodes.selectAll()
             .where { LicenseCodes.userId eq userId }
@@ -299,7 +297,7 @@ object AuthService {
     /**
      * 设置解绑冷却时间(小时)
      */
-    suspend fun setUnbindCooldownHours(hours: Int): Boolean = dbQuery {
+    fun setUnbindCooldownHours(hours: Int): Boolean = dbQuery {
         val exists = SystemConfig.selectAll()
             .where { SystemConfig.key eq "unbind_cooldown_hours" }
             .count() > 0
@@ -322,7 +320,7 @@ object AuthService {
     /**
      * 获取统计信息
      */
-    suspend fun getStats(): StatsDTO = dbQuery {
+    fun getStats(): StatsDTO = dbQuery {
         val totalUsers = Users.selectAll()
             .where { Users.isAdmin eq false }
             .count()

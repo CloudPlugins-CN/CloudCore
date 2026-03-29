@@ -12,7 +12,7 @@ object UserService {
     
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     
-    suspend fun register(request: RegisterRequest): Result<UserDTO> = dbQuery {
+    fun register(request: RegisterRequest): Result<UserDTO> = dbQuery {
         // 检查用户名是否已存在
         val exists = Users.select(Users.username)
             .where { Users.username eq request.username }
@@ -54,7 +54,7 @@ object UserService {
         ))
     }
     
-    suspend fun login(request: LoginRequest): Result<Pair<UserDTO, Boolean>> = dbQuery {
+    fun login(request: LoginRequest): Result<Pair<UserDTO, Boolean>> = dbQuery {
         val user = Users.selectAll()
             .where { Users.username eq request.username }
             .singleOrNull()
@@ -91,7 +91,7 @@ object UserService {
         ))
     }
     
-    suspend fun getAllUsers(): List<UserDTO> = dbQuery {
+    fun getAllUsers(): List<UserDTO> = dbQuery {
         Users.selectAll().map { row ->
             UserDTO(
                 id = row[Users.id].value,
@@ -105,7 +105,7 @@ object UserService {
         }
     }
     
-    suspend fun getUserByUsername(username: String): UserDTO? = dbQuery {
+    fun getUserByUsername(username: String): UserDTO? = dbQuery {
         Users.selectAll()
             .where { Users.username eq username }
             .singleOrNull()?.let { row ->
@@ -121,7 +121,7 @@ object UserService {
             }
     }
     
-    suspend fun getUserById(id: Int): UserDTO? = dbQuery {
+    fun getUserById(id: Int): UserDTO? = dbQuery {
         Users.selectAll()
             .where { Users.id eq id }
             .singleOrNull()?.let { row ->
@@ -140,7 +140,7 @@ object UserService {
     /**
      * 通过邮箱找回密码
      */
-    suspend fun resetPasswordByEmail(email: String, newPassword: String): Result<Boolean> = dbQuery {
+    fun resetPasswordByEmail(email: String, newPassword: String): Result<Boolean> = dbQuery {
         val user = Users.selectAll()
             .where { Users.email eq email }
             .singleOrNull()
@@ -163,7 +163,7 @@ object UserService {
     /**
      * 检查邮箱是否已注册
      */
-    suspend fun emailExists(email: String): Boolean = dbQuery {
+    fun emailExists(email: String): Boolean = dbQuery {
         Users.selectAll()
             .where { Users.email eq email }
             .count() > 0
@@ -172,7 +172,7 @@ object UserService {
     /**
      * 管理员修改用户密码
      */
-    suspend fun changePassword(userId: Int, newPassword: String): Boolean = dbQuery {
+    fun changePassword(userId: Int, newPassword: String): Boolean = dbQuery {
         val hashedPassword = BCrypt.withDefaults().hashToString(12, newPassword.toCharArray())
         val now = LocalDateTime.now()
         
@@ -185,7 +185,7 @@ object UserService {
     /**
      * 检查用户是否存在（用于验证 token 有效性）
      */
-    suspend fun userExists(userId: Int): Boolean = dbQuery {
+    fun userExists(userId: Int): Boolean = dbQuery {
         Users.selectAll()
             .where { Users.id eq userId }
             .count() > 0
@@ -194,7 +194,7 @@ object UserService {
     /**
      * 获取用户仪表盘统计信息
      */
-    suspend fun getUserDashboardStats(): Map<String, Any> = dbQuery {
+    fun getUserDashboardStats(): Map<String, Any> = dbQuery {
         val totalUsers = Users.selectAll().count()
         val totalLicenses = LicenseCodes.selectAll().count()
         val totalPlugins = Plugins.selectAll().count()
@@ -209,7 +209,7 @@ object UserService {
     /**
      * 插件领取：检查条件并发放授权码
      */
-    suspend fun claimPlugin(userId: Int, targetPluginId: Int, excludePlugins: List<Int>? = null): Result<String> = dbQuery {
+    fun claimPlugin(userId: Int, targetPluginId: Int, excludePlugins: List<Int>? = null): Result<String> = dbQuery {
         // 检查目标插件是否存在
         val targetPlugin = Plugins.selectAll().where { Plugins.id eq targetPluginId }.singleOrNull()
         if (targetPlugin == null) {
@@ -281,7 +281,7 @@ object UserService {
     /**
      * 获取可领取的插件列表
      */
-    suspend fun getClaimablePlugins(userId: Int): List<Map<String, Any>> = dbQuery {
+    fun getClaimablePlugins(userId: Int): List<Map<String, Any>> = dbQuery {
         // 获取用户当前拥有的所有授权码
         val userLicenses = UserPluginAuth
             .innerJoin(LicenseCodes, { UserPluginAuth.licenseId }, { LicenseCodes.id })
@@ -335,7 +335,7 @@ object UserService {
     /**
      * 超级管理员创建管理员账户
      */
-    suspend fun createAdmin(username: String, password: String): Result<UserDTO> = dbQuery {
+    fun createAdmin(username: String, password: String): Result<UserDTO> = dbQuery {
         val exists = Users.select(Users.username)
             .where { Users.username eq username }
             .count() > 0
@@ -369,7 +369,7 @@ object UserService {
     /**
      * 检查用户是否为超级管理员
      */
-    suspend fun isSuperAdmin(userId: Int): Boolean = dbQuery {
+    fun isSuperAdmin(userId: Int): Boolean = dbQuery {
         Users.selectAll()
             .where { Users.id eq userId }
             .singleOrNull()?.get(Users.isSuperAdmin) ?: false
@@ -378,7 +378,7 @@ object UserService {
     /**
      * 封禁/解封用户
      */
-    suspend fun toggleBan(userId: Int, banned: Boolean): Boolean = dbQuery {
+    fun toggleBan(userId: Int, banned: Boolean): Boolean = dbQuery {
         Users.update({ Users.id eq userId }) {
             it[Users.banned] = banned
             it[updatedAt] = LocalDateTime.now()
@@ -388,7 +388,7 @@ object UserService {
     /**
      * 设置/取消用户管理员权限
      */
-    suspend fun setAdmin(userId: Int, isAdmin: Boolean): Boolean = dbQuery {
+    fun setAdmin(userId: Int, isAdmin: Boolean): Boolean = dbQuery {
         Users.update({ Users.id eq userId }) {
             it[Users.isAdmin] = isAdmin
             it[updatedAt] = LocalDateTime.now()
@@ -398,7 +398,7 @@ object UserService {
     /**
      * 删除用户（级联删除授权码、设备绑定等）
      */
-    suspend fun deleteUser(userId: Int): Boolean = dbQuery {
+    fun deleteUser(userId: Int): Boolean = dbQuery {
         // 检查用户是否存在
         val user = Users.selectAll()
             .where { Users.id eq userId }

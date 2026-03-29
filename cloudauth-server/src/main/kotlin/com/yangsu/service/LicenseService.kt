@@ -31,7 +31,7 @@ object LicenseService {
      * - 指定用户名：直接授权给该用户，限制绑定数量
      * - 用户名留空：生成通用授权码，所有人可用，不限制绑定数量
      */
-    suspend fun generateLicenses(request: GenerateLicenseRequest): Result<List<LicenseDTO>> = dbQuery {
+    fun generateLicenses(request: GenerateLicenseRequest): Result<List<LicenseDTO>> = dbQuery {
         // 检查插件是否存在
         val plugin = Plugins.selectAll()
             .where { Plugins.id eq request.pluginId }
@@ -134,7 +134,7 @@ object LicenseService {
     /**
      * 为用户授权插件
      */
-    suspend fun grantLicense(request: GrantLicenseRequest, adminId: Int): Result<Boolean> = dbQuery {
+    fun grantLicense(request: GrantLicenseRequest, adminId: Int): Result<Boolean> = dbQuery {
         // 查找用户
         val user = Users.selectAll()
             .where { Users.username eq request.username }
@@ -187,7 +187,7 @@ object LicenseService {
     /**
      * 获取所有授权码
      */
-    suspend fun getAllLicenses(): List<LicenseDTO> = dbQuery {
+    fun getAllLicenses(): List<LicenseDTO> = dbQuery {
         (LicenseCodes innerJoin Plugins)
             .leftJoin(Users, { LicenseCodes.userId }, { Users.id })
             .selectAll()
@@ -218,7 +218,7 @@ object LicenseService {
     /**
      * 获取用户的授权信息
      */
-    suspend fun getUserAuthInfo(userId: Int): UserAuthInfo = dbQuery {
+    fun getUserAuthInfo(userId: Int): UserAuthInfo = dbQuery {
         val auths = UserPluginAuth
             .innerJoin(LicenseCodes, { UserPluginAuth.licenseId }, { LicenseCodes.id })
             .innerJoin(Plugins, { LicenseCodes.pluginId }, { Plugins.id })
@@ -256,7 +256,7 @@ object LicenseService {
     /**
      * 禁用/启用授权码
      */
-    suspend fun toggleLicense(licenseId: Int, enabled: Boolean): Boolean = dbQuery {
+    fun toggleLicense(licenseId: Int, enabled: Boolean): Boolean = dbQuery {
         LicenseCodes.update({ LicenseCodes.id eq licenseId }) {
             it[LicenseCodes.enabled] = enabled
         } > 0
@@ -265,7 +265,7 @@ object LicenseService {
     /**
      * 修改授权码最大绑定数量
      */
-    suspend fun updateMaxBindings(licenseId: Int, maxBindings: Int): Boolean = dbQuery {
+    fun updateMaxBindings(licenseId: Int, maxBindings: Int): Boolean = dbQuery {
         LicenseCodes.update({ LicenseCodes.id eq licenseId }) {
             it[LicenseCodes.maxBindings] = maxBindings
         } > 0
@@ -275,7 +275,7 @@ object LicenseService {
      * 删除授权码
      * 同时删除关联的设备绑定和用户授权记录
      */
-    suspend fun deleteLicense(licenseId: Int): Boolean = dbQuery {
+    fun deleteLicense(licenseId: Int): Boolean = dbQuery {
         // 检查授权码是否存在
         val exists = LicenseCodes.selectAll()
             .where { LicenseCodes.id eq licenseId }
@@ -298,7 +298,7 @@ object LicenseService {
     /**
      * 根据授权码获取信息
      */
-    suspend fun getLicenseByCode(code: String): LicenseDTO? = dbQuery {
+    fun getLicenseByCode(code: String): LicenseDTO? = dbQuery {
         (LicenseCodes innerJoin Plugins)
             .leftJoin(Users, { LicenseCodes.userId }, { Users.id })
             .selectAll()
@@ -331,7 +331,7 @@ object LicenseService {
      * 删除用户的所有授权码
      * @return 删除的授权码数量
      */
-    suspend fun deleteUserLicenses(userId: Int): Int = dbQuery {
+    fun deleteUserLicenses(userId: Int): Int = dbQuery {
         // 获取该用户的所有授权码ID
         val licenseIds = LicenseCodes.selectAll()
             .where { LicenseCodes.userId eq userId }
