@@ -56,9 +56,6 @@ dependencies {
     // HTTP Client & JSON - taboolib 会打包并重定位
     taboo("com.squareup.okhttp3:okhttp:4.12.0")
     taboo("com.google.code.gson:gson:2.11.0")
-    
-    // Kotlin 标准库作为 runtimeOnly 依赖
-    runtimeOnly(kotlin("stdlib"))
 }
 
 tasks.withType<JavaCompile> {
