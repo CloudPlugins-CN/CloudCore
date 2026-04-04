@@ -1,9 +1,11 @@
 package com.cloudcore.attribute
 
-import com.cloudcore.attribute.impl.*
+import com.cloudcore.attribute.impl.AttributePlusV2Hook
+import com.cloudcore.attribute.impl.AttributePlusV3Hook
+import com.cloudcore.attribute.impl.SXAttributeV2Hook
+import com.cloudcore.attribute.impl.SXAttributeV3Hook
 import org.bukkit.entity.Player
 import taboolib.common.platform.function.console
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 
 /**

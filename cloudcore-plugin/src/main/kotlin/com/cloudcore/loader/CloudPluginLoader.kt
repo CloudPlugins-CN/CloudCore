@@ -65,11 +65,11 @@ class CloudPluginLoader(
         } catch (e: Exception) {
             severe("加载插件失败 [${plugin.pluginName}]: ${e.message}")
             if (config.debug) {
-                e.printStackTrace()
+                severe(e.stackTraceToString())
             }
         }
     }
-    
+
     /**
      * 下载插件插件文件
      */
@@ -271,7 +271,7 @@ class CloudPluginLoader(
             // 输出更多调试信息
             severe("请检查插件的 plugin.yml 是否符合 Bukkit 规范")
             if (config.debug) {
-                e.printStackTrace()
+                severe(e.stackTraceToString())
             }
         } catch (e: InvalidPluginException) {
             severe("插件格式无效 [$pluginName]: ${e.message}")
@@ -283,12 +283,12 @@ class CloudPluginLoader(
                 }
             }
             if (config.debug) {
-                e.printStackTrace()
+                severe(e.stackTraceToString())
             }
         } catch (e: Exception) {
             severe("加载插件失败 [$pluginName]: ${e.javaClass.simpleName}: ${e.message}")
             if (config.debug) {
-                e.printStackTrace()
+                severe(e.stackTraceToString())
             }
         }
     }
@@ -312,7 +312,7 @@ class CloudPluginLoader(
         } catch (e: Exception) {
             warning("卸载插件失败 [$pluginName]: ${e.message}")
             if (config.debug) {
-                e.printStackTrace()
+                severe(e.stackTraceToString())
             }
         }
     }

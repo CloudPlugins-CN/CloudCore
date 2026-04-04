@@ -32,9 +32,7 @@ taboolib {
         }
     }
     version { taboolib = "6.2.4-99fb800" }
-    
-    // 打包依赖并重定位到 com.cloudcore.libs
-    // Kotlin 使用外部依赖，不打包
+
     relocate("okhttp3.", "com.cloudcore.libs.okhttp3.")
     relocate("okio.", "com.cloudcore.libs.okio.")
     relocate("com.google.gson.", "com.cloudcore.libs.gson.")
