@@ -31,7 +31,7 @@ taboolib {
             name("CraneAttribute").optional(true)
         }
     }
-    version { taboolib = "6.2.4-99fb800" }
+    version { taboolib = "6.3.0-716e043" }
 
     relocate("okhttp3.", "com.cloudcore.libs.okhttp3.")
     relocate("okio.", "com.cloudcore.libs.okio.")
