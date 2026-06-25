@@ -96,4 +96,6 @@ jwt.expiration-hours=168
 
 ## 许可证
 
-私有项目，保留所有权利。
+本项目采用 [MIT License](LICENSE) 开源协议。
+
+详细条款请见项目根目录下的 [LICENSE](LICENSE) 文件。
