@@ -1,6 +1,7 @@
 # CloudPlugins 授权管理系统
 
 一个完整的 Minecraft 插件授权管理解决方案，包含授权服务器和客户端 SDK。
+此项目不在提供维护，请勿提交Issues。
 
 ## 项目结构
 
@@ -97,5 +98,3 @@ jwt.expiration-hours=168
 ## 许可证
 
 本项目采用 [MIT License](LICENSE) 开源协议。
-
-详细条款请见项目根目录下的 [LICENSE](LICENSE) 文件。
